@@ -20,10 +20,13 @@ if [[ -z "$pid" ]] || [[ "$pid" == "" ]]; then
    exit 1
 fi
 
-gdb -n -q                                                 \
+gdb -n -q -batch                                                \
       -ex "attach $pid"                                  \
       -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
       -ex "set \$dlerror =  (char* (*)(void))dlerror"    \
       -ex "call \$dlopen(\"$lib\", 2)"           \
       -ex "call \$dlerror()"                             \
-      -ex "continue" # Comment this line for manual debug
+      -ex "detach"\
+      -ex "quit"
+
+tail -f /proc/$pid/fd/1 /proc/$pid/fd/2
