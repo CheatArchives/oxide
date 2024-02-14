@@ -9,7 +9,9 @@ crate-type = ["cdylib"]
 
 [dependencies]
 ctor = "0.2.6"
+env_logger = "0.11.2"
 libc = "0.2.153"
+log = "0.4.20"
 
 [build]
 target = "i686-unknown-linux-gnu"
