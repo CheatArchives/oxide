@@ -4,6 +4,7 @@ use ctor::{ctor, dtor};
 
 pub use log::{debug, error, info, log, trace, warn};
 pub use std::{ffi::*, mem::transmute};
+pub use libc::wchar_t;
 
 mod globals;
 mod sdk;
