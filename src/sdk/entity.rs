@@ -1,0 +1,86 @@
+use crate::*;
+
+const MAX_WEAPONS: usize = 48;
+
+#[allow(non_snake_case, non_camel_case_types, dead_code)]
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct VMTEntity {
+    _pad1: [u8; 4 * 4],
+    pub GetCollideable: cfn!(*const Collideable, *const Entity),
+    _pad2: [u8; 4 * 6],
+    pub GetAbsOrigin: cfn!(*const Vector3, *const Entity),
+    pub GetAbsAngles: cfn!(*const Angles, *const Entity),
+    _pad3: [u8; 4 * 66],
+    pub GetIndex: cfn!(*const c_int, *const Entity),
+    _pad4: [u8; 4 * 26],
+    pub WorldSpaceCenter: cfn!(*const Vector3, *const Entity),
+    _pad5: [u8; 4 * 10],
+    pub GetTeamNumber: cfn!(*const c_int, *const Entity),
+    _pad6: [u8; 4 * 34],
+    pub GetHealth: cfn!(*const c_int, *const Entity),
+    pub GetMaxHealth: cfn!(*const c_int, *const Entity),
+    _pad7: [u8; 4 * 29],
+    pub IsAlive: cfn!(*const bool, *const Entity),
+    pub IsPlayer: cfn!(*const bool, *const Entity),
+    _pad8: [u8; 4 * 2],
+    pub IsNPC: cfn!(*const bool, *const Entity),
+    pub IsWeapon: cfn!(*const bool, *const Entity),
+    _pad9: [u8; 4 * 3],
+    pub EyePosition: cfn!(*const Vector3, *const Entity),
+    pub EyeAngles: cfn!(*const Vector3, *const Entity),
+    _pad10: [u8; 4 * 12],
+    pub ThirdPersonSwitch: cfn!(c_void, *const Entity, bool),
+    _pad11: [u8; 4 * 82],
+    pub GetWeapon: cfn!(*const Weapon, *const Entity),
+    _pad12: [u8; 4 * 10],
+    pub GetShootPos: cfn!(Vector3, *const Entity),
+    _pad13: [u8; 4 * 6],
+    pub GetObserverMode: cfn!(c_int, *const Entity),
+    pub GetObserverTarget: cfn!(*const Entity, *const Entity),
+}
+
+#[allow(non_snake_case, non_camel_case_types, dead_code)]
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct Entity {
+    vmt: *const VMTEntity,
+    _pad1: [u8; 0x7C],
+    model_idx: c_int, /* 0x80 */
+    _pad2: [u8; 0x8C],
+    velocity: Vector3, /* 0x110 */
+    _pad3: [u8; 0x7C],
+    m_nWaterLevel: c_uint, /* 0x198, gcc adds 3 bytes of padding */
+    _pad4: [u8; 0x1B8],
+    m_vecOrigin: Vector3, /* 0x354 */
+    _pad5: [u8; 0xC],
+    flags: c_int, /* 0x36C */
+    _pad6: [u8; 0x8E4],
+    flNextAttack: c_float, /* 0xC54 */
+    _pad7: [u8; 0x84],
+    m_hMyWeapons: [CBaseHandle; MAX_WEAPONS], /* 0xCDC */
+    _pad8: [u8; 0xD0],                        /* Starts at 0xD9C */
+    vecPunchAngle: Angles,                      /* 0xE6C */
+    _pad9: [u8; 0xD0],
+    m_iObjectMode: c_int, /* 0xF48 */
+    _pad10: [u8; 0x1C4],
+    v_angle: Angles,
+    _pad11: [u8; 0x48],
+    m_pCurrentCommand: *const UserCmd, /* 0x1164, see CPrediction::StartCommand() */
+    _pad12: [u8; 0xCC],
+    nTickBase: c_int, /* 0x1234 */
+    _pad13: [u8; 0x3F8],
+    player_class: c_int, /* 0x1630 (ETFClass) */
+    _pad14: [u8; 0x36C],
+    m_nPlayerCond: c_int,    /* 0x19A0 */
+    m_nPlayerCondEx: c_int,  /* 0x19A4 */
+    m_nPlayerCondEx2: c_int, /* 0x19A8 */
+    m_nPlayerCondEx3: c_int, /* 0x19AC */
+    m_nPlayerCondEx4: c_int, /* 0x19B0 */
+    _pad15: [u8; 0x18],
+    condition_bits: c_int, /* 0x19CC */
+    _pad16: [u8; 0x418],
+    m_bAllowMoveDuringTaunt: bool, /* 0x1DE8 */
+    _pad17: [u8; 0x18],
+    nForceTauntCam: c_int, /* 0x1E04 */
+}

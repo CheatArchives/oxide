@@ -1,0 +1,40 @@
+use crate::*;
+
+#[allow(non_snake_case, non_camel_case_types, dead_code)]
+#[repr(C)]
+#[derive(Debug, Clone)]
+pub struct ViewSetup {
+    pub x: c_int,
+    pub m_nUnscaledX: c_int,
+    pub y: c_int,
+    pub m_nUnscaledY: c_int,
+    pub width: c_int,
+    pub m_nUnscaledWidth: c_int,
+    pub height: c_int,
+    pub m_eStereoEye: c_int,
+    pub m_nUnscaledHeight: c_int,
+    pub m_bOrtho: bool,
+    pub m_OrthoLeft: c_float,
+    pub m_OrthoTop: c_float,
+    pub m_OrthoRight: c_float,
+    pub m_OrthoBottom: c_float,
+    pub fov: c_float,
+    pub fovViewmodel: c_float,
+    pub origin: Vector3,
+    pub angles: Angles,
+    pub zNear: c_float,
+    pub zFar: c_float,
+    pub zNearViewmodel: c_float,
+    pub zFarViewmodel: c_float,
+    pub m_bRenderToSubrectOfLargerScreen: bool,
+    pub m_flAspectRatio: c_float,
+    pub m_bOffCenter: bool,
+    pub m_flOffCenterTop: c_float,
+    pub m_flOffCenterBottom: c_float,
+    pub m_flOffCenterLeft: c_float,
+    pub m_flOffCenterRight: c_float,
+    pub m_bDoBloomAndToneMapping: bool,
+    pub m_bCacheFullSceneState: bool,
+    pub m_bViewToProjectionOverride: bool,
+    pub m_ViewToProjection: VMatrix,
+}
