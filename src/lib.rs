@@ -1,4 +1,4 @@
-use std::{error::Error, panic::catch_unwind, thread, time::Duration};
+use std::{error::Error, panic::catch_unwind, sync::{Arc, Mutex}, thread, time::Duration};
 
 use ctor::{ctor, dtor};
 
@@ -7,22 +7,23 @@ pub use std::{ffi::*, mem::transmute};
 pub use libc::wchar_t;
 
 mod globals;
-mod sdk;
 mod util;
-mod error;
-
-pub use error::OxideError;
-pub use sdk::*;
 pub use util::*;
 
+mea!(oxide);
+mea!(sdk);
+mea!(error);
 
-unsafe fn main() {
+static mut OXIDE: Option<Arc<Mutex<Oxide>>> = None;
+
+unsafe fn main()-> Result<(),Box<dyn Error>> {
     info!("loading");
-    let base_client = globals::init_globals().unwrap();
+    OXIDE = Some(Arc::new(Mutex::new(Oxide::init()?)));
     info!("loaded");
     loop {
         thread::sleep(Duration::from_secs(5));
     }
+
 }
 
 #[ctor]
@@ -30,7 +31,12 @@ unsafe fn load() {
     env_logger::builder()
         .filter_level(log::LevelFilter::Debug)
         .init();
-    thread::spawn(|| main());
+    thread::spawn(|| {
+        if let Err(e) = main() {
+            error!("{}\n{:?}",e,e)
+        }
+        
+    });
 }
 
 #[dtor]
