@@ -20,17 +20,12 @@ if [ -z "$pid" ]; then
    exit 1
 fi
 
-gdb -n -q -batch                                        \
-     -ex "attach $pid"                                  \
-     -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
-     -ex "set \$dlclose = (int (*)(void*))dlclose"      \
-     -ex "set \$dlerror =  (char* (*)(void))dlerror"    \
-                                                        \
-     -ex "set \$self = \$dlopen(\"$lib\", 6)"   \
-     -ex "call \$dlclose(\$self)"                       \
-     -ex "call \$dlclose(\$self)"                       \
-                                                        \
-     -ex "call \$dlerror()"                             \
-     -ex "detach"                                       \
-     -ex "quit"
+gdb -n -q -batch                                       \
+    -ex "attach $pid"                                  \
+    -ex "set \$dlopen = (void* (*)(char*, int))dlopen" \
+    -ex "set \$dlerror =  (char* (*)(void))dlerror"    \
+    -ex "call \$dlopen(\"$lib\", 2)"                   \
+    -ex "call \$dlerror()"                             \
+    -ex "detach"                                       \
+    -ex "quit"
 
