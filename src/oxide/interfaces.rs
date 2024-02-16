@@ -1,3 +1,5 @@
+use std::ptr;
+
 use libc::dlsym;
 use sdl2::sys::malloc;
 
@@ -10,19 +12,15 @@ pub struct Interface<T: HasVmt<V>, V> {
 }
 impl<T: HasVmt<V>, V> Interface<T, V> {
     pub unsafe fn new(interface_ref: *mut T) -> Interface<T, V> {
-        let old_vmt = interface_ref.read().get_vmt();
-        let size = vmt_size(old_vmt as *mut c_void);
+        let old = interface_ref.read().get_vmt();
+        let size = vmt_size(old as *mut c_void);
 
         let new = malloc(size as u32) as *mut V;
-        libc::memcpy(new as *mut c_void, old_vmt as *mut c_void, size);
-
-        debug!("b {:?}", interface_ref.read().get_vmt());
+        libc::memcpy(new as *mut c_void, old as *mut c_void, size);
         interface_ref.read().set_vmt(new);
-        debug!("a {:?}", interface_ref.read().get_vmt());
-
         Interface {
             interface_ref,
-            old_vmt,
+            old_vmt: old,
         }
     }
     unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, Box<dyn Error>> {

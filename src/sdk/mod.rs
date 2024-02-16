@@ -1,3 +1,5 @@
+use std::ptr;
+
 use crate::*;
 
 mea!(base_client);
@@ -47,7 +49,6 @@ pub struct WithVmt<T> {
     pub vmt: *mut T,
 }
 
-
 pub trait HasVmt<T> {
     fn get_vmt(&self) -> *mut T;
     fn set_vmt(&mut self, vmt: *mut T);
@@ -57,6 +58,8 @@ impl<T> HasVmt<T> for WithVmt<T> {
         self.vmt
     }
    fn set_vmt(&mut self, vmt: *mut T) {
-        self.vmt = vmt;
+        unsafe{
+            vw!(&mut self.vmt as *mut *mut T, vmt);
+        }
     }
 }

@@ -31,19 +31,25 @@ unsafe fn main() -> Result<(), Box<dyn Error>> {
     }
 }
 
-#[ctor]
-unsafe fn load() {
-    env_logger::builder()
-        .filter_level(log::LevelFilter::Debug)
-        .init();
-    thread::spawn(|| {
-        if let Err(e) = main() {
-            error!("{}\n{:?}", e, e)
-        }
-    });
-}
+#[link_section = ".init_array"]
+static LOAD: extern fn() = {
+    #[link_section = ".text.startup"]
+    extern fn load() {
+        env_logger::builder()
+            .filter_level(log::LevelFilter::Debug)
+            .init();
+        thread::spawn(|| {
+            unsafe{
+                if let Err(e) = main() {
+                    error!("{}\n{:?}", e, e)
+                }
+            }
+        });
+    }
+    load
+};
 
-#[dtor]
+#[link_section = ".fini_array"]
 fn unload() {
     info!("unloaded");
 }

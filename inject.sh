@@ -16,7 +16,7 @@ if [[ ! -f $lib ]]; then
 fi
 
 if [ -z "$pid" ]; then
-   echo "tf2 running"
+   echo "tf2 not running"
    exit 1
 fi
 

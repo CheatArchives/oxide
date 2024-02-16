@@ -22,7 +22,7 @@ unsafe impl Send for BaseClient{}
 #[derive(Debug, Clone)]
 pub struct VMTBaseClient {
     _pad1: [u8; 4 * 6],
-    pub LevelInitPostEntity: cfn!(c_void, *const BaseClient),
+    pub LevelInitPostEntity: cfn!(c_void, *mut BaseClient),
     pub LevelShutdown: cfn!(c_void, *const BaseClient),
     _pad2: [u8; 4 * 2],
     pub HudProcessInput: cfn!(c_void, *const BaseClient, bool),

@@ -3,20 +3,33 @@ use crate::*;
 pub struct VMTMoveHelper(*mut c_void);
 
 struct MoveHelper {
-    vmt: *mut VMTMoveHelper
+    vmt: *mut VMTMoveHelper,
 }
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTPrediction {
-    _pad1: [u8;4 * 13],
-    pub GetLocalViewAngles: cfn!(c_void, *mut Prediction , *mut Angles),
-    pub SetLocalViewAngles: cfn!(c_void, *const Prediction , *mut Angles),
-    _pad2: [u8;4 * 3],
-    pub RunCommand: cfn!(c_void, *mut Prediction , *mut Entity, *mut UserCmd, *mut MoveHelper),
-    pub SetupMove: cfn!(c_void, *mut Prediction , *mut Entity, *mut UserCmd, *mut MoveHelper, *mut CMoveData),
-    pub FinishMove: cfn!(c_void, *mut Prediction , *mut Entity, *mut UserCmd),
+    _pad1: [u8; 4 * 13],
+    pub GetLocalViewAngles: cfn!(c_void, *mut Prediction, *mut Angles),
+    pub SetLocalViewAngles: cfn!(c_void, *const Prediction, *mut Angles),
+    _pad2: [u8; 4 * 3],
+    pub RunCommand: cfn!(
+        c_void,
+        *mut Prediction,
+        *mut Entity,
+        *mut UserCmd,
+        *mut MoveHelper
+    ),
+    pub SetupMove: cfn!(
+        c_void,
+        *mut Prediction,
+        *mut Entity,
+        *mut UserCmd,
+        *mut MoveHelper,
+        *mut CMoveData
+    ),
+    pub FinishMove: cfn!(c_void, *mut Prediction, *mut Entity, *mut UserCmd),
 }
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
@@ -43,6 +56,8 @@ impl HasVmt<VMTPrediction> for Prediction {
     }
 
     fn set_vmt(&mut self, vmt: *mut VMTPrediction) {
-        self.vmt = vmt
+        unsafe{
+            vw!(&mut self.vmt as *mut *mut VMTPrediction, vmt);
+        }
     }
 }

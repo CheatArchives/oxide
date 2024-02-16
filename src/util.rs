@@ -39,3 +39,9 @@ macro_rules! mea {
         pub use $m::*;
     };
 }
+#[macro_export]
+macro_rules! vw {
+    ($s:expr, $v:expr) => {
+        (&mut $s as *mut _ as *mut c_void ).write_volatile(((&$v) as *const _ as *const c_void).read());
+    };
+}
