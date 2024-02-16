@@ -7,7 +7,7 @@ pub type ModelRender = WithVmt<VMTModelRender>;
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone)]
-struct matrix3x4(
+pub struct matrix3x4(
     [[c_float;4];3]
 );
 

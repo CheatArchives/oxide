@@ -1,3 +1,5 @@
+#![feature(core_intrinsics)]
+
 use std::{
     error::Error,
     panic::catch_unwind,
@@ -26,30 +28,26 @@ unsafe fn main() -> Result<(), Box<dyn Error>> {
     info!("loading");
     OXIDE = Some(Arc::new(Mutex::new(Oxide::init()?)));
     info!("loaded");
-    loop {
-        thread::sleep(Duration::from_secs(5));
-    }
+    Ok(())
 }
 
 #[link_section = ".init_array"]
-static LOAD: extern fn() = {
+static LOAD: unsafe extern "C" fn() = {
     #[link_section = ".text.startup"]
-    extern fn load() {
+    unsafe extern "C" fn load() {
+        libc::atexit(unload);
         env_logger::builder()
             .filter_level(log::LevelFilter::Debug)
             .init();
-        thread::spawn(|| {
-            unsafe{
-                if let Err(e) = main() {
-                    error!("{}\n{:?}", e, e)
-                }
+        thread::spawn(|| unsafe {
+            if let Err(e) = main() {
+                error!("{}\n{:?}", e, e)
             }
         });
-    }
+    };
     load
 };
-
-#[link_section = ".fini_array"]
-fn unload() {
-    info!("unloaded");
+#[link_section = ".text.exit"]
+extern "C" fn unload() {
+    info!("unload")
 }

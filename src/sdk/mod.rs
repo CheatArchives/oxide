@@ -59,7 +59,7 @@ impl<T> HasVmt<T> for WithVmt<T> {
     }
    fn set_vmt(&mut self, vmt: *mut T) {
         unsafe{
-            vw!(&mut self.vmt as *mut *mut T, vmt);
+            self.vmt = vmt
         }
     }
 }

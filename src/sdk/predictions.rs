@@ -2,7 +2,7 @@ use crate::*;
 
 pub struct VMTMoveHelper(*mut c_void);
 
-struct MoveHelper {
+pub struct MoveHelper {
     vmt: *mut VMTMoveHelper,
 }
 
@@ -57,7 +57,7 @@ impl HasVmt<VMTPrediction> for Prediction {
 
     fn set_vmt(&mut self, vmt: *mut VMTPrediction) {
         unsafe{
-            vw!(&mut self.vmt as *mut *mut VMTPrediction, vmt);
+            self.vmt = vmt
         }
     }
 }

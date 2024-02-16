@@ -1,7 +1,7 @@
-use std::ptr;
+use std::{ alloc::{alloc, Layout}, intrinsics::{volatile_copy_nonoverlapping_memory, volatile_store}};
+
 
 use libc::dlsym;
-use sdl2::sys::malloc;
 
 use crate::*;
 
@@ -10,21 +10,25 @@ pub struct Interface<T: HasVmt<V>, V> {
     pub interface_ref: *mut T,
     pub old_vmt: *mut V,
 }
+
+
 impl<T: HasVmt<V>, V> Interface<T, V> {
     pub unsafe fn new(interface_ref: *mut T) -> Interface<T, V> {
+        info!("creating interface {:?}", interface_ref);
+        
         let old = interface_ref.read().get_vmt();
         let size = vmt_size(old as *mut c_void);
 
-        let new = malloc(size as u32) as *mut V;
-        libc::memcpy(new as *mut c_void, old as *mut c_void, size);
+        let new = alloc(Layout::from_size_align(size, 0x8).unwrap()) as *mut V;
+        volatile_copy_nonoverlapping_memory(new, old,size);
         interface_ref.read().set_vmt(new);
+        info!("o: {:?}n: {:?}", old, new);
         Interface {
             interface_ref,
             old_vmt: old,
         }
     }
     unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, Box<dyn Error>> {
-        log::info!("creating interface {}", name);
         let create_interface_fn: cfn!(*const c_void, *const c_char, *const c_int) =
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
         let interface_ref = create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null())
@@ -32,6 +36,11 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
         Ok(Interface::new(interface_ref))
     }
 
+    pub fn get_vmt(&self) -> *mut V {
+        unsafe{
+            (*self.interface_ref).get_vmt()
+        }
+    }
     unsafe fn restore(&self) {
         self.interface_ref.read().set_vmt(self.old_vmt)
     }

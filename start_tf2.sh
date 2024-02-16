@@ -18,7 +18,7 @@ tf2_dir=$(realpath ~/.local/share/Steam/steamapps/common/Team\ Fortress\ 2)
 
 cd "$tf2_dir"
 
-command=" LD_LIBRARY_PATH=bin hl2_linux -game tf"
+command=" LD_LIBRARY_PATH=bin ./hl2_linux -game tf"
 if [[ ! $1 == "-f" ]]; then
   command="$command|& grep oxide"
 fi
