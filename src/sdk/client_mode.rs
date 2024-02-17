@@ -6,8 +6,8 @@ pub type ClientMode = WithVmt<VMTClientMode>;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTClientMode {
-    _pad1: [u8; 4 * 17],
+    _pad1: [cfn!(c_void,c_void); 17],
     pub OverrideView: cfn!(c_void, *mut ClientMode,*mut ViewSetup),
-    _pad2: [u8; 4 * 4],
+    _pad2: [cfn!(c_void,c_void); 4],
     pub CreateMove: cfn!(bool, *mut ClientMode, c_float,*mut UserCmd),
 }

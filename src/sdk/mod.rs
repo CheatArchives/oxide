@@ -1,4 +1,4 @@
-use std::ptr;
+use std::{intrinsics::volatile_store, ptr};
 
 use crate::*;
 
@@ -58,8 +58,6 @@ impl<T> HasVmt<T> for WithVmt<T> {
         self.vmt
     }
    fn set_vmt(&mut self, vmt: *mut T) {
-        unsafe{
-            self.vmt = vmt
-        }
+        self.vmt = vmt
     }
 }

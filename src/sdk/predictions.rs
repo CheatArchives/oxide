@@ -10,10 +10,10 @@ pub struct MoveHelper {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTPrediction {
-    _pad1: [u8; 4 * 13],
+    _pad1: [u32; 13],
     pub GetLocalViewAngles: cfn!(c_void, *mut Prediction, *mut Angles),
     pub SetLocalViewAngles: cfn!(c_void, *const Prediction, *mut Angles),
-    _pad2: [u8; 4 * 3],
+    _pad2: [u32; 3],
     pub RunCommand: cfn!(
         c_void,
         *mut Prediction,

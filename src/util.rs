@@ -7,7 +7,7 @@ pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let size = std::mem::size_of::<*const c_void>();
 
     let mut i = 0;
-    while !funcs.read().is_null() {
+    while !(*funcs).is_null() {
         i += 1;
         funcs = (funcs as usize + size) as *const *const c_void;
     }
@@ -15,7 +15,7 @@ pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     i * size
 }
 
-pub unsafe fn get_handle<T>(name: &str) -> Result<*mut T, Box<dyn Error>> {
+pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, Box<dyn Error>> {
     let handle = dlopen(CString::new(name)?.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
     if handle.is_null() {
         let error = CStr::from_ptr(dlerror()).to_str()?;
@@ -25,7 +25,7 @@ pub unsafe fn get_handle<T>(name: &str) -> Result<*mut T, Box<dyn Error>> {
         ))));
     }
     dlclose(handle);
-    Ok(handle as *mut T)
+    Ok(handle)
 }
 
 #[macro_export]

@@ -14,7 +14,6 @@ pub use libc::wchar_t;
 pub use log::{debug, error, info, log, trace, warn};
 pub use std::{ffi::*, mem::transmute};
 
-mod globals;
 mod util;
 pub use util::*;
 

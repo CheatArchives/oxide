@@ -7,13 +7,8 @@ fi
 
 cd "$(dirname "$0")"
 
-lib_local= 'target/i686-unknown-linux-gnu/debug/liboxide.so'
 lib=$(realpath 'target/i686-unknown-linux-gnu/debug/liboxide.so')
 pid=$(pidof -s "hl2_linux")
-if [!-d ./tmp]; then
-    mkdir -p ./tmp;
-fi;
-cp $lib tmp/$lib
 
 if [[ ! -f $lib ]]; then
     echo "$lib not found"

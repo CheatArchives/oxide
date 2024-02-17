@@ -1,5 +1,9 @@
-use std::{ alloc::{alloc, Layout}, intrinsics::{volatile_copy_nonoverlapping_memory, volatile_store}};
-
+use std::{
+    alloc::{alloc, Layout},
+    intrinsics::{volatile_copy_memory, volatile_copy_nonoverlapping_memory, volatile_store},
+    mem::{align_of, MaybeUninit},
+    ptr::{copy_nonoverlapping, write_volatile},
+};
 
 use libc::dlsym;
 
@@ -11,24 +15,33 @@ pub struct Interface<T: HasVmt<V>, V> {
     pub old_vmt: *mut V,
 }
 
-
 impl<T: HasVmt<V>, V> Interface<T, V> {
     pub unsafe fn new(interface_ref: *mut T) -> Interface<T, V> {
         info!("creating interface {:?}", interface_ref);
-        
-        let old = interface_ref.read().get_vmt();
+
+        let old = (*interface_ref).get_vmt();
         let size = vmt_size(old as *mut c_void);
 
-        let new = alloc(Layout::from_size_align(size, 0x8).unwrap()) as *mut V;
-        volatile_copy_nonoverlapping_memory(new, old,size);
-        interface_ref.read().set_vmt(new);
-        info!("o: {:?}n: {:?}", old, new);
+        let new = alloc(Layout::from_size_align(size, align_of::<VMTCVar>()).unwrap()) as *mut V;
+
+        //TODO: FIX volatile_copy_nonoverlapping_memory
+        libc::memcpy(new as *mut c_void, old as *const c_void, size);
+        libc::memcpy(
+            interface_ref as *mut _ as *mut c_void,
+            &new as *const _ as *const c_void,
+            4,
+        );
+        debug!(
+            "replacing {:?} with {:?}",
+            interface_ref as *mut _ as *mut c_void, &new
+        );
         Interface {
             interface_ref,
             old_vmt: old,
         }
     }
     unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, Box<dyn Error>> {
+        info!("creating interface {}", name);
         let create_interface_fn: cfn!(*const c_void, *const c_char, *const c_int) =
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
         let interface_ref = create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null())
@@ -37,12 +50,10 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
     }
 
     pub fn get_vmt(&self) -> *mut V {
-        unsafe{
-            (*self.interface_ref).get_vmt()
-        }
+        unsafe { (*self.interface_ref).get_vmt() }
     }
     unsafe fn restore(&self) {
-        self.interface_ref.read().set_vmt(self.old_vmt)
+        (*self.interface_ref).set_vmt(self.old_vmt)
     }
 }
 
@@ -77,13 +88,8 @@ impl Interfaces {
         let base_client: Interface<BaseClient, VMTBaseClient> =
             Interface::create(client_handle, "VClient017")?;
 
-        let client_mode = (((base_client.interface_ref)
-            .read()
-            .vmt
-            .read()
-            .HudProcessInput as usize
-            + 1) as *mut *mut ClientMode)
-            .read();
+        let client_mode = **(((*(*base_client.interface_ref).vmt).HudProcessInput as usize + 1)
+            as *mut *mut *mut ClientMode);
 
         Ok(Interfaces {
             base_client,

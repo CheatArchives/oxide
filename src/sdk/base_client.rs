@@ -21,16 +21,16 @@ unsafe impl Send for BaseClient{}
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTBaseClient {
-    _pad1: [u8; 4 * 6],
+    _pad1: [u32; 6],
     pub LevelInitPostEntity: cfn!(c_void, *mut BaseClient),
     pub LevelShutdown: cfn!(c_void, *const BaseClient),
-    _pad2: [u8; 4 * 2],
+    _pad2: [u32; 2],
     pub HudProcessInput: cfn!(c_void, *const BaseClient, bool),
     pub HudUpdate: cfn!(c_void, *const BaseClient, bool),
-    _pad3: [u8; 4 * 2],
+    _pad3: [u32; 2],
     pub IN_ActivateMouse: cfn!(c_void, *const BaseClient),
-    _pad4: [u8; 4 * 20],
+    _pad4: [u32; 20],
     pub FrameStageNotify: cfn!(c_void, *const BaseClient, ClientFrameStage),
-    _pad5: [u8; 4 * 23],
+    _pad5: [u32; 23],
     pub GetPlayerView: cfn!(bool, *const BaseClient, *const ViewSetup),
 }

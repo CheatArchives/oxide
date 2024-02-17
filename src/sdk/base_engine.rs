@@ -24,21 +24,21 @@ pub struct PlayerInfo {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTBaseEngine {
-    _pad1: [u8; 4 * 5],
+    _pad1: [u32; 5],
     pub GetScreenSize: cfn!(c_void, *const BaseEngine, *const c_int, *const c_int),
-    _pad2: [u8; 4 * 2],
+    _pad2: [u32; 2],
     pub GetPlayerInfo: cfn!(bool, *const BaseEngine, *const c_int, *const PlayerInfo),
-    _pad3: [u8; 4 * 3],
+    _pad3: [u32; 3],
     pub GetLocalPlayer: cfn!(c_int, *const BaseEngine),
-    _pad4: [u8; 4 * 6],
+    _pad4: [u32; 6],
     pub GetViewAngles: cfn!(c_void, *const BaseEngine, Angles),
     pub SetViewAngles: cfn!(c_void, *const BaseEngine, Angles),
     pub GetMaxClients: cfn!(c_int, *const BaseEngine),
-    _pad5: [u8; 4 * 4],
+    _pad5: [u32; 4],
     pub IsInGame: cfn!(bool, *const BaseEngine),
     pub IsConnected: cfn!(bool, *const BaseEngine),
-    _pad6: [u8; 4 * 8],
+    _pad6: [u32; 8],
     pub WorldToScreenMatrix: cfn!(VMatrix, *const BaseEngine),
-    _pad7: [u8; 4 * 48],
+    _pad7: [u32; 48],
     pub IsTakingScreenshot: cfn!(bool, *const BaseEngine),
 }

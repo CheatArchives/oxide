@@ -10,8 +10,8 @@ type VPanel = c_uint;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTPanel {
-    _pad1: [u8; 4 * 37],
+    _pad1: [u32; 37],
     pub GetName: cfn!(*const char, *const Panel, VPanel),
-    _pad2: [u8; 4 * 4],
+    _pad2: [u32; 4],
     pub PaintTraverse: cfn!(c_void, *const Panel, VPanel, bool, bool),
 }
