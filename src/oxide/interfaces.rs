@@ -9,7 +9,7 @@ use libc::dlsym;
 
 use crate::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Interface<T: HasVmt<V>, V> {
     pub interface_ref: *mut T,
     pub old_vmt: *mut V,
@@ -24,17 +24,14 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
 
         let new = alloc(Layout::from_size_align(size, align_of::<VMTCVar>()).unwrap()) as *mut V;
 
-        //TODO: FIX volatile_copy_nonoverlapping_memory
+        info!(
+            "replacing VMT {:?} with {:?}",
+            old, new
+        );
+
         libc::memcpy(new as *mut c_void, old as *const c_void, size);
-        libc::memcpy(
-            interface_ref as *mut _ as *mut c_void,
-            &new as *const _ as *const c_void,
-            4,
-        );
-        debug!(
-            "replacing {:?} with {:?}",
-            interface_ref as *mut _ as *mut c_void, &new
-        );
+        (*interface_ref).set_vmt(new);
+
         Interface {
             interface_ref,
             old_vmt: old,
@@ -53,11 +50,21 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
         unsafe { (*self.interface_ref).get_vmt() }
     }
     unsafe fn restore(&self) {
-        (*self.interface_ref).set_vmt(self.old_vmt)
+        info!(
+            "restoring {:?} from {:?} to {:?}",
+            self.interface_ref,
+            self.get_vmt(),
+            self.old_vmt
+        );
+        (*self.interface_ref).set_vmt(self.old_vmt);
+        debug!(
+            "{:?}",
+            self.get_vmt()
+        );
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 #[allow(unused)]
 pub struct Interfaces {
     pub base_client: Interface<BaseClient, VMTBaseClient>,

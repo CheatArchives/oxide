@@ -4,7 +4,7 @@ const MAX_WEAPONS: usize = 48;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTEntity {
     _pad1: [u32; 4],
     pub GetCollideable: cfn!(*const Collideable, *const Entity),
@@ -42,7 +42,7 @@ pub struct VMTEntity {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Entity {
     vmt: *const VMTEntity,
     _pad1: [u8; 0x7C],

@@ -2,7 +2,7 @@ use crate::*;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTWeapon {
     _pad1: [u8;4 * 79],
     pub GetIndex: cfn!(c_int, *const Weapon),
@@ -23,7 +23,7 @@ pub struct VMTWeapon {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Weapon {
     vmt: *const VMTWeapon,
     _pad1: [u8;0x924],

@@ -1,14 +1,9 @@
 #![feature(core_intrinsics)]
 
 use std::{
-    error::Error,
-    panic::catch_unwind,
-    sync::{Arc, Mutex},
-    thread,
-    time::Duration,
+    alloc::{self, alloc, Layout}, borrow::BorrowMut, error::Error, panic::catch_unwind, sync::{Arc, Mutex}, thread, time::Duration
 };
 
-use ctor::{ctor, dtor};
 
 pub use libc::wchar_t;
 pub use log::{debug, error, info, log, trace, warn};
@@ -21,11 +16,13 @@ mea!(oxide);
 mea!(sdk);
 mea!(error);
 
-static mut OXIDE: Option<Arc<Mutex<Oxide>>> = None;
+static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 
 unsafe fn main() -> Result<(), Box<dyn Error>> {
     info!("loading");
-    OXIDE = Some(Arc::new(Mutex::new(Oxide::init()?)));
+    let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut Oxide;
+    *oxide_ptr = Oxide::init()?;
+    OXIDE = oxide_ptr as *mut _ as *mut c_void;
     info!("loaded");
     Ok(())
 }
@@ -43,10 +40,15 @@ static LOAD: unsafe extern "C" fn() = {
                 error!("{}\n{:?}", e, e)
             }
         });
-    };
+    }
     load
 };
 #[link_section = ".text.exit"]
 extern "C" fn unload() {
-    info!("unload")
+    unsafe{
+        info!("unloading");
+        let oxide = *(OXIDE as *mut _ as *mut Oxide);
+        oxide.close();
+        info!("unloaded");
+    }
 }

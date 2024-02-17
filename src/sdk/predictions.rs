@@ -8,7 +8,7 @@ pub struct MoveHelper {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTPrediction {
     _pad1: [u32; 13],
     pub GetLocalViewAngles: cfn!(c_void, *mut Prediction, *mut Angles),
@@ -34,7 +34,7 @@ pub struct VMTPrediction {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Prediction {
     vmt: *mut VMTPrediction,
     m_hLastGround: c_int,

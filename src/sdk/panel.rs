@@ -8,7 +8,7 @@ type VPanel = c_uint;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTPanel {
     _pad1: [u32; 37],
     pub GetName: cfn!(*const char, *const Panel, VPanel),

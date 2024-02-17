@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum ClientFrameStage {
     FrameUndefined = -1,
     FrameStart,
@@ -19,7 +19,7 @@ unsafe impl Send for BaseClient{}
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTBaseClient {
     _pad1: [u32; 6],
     pub LevelInitPostEntity: cfn!(c_void, *mut BaseClient),

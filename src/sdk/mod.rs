@@ -30,21 +30,21 @@ pub type HFont = c_uint;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMatrix([[c_float; 4]; 4]);
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Vector3(c_float, c_float, c_float);
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Angles(c_float, c_float, c_float);
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct WithVmt<T> {
     pub vmt: *mut T,
 }
@@ -61,3 +61,4 @@ impl<T> HasVmt<T> for WithVmt<T> {
         self.vmt = vmt
     }
 }
+

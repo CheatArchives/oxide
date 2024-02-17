@@ -2,7 +2,7 @@ use crate::*;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTCollideable {
     _pad: [u8; 4],
     pub ObbMinsPreScaled: cfn!(Vector3, *const Collideable),

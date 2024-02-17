@@ -3,7 +3,7 @@ use crate::*;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub enum FontDrawType {
     FONT_DRAW_DEFAULT = 0,
     FONT_DRAW_NONADDITIVE,
@@ -15,7 +15,7 @@ pub type MatSurface = WithVmt<VMTMatSurface>;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTMatSurface {
     _pad1: [u32; 10],
     pub SetColor: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),

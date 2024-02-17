@@ -3,7 +3,7 @@ use crate::*;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTConVar {
     _pad: [u8; 4*14],
     pub InternalSetValue: cfn!(c_void, *const ConVar , *const c_char),
@@ -13,7 +13,7 @@ pub struct VMTConVar {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct ConVar {
     vmt: VMTConVar,
     _pad: [u8; 0x18],

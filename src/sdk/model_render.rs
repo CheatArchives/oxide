@@ -6,7 +6,7 @@ pub type ModelRender = WithVmt<VMTModelRender>;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct matrix3x4(
     [[c_float;4];3]
 );
@@ -14,7 +14,7 @@ pub struct matrix3x4(
 pub type Renderable = WithVmt<VMTRenderable>;
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTRenderable {
     _pad1: [u8;4 * 9],
     pub GetModel: cfn!(*const Model, *const Renderable),
@@ -26,7 +26,7 @@ pub struct VMTRenderable {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct ModelRenderInfo{
     origin: Vector3,
     angles: Angles, /* QAngle */
@@ -45,7 +45,7 @@ pub struct ModelRenderInfo{
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct DrawModelState{
     m_pStudioHdr: *mut StudioHdr ,
     m_pStudioHWData: *mut c_void, /* studiohwdata_t */
@@ -58,7 +58,7 @@ pub struct DrawModelState{
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTModelRender {
     _pad1: [u8;4 * 1],
     pub ForcedMaterialOverride: cfn!(c_void, *mut ModelRender , *const IMaterial, c_int),

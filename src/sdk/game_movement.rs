@@ -6,7 +6,7 @@ type EntityHandle = CBaseHandle;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct CMoveData{
     m_bFirstRunOfFunctions: bool,
     m_bGameCodeMovedPlayer: bool,
@@ -40,7 +40,7 @@ pub struct CMoveData{
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTGameMovement {
     _pad1: [u32; 2],
     pub ProcessMovement: cfn!(c_void, *mut GameMovement, *mut Entity, *mut CMoveData),

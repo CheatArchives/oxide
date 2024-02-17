@@ -7,7 +7,7 @@ const SIGNED_GUID_LEN: usize = 32;
 const MAX_CUSTOM_FILES: usize = 4;
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct PlayerInfo {
     name: [c_char; MAX_PLAYER_NAME_LENGTH],
     user_id: c_int,
@@ -22,7 +22,7 @@ pub struct PlayerInfo {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTBaseEngine {
     _pad1: [u32; 5],
     pub GetScreenSize: cfn!(c_void, *const BaseEngine, *const c_int, *const c_int),

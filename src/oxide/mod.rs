@@ -10,7 +10,7 @@ use libc::{dladdr, dlsym, posix_fadvise, wait, Dl_info};
 use crate::*;
 
 mea!(interfaces);
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Oxide {
     pub interfaces: Interfaces,
 }
@@ -20,7 +20,7 @@ unsafe extern "C-unwind" fn create_move_hook(
     input_sample_time: c_float,
     cmd: *mut UserCmd,
 ) -> bool {
-    debug!("CREATE MOVE!");
+    debug!("cmd1: {:?}", *cmd);
     true
 }
 
@@ -34,7 +34,7 @@ impl Oxide {
             interfaces: Interfaces::create()?,
         };
 
-        (*(*oxide.interfaces.client_mode.interface_ref).vmt).CreateMove = create_move_hook;
+        (*oxide.interfaces.client_mode.get_vmt()).CreateMove = create_move_hook;
 
         Ok(oxide)
     }
@@ -43,4 +43,3 @@ impl Oxide {
     }
 }
 
-unsafe impl Send for Oxide {}

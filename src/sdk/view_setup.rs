@@ -2,7 +2,7 @@ use crate::*;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct ViewSetup {
     pub x: c_int,
     pub m_nUnscaledX: c_int,

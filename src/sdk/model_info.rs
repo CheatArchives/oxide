@@ -4,7 +4,7 @@ pub type ModelInfo = WithVmt<VMTModelInfo>;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct Model {
     handle: *const c_void,
     name: *const c_char,
@@ -19,7 +19,7 @@ pub struct Model {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct StudioHdr {
     id: c_int,
     version: c_int,
@@ -46,7 +46,7 @@ pub struct StudioHdr {
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub struct VMTModelInfo {
     _pad1: [u8;4 * 3],
     pub GetModelIndex: cfn!(c_int, *const ModelInfo , *const c_char),
