@@ -39,3 +39,11 @@ macro_rules! mea {
         pub use $m::*;
     };
 }
+
+#[macro_export]
+macro_rules! o {
+    () => {
+        *(OXIDE as *mut _ as *mut Oxide)
+    };
+}
+

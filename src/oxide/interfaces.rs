@@ -24,10 +24,6 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
 
         let new = alloc(Layout::from_size_align(size, align_of::<VMTCVar>()).unwrap()) as *mut V;
 
-        info!(
-            "replacing VMT {:?} with {:?}",
-            old, new
-        );
 
         libc::memcpy(new as *mut c_void, old as *const c_void, size);
         (*interface_ref).set_vmt(new);
@@ -38,7 +34,6 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
         }
     }
     unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, Box<dyn Error>> {
-        info!("creating interface {}", name);
         let create_interface_fn: cfn!(*const c_void, *const c_char, *const c_int) =
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
         let interface_ref = create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null())
@@ -57,10 +52,6 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
             self.old_vmt
         );
         (*self.interface_ref).set_vmt(self.old_vmt);
-        debug!(
-            "{:?}",
-            self.get_vmt()
-        );
     }
 }
 
@@ -85,7 +76,6 @@ pub struct Interfaces {
 }
 impl Interfaces {
     pub unsafe fn create() -> Result<Interfaces, Box<dyn Error>> {
-        log::info!("creating interfaces");
         let client_handle = get_handle("./tf/bin/client.so")?;
         let engine_handle = get_handle("./bin/engine.so")?;
         let matsurface_handle = get_handle("./bin/vguimatsurface.so")?;

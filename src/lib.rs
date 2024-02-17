@@ -1,9 +1,14 @@
 #![feature(core_intrinsics)]
 
 use std::{
-    alloc::{self, alloc, Layout}, borrow::BorrowMut, error::Error, panic::catch_unwind, sync::{Arc, Mutex}, thread, time::Duration
+    alloc::{self, alloc, Layout},
+    borrow::BorrowMut,
+    error::Error,
+    panic::catch_unwind,
+    sync::{Arc, Mutex},
+    thread,
+    time::Duration,
 };
-
 
 pub use libc::wchar_t;
 pub use log::{debug, error, info, log, trace, warn};
@@ -31,10 +36,12 @@ unsafe fn main() -> Result<(), Box<dyn Error>> {
 static LOAD: unsafe extern "C" fn() = {
     #[link_section = ".text.startup"]
     unsafe extern "C" fn load() {
+
         libc::atexit(unload);
         env_logger::builder()
             .filter_level(log::LevelFilter::Debug)
             .init();
+
         thread::spawn(|| unsafe {
             if let Err(e) = main() {
                 error!("{}\n{:?}", e, e)
@@ -43,9 +50,10 @@ static LOAD: unsafe extern "C" fn() = {
     }
     load
 };
+
 #[link_section = ".text.exit"]
 extern "C" fn unload() {
-    unsafe{
+    unsafe {
         info!("unloading");
         let oxide = *(OXIDE as *mut _ as *mut Oxide);
         oxide.close();

@@ -1,47 +1,47 @@
-[2024-02-17T20:33:58Z INFO  oxide] loading
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interfaces
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VClient017
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xdc3eb684
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xdbc46288 with 0x43024000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VEngineClient014
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xeb6a9660
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb44cc48 with 0x4302c000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VClientEntityList003
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xdc40c2b4
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xdbc46724 with 0x43020060
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VEngineVGui002
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xeb8b7b20
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb4bbc68 with 0x43030000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VEngineCvar004
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xf2d48280
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xf2d35248 with 0x43034000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VGUI_Surface030
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xe81ec5e0
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xe8178768 with 0x42ff2600
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VGUI_Panel009
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xe88d7660
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xe88bfe68 with 0x43034280
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VModelInfoClient006
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xeb82b020
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb49f0a8 with 0x43038000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VEngineRenderView014
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xeb607714
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb4cdde8 with 0x43038140
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface EngineTraceClient003
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xeb707864
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb491688 with 0x43014060
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VMaterialSystem081
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xe9ddfa20
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xe9d8d908 with 0x42c05500
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VEngineModel016
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xeb8284a0
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb49c4e8 with 0x424ee000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface GameMovement001
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xdc3cf900
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xdbbcade8 with 0x4303c000
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface VClientPrediction001
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xdc47b280
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xdbe2e148 with 0x42c05880
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] creating interface 0xdc464a60
-[2024-02-17T20:33:58Z INFO  oxide::oxide::interfaces] replacing VMT 0xdbd5fc88 with 0x42ff6d00
-[2024-02-17T20:33:58Z INFO  o
+[2024-02-17T21:47:05Z INFO  oxide] loading
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interfaces
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VClient017
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xdf9eb684
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xdf246288 with 0x449aba80
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VEngineClient014
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeeca9660
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeea4cc48 with 0x42dfe580
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VClientEntityList003
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xdfa0c2b4
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xdf246724 with 0x413a4090
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VEngineVGui002
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeeeb7b20
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeeabbc68 with 0x43730f40
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VEngineCvar004
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xf6348280
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xf6335248 with 0x58cdd900
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VGUI_Surface030
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeb7ec5e0
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeb778768 with 0x57a39c00
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VGUI_Panel009
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xebed7660
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xebebfe68 with 0x58cddb80
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VModelInfoClient006
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeee2b020
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeea9f0a8 with 0x42c93f40
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VEngineRenderView014
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeec07714
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeeacdde8 with 0x42c93e00
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface EngineTraceClient003
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeed07864
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeea91688 with 0x4279b420
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VMaterialSystem081
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xed3dfa20
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xed38d908 with 0x42eba680
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VEngineModel016
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xeee284a0
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xeea9c4e8 with 0x597a8400
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface GameMovement001
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xdf9cf900
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xdf1cade8 with 0x329b2620
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface VClientPrediction001
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xdfa7b280
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xdf42e148 with 0x583a7480
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] creating interface 0xdfa64a60
+[2024-02-17T21:47:05Z INFO  oxide::oxide::interfaces] replacing VMT 0xdf35fc88 with 0x42f6bf00
+[2024-02-17T21:47:05Z INFO  o

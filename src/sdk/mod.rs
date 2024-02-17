@@ -41,7 +41,7 @@ pub struct Vector3(c_float, c_float, c_float);
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct Angles(c_float, c_float, c_float);
+pub struct Angles(pub c_float, pub c_float, pub c_float);
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
