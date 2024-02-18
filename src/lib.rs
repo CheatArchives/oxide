@@ -56,7 +56,7 @@ extern "C" fn unload() {
     unsafe {
         info!("unloading");
         let oxide = *(OXIDE as *mut _ as *mut Oxide);
-        oxide.close();
+        oxide.unload();
         info!("unloaded");
     }
 }
