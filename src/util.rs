@@ -47,3 +47,10 @@ macro_rules! o {
     };
 }
 
+#[macro_export]
+macro_rules! m {
+    () => {
+        *(MENU as *mut _ as *mut Menu)
+    };
+}
+

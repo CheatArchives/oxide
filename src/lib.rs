@@ -1,33 +1,33 @@
-#![feature(core_intrinsics)]
-
 use std::{
     alloc::{self, alloc, Layout},
-    borrow::BorrowMut,
     error::Error,
-    panic::catch_unwind,
     sync::{Arc, Mutex},
     thread,
-    time::Duration,
 };
 
 pub use libc::wchar_t;
 pub use log::{debug, error, info, log, trace, warn};
-pub use std::{ffi::*, mem::transmute};
+pub use std::{ffi::*, mem::transmute, ptr::{addr_of, addr_of_mut}};
 
 mod util;
 pub use util::*;
+
+use crate::menu::Menu;
 
 mea!(oxide);
 mea!(sdk);
 mea!(error);
 
 static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
+static mut MENU: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 
 unsafe fn main() -> Result<(), Box<dyn Error>> {
     info!("loading");
+
     let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut Oxide;
     *oxide_ptr = Oxide::init()?;
     OXIDE = oxide_ptr as *mut _ as *mut c_void;
+
     info!("loaded");
     Ok(())
 }
@@ -55,8 +55,8 @@ static LOAD: unsafe extern "C" fn() = {
 extern "C" fn unload() {
     unsafe {
         info!("unloading");
-        let oxide = *(OXIDE as *mut _ as *mut Oxide);
-        oxide.unload();
+        o!().unload();
+        m!().unload();
         info!("unloaded");
     }
 }

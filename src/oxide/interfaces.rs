@@ -1,8 +1,6 @@
 use std::{
     alloc::{alloc, Layout},
-    intrinsics::{volatile_copy_memory, volatile_copy_nonoverlapping_memory, volatile_store},
-    mem::{align_of, MaybeUninit},
-    ptr::{copy_nonoverlapping, write_volatile},
+    mem::align_of,
 };
 
 use libc::dlsym;
@@ -23,7 +21,6 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
         let size = vmt_size(old as *mut c_void);
 
         let new = alloc(Layout::from_size_align(size, align_of::<VMTCVar>()).unwrap()) as *mut V;
-
 
         libc::memcpy(new as *mut c_void, old as *const c_void, size);
         (*interface_ref).set_vmt(new);
@@ -75,7 +72,7 @@ pub struct Interfaces {
     pub client_mode: Interface<ClientMode, VMTClientMode>,
 }
 impl Interfaces {
-    pub unsafe fn create() -> Result<Interfaces, Box<dyn Error>> {
+    pub unsafe fn init() -> Result<Interfaces, Box<dyn Error>> {
         let client_handle = get_handle("./tf/bin/client.so")?;
         let engine_handle = get_handle("./bin/engine.so")?;
         let matsurface_handle = get_handle("./bin/vguimatsurface.so")?;

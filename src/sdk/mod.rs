@@ -1,5 +1,3 @@
-use std::{intrinsics::volatile_store, ptr};
-
 use crate::*;
 
 mea!(base_client);
