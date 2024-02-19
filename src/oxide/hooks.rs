@@ -29,21 +29,21 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     input_sample_time: c_float,
     cmd: *mut UserCmd,
 ) -> bool {
-    let entity_count = ((*o!().interfaces.entity_list.get_vmt()).GetMaxEntities)(o!().interfaces.entity_list.interface_ref);
+    let entity_count = ((*o!().interfaces.entity_list.get_vmt()).GetMaxEntities)(r!(entity_list));
 
     for i in 0..entity_count {
-        let ent = ((*o!().interfaces.entity_list.get_vmt()).GetClientEntity)(o!().interfaces.entity_list.interface_ref,i);
+        let ent = (i!(entity_list).GetClientEntity)(r!(entity_list),i);
         if ent.is_null() {
             continue;
         }
-        dbg!(ent);
+        let ent = *ent;
     }
     
     true
 }
 
 #[derive(Debug, Clone, Copy)]
-struct Hook {
+pub struct Hook {
     pub org: *const c_void,
     pub target: *mut *const c_void,
 }

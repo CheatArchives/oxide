@@ -34,7 +34,6 @@ impl Menu {
     }
     pub unsafe fn unload(self) {
         SDL_GL_DeleteContext(self.ctx);
-        SDL_DestroyRenderer(self.renderer);
     }
 
     pub unsafe fn run(&mut self,window: *mut SDL_Window) {

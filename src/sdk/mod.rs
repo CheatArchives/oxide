@@ -1,3 +1,5 @@
+use std::fmt::Debug;
+
 use crate::*;
 
 mea!(base_client);
@@ -46,6 +48,8 @@ pub struct Angles(pub c_float, pub c_float, pub c_float);
 pub struct WithVmt<T> {
     pub vmt: *mut T,
 }
+
+
 
 pub trait HasVmt<T> {
     fn get_vmt(&self) -> *mut T;

@@ -82,8 +82,8 @@ impl Interfaces {
         let base_client: Interface<BaseClient, VMTBaseClient> =
             Interface::create(client_handle, "VClient017")?;
 
-        let client_mode = **(((*(*base_client.interface_ref).vmt).HudProcessInput as usize + 1)
-            as *mut *mut *mut ClientMode);
+        let client_mode = *(((*(*base_client.interface_ref).vmt).HudProcessInput as usize + 1)
+            as *mut *mut *mut ClientMode).read_unaligned();
 
         Ok(Interfaces {
             base_client,

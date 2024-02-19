@@ -54,3 +54,16 @@ macro_rules! m {
     };
 }
 
+#[macro_export]
+macro_rules! i {
+    ($n:ident) => {
+        (*o!().interfaces.$n.get_vmt())
+    };
+}
+
+#[macro_export]
+macro_rules! r {
+    ($n:ident) => {
+        o!().interfaces.$n.interface_ref
+    };
+}
