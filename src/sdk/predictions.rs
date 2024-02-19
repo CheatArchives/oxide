@@ -60,4 +60,7 @@ impl HasVmt<VMTPrediction> for Prediction {
             self.vmt = vmt
         }
     }
+    unsafe fn c(&mut self) -> VMTPrediction {
+        *self.vmt
+    }
 }

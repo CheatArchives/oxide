@@ -2,6 +2,11 @@ use libc::{dlclose, dlerror, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 
 use crate::*;
 
+pub mod macros;
+pub use macros::*;
+
+mea!(vec);
+
 pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let mut funcs = transmute::<_, *const *const c_void>(vmt);
     let size = std::mem::size_of::<*const c_void>();
@@ -28,42 +33,31 @@ pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, Box<dyn Error>> {
     Ok(handle)
 }
 
-#[macro_export]
-macro_rules! cfn {
-    ($r:ty,$($t:ty),*) => {unsafe extern "C-unwind" fn($($t), *) -> $r}
-}
-#[macro_export]
-macro_rules! mea {
-    ($m:ident) => {
-        pub mod $m;
-        pub use $m::*;
-    };
+pub unsafe fn get_networkabe(ent: &Entity) -> &Networkable{
+    return &*((ent as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable);
 }
 
-#[macro_export]
-macro_rules! o {
-    () => {
-        *(OXIDE as *mut _ as *mut Oxide)
-    };
+pub unsafe fn get_ent(id: i32) -> Option<&'static mut Entity> {
+    let ent = c!(entity_list, GetClientEntity, id);
+    if ent.is_null() {
+        return None;
+    }
+    let ent = &mut *ent;
+    let net = get_networkabe(ent);
+
+    if (!ent || (net.c().IsDormant)() || (ent.c().IsAlive))
+                continue;
+
+    if (*(*ent).vmt). {
+        return None;
+    }
+    return Some(ent)
 }
 
-#[macro_export]
-macro_rules! m {
-    () => {
-        *(MENU as *mut _ as *mut Menu)
-    };
-}
-
-#[macro_export]
-macro_rules! i {
-    ($n:ident) => {
-        (*o!().interfaces.$n.get_vmt())
-    };
-}
-
-#[macro_export]
-macro_rules! r {
-    ($n:ident) => {
-        o!().interfaces.$n.interface_ref
-    };
+pub unsafe fn get_plocal() -> Option<&'static mut Entity> {
+    let ent = c!(entity_list, GetClientEntity, c!(base_engine, GetLocalPlayer));
+    if ent.is_null() {
+        return None;
+    }
+    return Some(&mut *ent)
 }
