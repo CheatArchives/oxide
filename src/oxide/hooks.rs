@@ -49,6 +49,13 @@ pub unsafe extern "C-unwind" fn create_move_hook(
         cmd.viewangles = ang;
 
         let net = get_networkabe(ent);
+        struct ConditionData {
+            cond_0: usize,
+            cond_1: usize,
+            cond_2: usize,
+            cond_3: usize,
+        }
+        ent.condition_bitsz
 
         //bool zoomed    = HasCondition<TFCond_Zoomed>(entity);
         //
