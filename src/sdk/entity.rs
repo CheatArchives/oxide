@@ -72,13 +72,9 @@ pub struct Entity {
     _pad13: [u8; 0x3F8],
     pub player_class: c_int, /* 0x1630 (ETFClass) */
     _pad14: [u8; 0x36C],
-    pub m_nPlayerCond: c_int,    /* 0x19A0 */
-    pub m_nPlayerCondEx: c_int,  /* 0x19A4 */
-    pub m_nPlayerCondEx2: c_int, /* 0x19A8 */
-    pub m_nPlayerCondEx3: c_int, /* 0x19AC */
-    pub m_nPlayerCondEx4: c_int, /* 0x19B0 */
+    pub m_nPlayerCond: Condition,    /* 0x19A0 */
     _pad15: [u8; 0x18],
-    pub condition_bits: c_int, /* 0x19CC */
+    pub condition_bits: isize, /* 0x19CC */
     _pad16: [u8; 0x418],
     pub m_bAllowMoveDuringTaunt: bool, /* 0x1DE8 */
     _pad17: [u8; 0x18],

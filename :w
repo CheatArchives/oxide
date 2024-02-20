@@ -24,30 +24,21 @@ pub struct UserCmd {
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
-pub struct Buttons(u32);
+struct Buttons(u32);
 
 impl Buttons {
-    pub fn get(&self, flag: ButtonFlags) -> bool {
+    pub fn get(&self,flag :ButtonFlags) {
         let flag = flag as u8;
         let shifted = 1 << flag;
-        ButtonFlags::IN_ATTACK as u8;
-        let Buttons(s) = *self;
-        s & shifted == shifted
-    }
-    pub fn set(&mut self, flag: ButtonFlags, val: bool)  {
-        let flag = flag as u8;
-        unsafe{
-            let s = self as  *mut _ as *mut u32;
-            let val = if val {1} else {0};
-            *s |= val << flag
-        }
-
+        (*self as u8) 
+        
     }
 }
 
+
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[derive(Debug, Clone, Copy)]
-pub enum ButtonFlags {
+enum ButtonFlags {
     IN_ATTACK,
     IN_JUMP,
     IN_DUCK,
