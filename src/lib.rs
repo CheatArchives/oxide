@@ -1,3 +1,5 @@
+#![feature(associated_type_defaults)]
+
 use std::{
     alloc::{self, alloc, Layout},
     error::Error,
@@ -12,11 +14,11 @@ pub use std::{ffi::*, mem::transmute, ptr::{addr_of, addr_of_mut}};
 mod util;
 pub use util::*;
 
-use crate::menu::Menu;
 
 mea!(oxide);
 mea!(sdk);
 mea!(error);
+mea!(math);
 
 static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 static mut MENU: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;

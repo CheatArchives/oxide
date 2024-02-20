@@ -34,10 +34,6 @@ pub type HFont = c_uint;
 #[derive(Debug, Clone, Copy)]
 pub struct VMatrix([[c_float; 4]; 4]);
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
-#[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct Angles(pub c_float, pub c_float, pub c_float);
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -52,6 +48,7 @@ impl<T: Copy> WithVmt<T> {
 }
 
 pub trait HasVmt<T> {
+    type VMTType = T;
     fn get_vmt(&self) -> *mut T;
     fn set_vmt(&mut self, vmt: *mut T);
     unsafe fn c(&mut self) -> T;

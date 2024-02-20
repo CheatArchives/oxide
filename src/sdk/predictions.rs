@@ -50,17 +50,5 @@ pub struct Prediction {
     m_flIdealPitch: c_float,
 }
 unsafe impl Send for Prediction {}
-impl HasVmt<VMTPrediction> for Prediction {
-    fn get_vmt(&self) -> *mut VMTPrediction {
-        self.vmt
-    }
 
-    fn set_vmt(&mut self, vmt: *mut VMTPrediction) {
-        unsafe{
-            self.vmt = vmt
-        }
-    }
-    unsafe fn c(&mut self) -> VMTPrediction {
-        *self.vmt
-    }
-}
+impl_has_vmt!(Prediction, VMTPrediction);

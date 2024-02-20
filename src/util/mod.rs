@@ -5,7 +5,6 @@ use crate::*;
 pub mod macros;
 pub use macros::*;
 
-mea!(vec);
 
 pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let mut funcs = transmute::<_, *const *const c_void>(vmt);
@@ -33,31 +32,29 @@ pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, Box<dyn Error>> {
     Ok(handle)
 }
 
-pub unsafe fn get_networkabe(ent: &Entity) -> &Networkable{
-    return &*((ent as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable);
+pub unsafe fn get_networkabe(ent: &Entity) -> &'static mut Networkable{
+    &mut *((ent as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable)
 }
 
 pub unsafe fn get_ent(id: i32) -> Option<&'static mut Entity> {
-    let ent = c!(entity_list, GetClientEntity, id);
-    if ent.is_null() {
+    let ent_ptr = call!(i!(entity_list), GetClientEntity, id);
+    if ent_ptr.is_null() {
         return None;
     }
-    let ent = &mut *ent;
+    let ent = &mut *ent_ptr;
     let net = get_networkabe(ent);
 
-    if (!ent || (net.c().IsDormant)() || (ent.c().IsAlive))
-                continue;
-
-    if (*(*ent).vmt). {
+    if ent_ptr.is_null() || call!(net,IsDormant) || !call!(ent,IsAlive) {
         return None;
     }
-    return Some(ent)
+
+    Some(ent)
 }
 
 pub unsafe fn get_plocal() -> Option<&'static mut Entity> {
-    let ent = c!(entity_list, GetClientEntity, c!(base_engine, GetLocalPlayer));
+    let ent = call!(i!(entity_list), GetClientEntity, call!(i!(base_engine), GetLocalPlayer));
     if ent.is_null() {
         return None;
     }
-    return Some(&mut *ent)
+    Some(&mut *ent)
 }

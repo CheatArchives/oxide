@@ -28,24 +28,26 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     input_sample_time: c_float,
     cmd: *mut UserCmd,
 ) -> bool {
-    let entity_count = c!(entity_list, GetMaxEntities);
+    let entity_count = call!(i!(entity_list), GetMaxEntities);
 
-    let plocal = get_plocal().unwrap();
+    let p_local = get_plocal().unwrap();
+    let p_angles = call!(p_local,GetAbsAngles);
     for i in 0..entity_count {
         let Some(ent) = get_ent(i) else {
             continue;
         };
-        if ((*ent.vmt).GetTeamNumber)() == ((*ent.vmt).GetTeamNumber)() {
+        if call!(ent,GetTeamNumber) == call!(p_local,GetTeamNumber) {
+            continue;
         }
-        let diff = plocal.m_vecOrigin - ent.m_vecOrigin;
+        let diff = p_local.m_vecOrigin - ent.m_vecOrigin;
 
-        dbg!(diff.x.atan2(diff.y)/PI * 360f32);
         let dist = (diff.x.powi(2) + diff.y.powi(2)).sqrt();
         dbg!(dist);
-        dbg!(ent.model_idx);
+        let ang = (diff.x/diff.y).atan() / PI * 180f32;
+        dbg!(ang-p_angles.yaw);
 
 
-        //break;
+        break;
     }
 
     true

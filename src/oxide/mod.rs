@@ -4,13 +4,9 @@ use crate::*;
 
 use self::{hooks::Hooks};
 
-
-
-pub mod menu;
-pub mod hooks;
-
-
 mea!(interfaces);
+mea!(menu);
+mea!(hooks);
 
 #[derive(Debug, Clone, Copy)]
 pub struct Oxide {

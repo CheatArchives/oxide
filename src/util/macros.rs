@@ -27,23 +27,47 @@ macro_rules! m {
 }
 
 #[macro_export]
-macro_rules! i {
+macro_rules! interface_vmt {
     ($n:ident) => {
         (*o!().interfaces.$n.get_vmt())
     };
 }
 
 #[macro_export]
-macro_rules! r {
+macro_rules! i {
     ($n:ident) => {
         o!().interfaces.$n.interface_ref
     };
 }
 
 #[macro_export]
-macro_rules! c {
+macro_rules! call_interface {
     ($i:ident,$f:ident $(,$args: expr)*) => {
-        (i!($i).$f)(r!($i),$($args),*)
+        call!(interface_ref!($i),$f $(,$args)*)
+    };
+}
+#[macro_export]
+macro_rules! call {
+    ($i:expr,$f:ident $(,$args: expr)*) => {
+        ((*$i).c().$f)($i,$($args),*)
     };
 }
 
+#[macro_export]
+macro_rules! impl_has_vmt {
+    ($t:tt,$tv:tt) => {
+        impl HasVmt<$tv> for $t {
+            fn get_vmt(&self) -> *mut $tv {
+                self.vmt
+            }
+
+            fn set_vmt(&mut self, vmt: *mut $tv) {
+                self.vmt = vmt
+            }
+
+            unsafe fn c(&mut self) -> $tv {
+                *self.vmt
+            }
+        }
+    };
+}

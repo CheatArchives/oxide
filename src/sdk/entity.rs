@@ -10,7 +10,7 @@ pub struct VMTEntity {
     pub GetCollideable: cfn!(*const Collideable, *const Entity),
     _pad2: [u32; 6],
     pub GetAbsOrigin: cfn!(*const Vector3, *const Entity),
-    pub GetAbsAngles: cfn!(*const Angles, *const Entity),
+    pub GetAbsAngles: cfn!(&'static Angles, *const Entity),
     _pad3: [u32; 66],
     pub GetIndex: cfn!(*const c_int, *const Entity),
     _pad4: [u32; 26],
@@ -21,7 +21,7 @@ pub struct VMTEntity {
     pub GetHealth: cfn!(*const c_int, *const Entity),
     pub GetMaxHealth: cfn!(*const c_int, *const Entity),
     _pad7: [u32; 29],
-    pub IsAlive: cfn!(*const bool, *const Entity),
+    pub IsAlive: cfn!(bool, *const Entity),
     pub IsPlayer: cfn!(*const bool, *const Entity),
     _pad8: [u32; 2],
     pub IsNPC: cfn!(*const bool, *const Entity),
@@ -44,7 +44,7 @@ pub struct VMTEntity {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Entity {
-    pub vmt: *const VMTEntity,
+    pub vmt: *mut VMTEntity,
     _pad1: [u8; 0x7C],
     pub model_idx: c_int, /* 0x80 */
     _pad2: [u8; 0x8C],
@@ -84,3 +84,6 @@ pub struct Entity {
     _pad17: [u8; 0x18],
     pub nForceTauntCam: c_int, /* 0x1E04 */
 }
+
+impl_has_vmt!(Entity,VMTEntity);
+
