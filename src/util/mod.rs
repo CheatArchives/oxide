@@ -44,7 +44,7 @@ pub unsafe fn get_ent(id: i32) -> Option<&'static mut Entity> {
     let ent = &mut *ent_ptr;
     let net = get_networkabe(ent);
 
-    if ent_ptr.is_null() || call!(net,IsDormant) || !call!(ent,IsAlive) {
+    if ent_ptr.is_null() || call!(net,IsDormant) || !call!(ent,IsAlive) || !call!(ent,IsPlayer){
         return None;
     }
 

@@ -26,26 +26,55 @@ unsafe extern "C-unwind" fn swap_window(window: *mut sdl2_sys::SDL_Window) -> c_
 pub unsafe extern "C-unwind" fn create_move_hook(
     client_mode: *mut ClientMode,
     input_sample_time: c_float,
-    cmd: *mut UserCmd,
+    cmd: &'static mut UserCmd,
 ) -> bool {
     let entity_count = call!(i!(entity_list), GetMaxEntities);
 
     let p_local = get_plocal().unwrap();
-    let p_angles = call!(p_local,GetAbsAngles);
+    let p_angles = call!(p_local, GetAbsAngles);
     for i in 0..entity_count {
         let Some(ent) = get_ent(i) else {
             continue;
         };
-        if call!(ent,GetTeamNumber) == call!(p_local,GetTeamNumber) {
+        if call!(ent, GetTeamNumber) == call!(p_local, GetTeamNumber) {
             continue;
         }
         let diff = p_local.m_vecOrigin - ent.m_vecOrigin;
+        dbg!(p_local.m_vecOrigin);
+        let mut ang = p_angles.clone();
+        dbg!(ang);
+        ang.yaw = diff.y.atan2(diff.x) / PI * 180f32 + 180f32;
+        let dist2d = (diff.x.powi(2) + diff.y.powi(2)).sqrt();
+        ang.pitch = diff.z.atan2(dist2d) / PI * 180f32;
+        cmd.viewangles = ang;
 
-        let dist = (diff.x.powi(2) + diff.y.powi(2)).sqrt();
-        dbg!(dist);
-        let ang = (diff.x/diff.y).atan() / PI * 180f32;
-        dbg!(ang-p_angles.yaw);
+        let net = get_networkabe(ent);
 
+        //bool zoomed    = HasCondition<TFCond_Zoomed>(entity);
+        //
+        //template <condition cond> inline bool HasCondition(CachedEntity *ent)
+        //{
+        //    if (cond < condition(96) && CondBitCheck<cond>(CE_VAR(ent, netvar._condition_bits, condition_data_s)))
+        //        return true;
+        //
+        //    return CondBitCheck<cond>(CE_VAR(ent, netvar.iCond, condition_data_s));
+        //}
+        //#define CE_VAR(entity, offset, type) NET_VAR(RAW_ENT(entity), offset, type)
+        //
+        //template <condition cond> inline bool CondBitCheck(condition_data_s &data)
+        //{
+        //    if (cond >= 32 * 3)
+        //        return data.cond_3 & (1u << (cond % 32));
+        //
+        //    if (cond >= 32 * 2)
+        //        return data.cond_2 & (1u << (cond % 32));
+        //
+        //    if (cond >= 32)
+        //        return data.cond_1 & (1u << (cond % 32));
+        //
+        //    return data.cond_0 & (1u << (cond));
+        //}
+        cmd.buttons.IN_ATTACK = true;
 
         break;
     }

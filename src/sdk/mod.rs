@@ -24,6 +24,7 @@ mea!(game_movement);
 mea!(predictions);
 mea!(client_mode);
 mea!(networkable);
+mea!(condition);
 
 pub type CBaseHandle = c_uint;
 pub type ConCommand = *const c_void;
