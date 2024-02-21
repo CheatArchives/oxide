@@ -25,6 +25,7 @@ mea!(predictions);
 mea!(client_mode);
 mea!(networkable);
 mea!(condition);
+mea!(global_vars);
 
 pub type CBaseHandle = c_uint;
 pub type ConCommand = *const c_void;

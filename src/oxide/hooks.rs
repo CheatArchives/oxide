@@ -30,18 +30,29 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     cmd: &'static mut UserCmd,
 ) -> bool {
     let p_local = get_plocal().unwrap();
-    if !p_local.m_nPlayerCond.get(ConditionFlags::Zoomed) {
+    if !call!(p_local, IsAlive) {
+        return true;
+    }
+    let weapon = call!(p_local, GetWeapon);
+
+    if !p_local.m_nPlayerCond.get(ConditionFlags::Zoomed)
+        || !p_local.can_attack()
+        || !call!(weapon, CanFireCriticalShot, true)
+    {
         return true;
     }
     let p_angles = call!(p_local, GetAbsAngles);
-    let entity_count = call!(i!(entity_list), GetMaxEntities);
+    let entity_count = call!(interface_ref!(entity_list), GetMaxEntities);
     for i in 0..entity_count {
-        let Some(ent) = get_ent(i) else {
+        let Some(ent) = Entity::get(i) else {
             continue;
         };
         if call!(ent, GetTeamNumber) == call!(p_local, GetTeamNumber) {
             continue;
         }
+
+
+
         let diff = p_local.m_vecOrigin - ent.m_vecOrigin;
         let mut ang = p_angles.clone();
         ang.yaw = diff.y.atan2(diff.x) / PI * 180f32 + 180f32;

@@ -22,3 +22,12 @@ impl Sub for Vector3 {
         Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
+
+#[derive(Debug, Clone, Copy)]
+#[repr(C)]
+pub struct Vector4 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub t: f32,
+}

@@ -34,7 +34,7 @@ macro_rules! interface_vmt {
 }
 
 #[macro_export]
-macro_rules! i {
+macro_rules! interface_ref {
     ($n:ident) => {
         o!().interfaces.$n.interface_ref
     };
@@ -49,7 +49,9 @@ macro_rules! call_interface {
 #[macro_export]
 macro_rules! call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        ((*$i).c().$f)($i,$($args),*)
+        unsafe{
+            ((*$i).c().$f)($i,$($args),*)
+        }
     };
 }
 
