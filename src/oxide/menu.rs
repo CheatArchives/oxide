@@ -16,7 +16,7 @@ pub struct Menu {
     pub renderer: *mut SDL_Renderer,
 }
 impl Menu {
-    pub unsafe fn init(window: *mut SDL_Window) -> Result<Menu, Box<dyn Error>> {
+    pub unsafe fn init(window: *mut SDL_Window) -> Result<Menu, std::boxed::Box<dyn Error>> {
 
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);

@@ -23,7 +23,7 @@ mea!(math);
 static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 static mut MENU: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 
-unsafe fn main() -> Result<(), Box<dyn Error>> {
+unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     info!("loading");
 
     let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut Oxide;

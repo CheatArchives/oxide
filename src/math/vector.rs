@@ -1,6 +1,5 @@
 use std::ops::Sub;
 
-
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Vector3 {
@@ -10,8 +9,14 @@ pub struct Vector3 {
 }
 
 impl Vector3 {
-    fn new(x: f32, y: f32, z: f32) -> Vector3 {
+    pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3 { x, y, z }
+    }
+    pub fn dot(&self, vec: Vector3) -> f32 {
+        self.x * vec.x + self.y * vec.y + self.z * vec.z
+    }
+    pub fn empty() -> Vector3 {
+        Vector3::new(0.0, 0.0, 0.0)
     }
 }
 

@@ -51,8 +51,10 @@ pub unsafe extern "C-unwind" fn create_move_hook(
             continue;
         }
 
-
-
+        dbg!(ent.m_vecOrigin);
+        let Some(hitbox) = ent.get_hitbox(HitboxId::HitboxHead) else {
+            return true;
+        };
         let diff = p_local.m_vecOrigin - ent.m_vecOrigin;
         let mut ang = p_angles.clone();
         ang.yaw = diff.y.atan2(diff.x) / PI * 180f32 + 180f32;
@@ -92,7 +94,7 @@ pub struct Hooks {
 }
 
 impl Hooks {
-    pub unsafe fn init(interfaces: &Interfaces) -> Result<Hooks, Box<dyn Error>> {
+    pub unsafe fn init(interfaces: &Interfaces) -> Result<Hooks, std::boxed::Box<dyn Error>> {
         let create_move = Hook::init(
             addr_of_mut!((*interfaces.client_mode.get_vmt()).CreateMove) as *mut *const c_void,
             create_move_hook as *const c_void,

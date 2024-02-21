@@ -19,11 +19,11 @@ pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     i * size
 }
 
-pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, Box<dyn Error>> {
+pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>> {
     let handle = dlopen(CString::new(name)?.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
     if handle.is_null() {
         let error = CStr::from_ptr(dlerror()).to_str()?;
-        return Err(Box::new(OxideError::new(&format!(
+        return Err(std::boxed::Box::new(OxideError::new(&format!(
             "{} handle not found\n {}",
             name, error
         ))));

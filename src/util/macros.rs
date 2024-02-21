@@ -49,9 +49,7 @@ macro_rules! call_interface {
 #[macro_export]
 macro_rules! call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        unsafe{
-            ((*$i).c().$f)($i,$($args),*)
-        }
+        ((*$i).c().$f)($i,$($args),*)
     };
 }
 

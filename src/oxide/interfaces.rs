@@ -30,7 +30,7 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
             old_vmt: old,
         }
     }
-    unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, Box<dyn Error>> {
+    unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, std::boxed::Box<dyn Error>> {
         let create_interface_fn: cfn!(*const c_void, *const c_char, *const c_int) =
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
         let interface_ref = create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null())
@@ -72,7 +72,7 @@ pub struct Interfaces {
     pub client_mode: Interface<ClientMode, VMTClientMode>,
 }
 impl Interfaces {
-    pub unsafe fn init() -> Result<Interfaces, Box<dyn Error>> {
+    pub unsafe fn init() -> Result<Interfaces, std::boxed::Box<dyn Error>> {
         let client_handle = get_handle("./tf/bin/client.so")?;
         let engine_handle = get_handle("./bin/engine.so")?;
         let matsurface_handle = get_handle("./bin/vguimatsurface.so")?;

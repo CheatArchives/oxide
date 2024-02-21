@@ -2,8 +2,9 @@ use std::mem::MaybeUninit;
 
 use crate::*;
 
-const MAX_WEAPONS: usize = 48;
-const MAXSTUDIOBONES: usize = 128;
+pub const MAX_WEAPONS: usize = 48;
+pub const MAX_STUDIO_BONES: usize = 128;
+pub const HITBOX_SET: usize = 0;
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
@@ -126,7 +127,7 @@ impl Entity {
         Some(ent)
     }
 
-    pub fn can_attack(&mut self) -> bool {
+    pub unsafe fn can_attack(&mut self) -> bool {
         let now = o!().global_vars.interval_per_tick * self.nTickBase as f32;
         if !call!(self, IsAlive) {
             return false;
@@ -142,21 +143,30 @@ impl Entity {
         &mut *((self as *const Entity as usize + 0x4) as *mut c_void as *mut _ as *mut Renderable)
     }
 
-    pub unsafe fn get_hitbox(&self) -> Option<Vector3> {
-        let bones: [Matrix3x4; MAXSTUDIOBONES] = MaybeUninit::uninit().assume_init();
+    pub unsafe fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<Vector3> {
+        let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::uninit().assume_init();
         let rend = self.renderable();
-        if (!call!(
+        if !call!(
             rend,
             SetupBones,
-            bones,
-            MAXSTUDIOBONES,
+            &bones,
+            MAX_STUDIO_BONES,
             BoneMask::BONE_USED_BY_HITBOX,
-            0
-        )) {
+            0f32
+        ) {
             return None;
         }
+        dbg!(bones[hitbox_id as usize]);
         let model = call!(rend, GetModel);
-        let hdr = call_interface!(model_info,GetStudioModel,model);
+        let hdr = call_interface!(model_info, GetStudioModel, model);
+        let Some(set) = hdr.hitbox_set(HITBOX_SET) else {
+            return None;
+        };
+        let Some(box_set) = set.get_box(hitbox_id) else {
+            return None;
+        };
+        let center = box_set.center(bones);
+        Some(center)
     }
 
     //studiohdr_t* hdr = METHOD_ARGS(i_modelinfo, GetStudioModel, model);

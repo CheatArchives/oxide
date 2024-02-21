@@ -17,7 +17,7 @@ pub struct Oxide {
 
 
 impl Oxide {
-    pub unsafe fn init() -> Result<Oxide, Box<dyn Error>> {
+    pub unsafe fn init() -> Result<Oxide, std::boxed::Box<dyn Error>> {
         let interfaces = Interfaces::init()?;
         let hooks = Hooks::init(&interfaces)?;
 
