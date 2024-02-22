@@ -1,5 +1,3 @@
-use std::{intrinsics::transmute_unchecked, ops::Index, usize};
-
 use libc::c_ushort;
 
 use crate::*;

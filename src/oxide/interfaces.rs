@@ -1,28 +1,28 @@
 use std::{
     alloc::{alloc, Layout},
-    mem::align_of,
+    mem::{align_of, MaybeUninit},
+    ptr::copy_nonoverlapping, usize,
 };
 
 use libc::dlsym;
 
 use crate::*;
 
+
 #[derive(Debug, Clone, Copy)]
-pub struct Interface<T: HasVmt<V>, V> {
-    pub interface_ref: *mut T,
-    pub old_vmt: *mut V,
+pub struct Interface<T: HasVmt<V> + 'static, V: 'static> {
+    interface_ref: *mut T,
+    pub old_vmt: &'static V,
 }
 
-impl<T: HasVmt<V>, V> Interface<T, V> {
-    pub unsafe fn new(interface_ref: *mut T) -> Interface<T, V> {
-        info!("creating interface {:?}", interface_ref);
-
+impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
+    pub unsafe fn new(interface_ref: &'static mut T) -> Interface<T, V> {
         let old = (*interface_ref).get_vmt();
-        let size = vmt_size(old as *mut c_void);
+        let size = vmt_size(transmute(old));
 
-        let new = alloc(Layout::from_size_align(size, align_of::<VMTCVar>()).unwrap()) as *mut V;
+        let new: &'static mut V = transmute(alloc(Layout::new::<V>()));
 
-        libc::memcpy(new as *mut c_void, old as *const c_void, size);
+        libc::memcpy(transmute(&mut *new), transmute(old), size);
         (*interface_ref).set_vmt(new);
 
         Interface {
@@ -30,25 +30,26 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
             old_vmt: old,
         }
     }
-    unsafe fn create(handle: *mut c_void, name: &str) -> Result<Interface<T, V>, std::boxed::Box<dyn Error>> {
+    unsafe fn create(
+        handle: *mut c_void,
+        name: &str,
+    ) -> Result<Interface<T, V>, std::boxed::Box<dyn Error>> {
         let create_interface_fn: cfn!(*const c_void, *const c_char, *const c_int) =
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
-        let interface_ref = create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null())
-            as *const _ as *mut T;
+
+        let interface_ref: &'static mut T = transmute(create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null()));
+
         Ok(Interface::new(interface_ref))
     }
 
-    pub fn get_vmt(&self) -> *mut V {
+    pub fn get_vmt(&self) -> &'static V {
         unsafe { (*self.interface_ref).get_vmt() }
     }
-    unsafe fn restore(&self) {
-        info!(
-            "restoring {:?} from {:?} to {:?}",
-            self.interface_ref,
-            self.get_vmt(),
-            self.old_vmt
-        );
+    unsafe fn restore(&mut self) {
         (*self.interface_ref).set_vmt(self.old_vmt);
+    }
+    pub unsafe fn interface_ref(&self) -> &'static mut T {
+        &mut *self.interface_ref
     }
 }
 
@@ -82,8 +83,7 @@ impl Interfaces {
         let base_client: Interface<BaseClient, VMTBaseClient> =
             Interface::create(client_handle, "VClient017")?;
 
-        let client_mode = *(((*(*base_client.interface_ref).vmt).HudProcessInput as usize + 1)
-            as *mut *mut *mut ClientMode).read_unaligned();
+        let client_mode = Interfaces::get_client_mode(*base_client.interface_ref());
 
         Ok(Interfaces {
             base_client,
@@ -104,7 +104,7 @@ impl Interfaces {
         })
     }
 
-    pub unsafe fn restore(&self) {
+    pub unsafe fn restore(&mut self) {
         self.base_client.restore();
         self.base_engine.restore();
         self.entity_list.restore();
@@ -120,5 +120,9 @@ impl Interfaces {
         self.game_movement.restore();
         self.prediction.restore();
         self.client_mode.restore();
+    }
+    unsafe fn get_client_mode(base_client: BaseClient) -> &'static mut ClientMode {
+        **transmute::<usize,&'static mut &'static mut &'static mut ClientMode>((*base_client.vmt).HudProcessInput as usize + 1)
+
     }
 }

@@ -15,7 +15,6 @@ pub enum ClientFrameStage {
 
 pub type BaseClient = WithVmt<VMTBaseClient>;
 
-unsafe impl Send for BaseClient{}
 
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]

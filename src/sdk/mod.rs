@@ -1,3 +1,4 @@
+#[allow(unused)]
 use std::fmt::Debug;
 
 use crate::*;
@@ -39,27 +40,22 @@ pub struct VMatrix([[f32; 4]; 4]);
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct WithVmt<T> {
-    pub vmt: *mut T,
+pub struct WithVmt<T: Copy + 'static> {
+    pub vmt: &'static T,
 }
 
-impl<T: Copy> WithVmt<T> {
-    pub unsafe fn c(&mut self) -> T {
-        *self.vmt
-    }
-}
 
-pub trait HasVmt<T> {
+pub trait HasVmt<T: 'static> {
     type VMTType = T;
-    fn get_vmt(&self) -> *mut T;
-    fn set_vmt(&mut self, vmt: *mut T);
+    fn get_vmt(&self) -> &'static T;
+    fn set_vmt(&mut self, vmt: &'static T);
     unsafe fn c(&mut self) -> T;
 }
-impl<T: Copy> HasVmt<T> for WithVmt<T> {
-    fn get_vmt(&self) -> *mut T {
+impl<T: Copy + 'static> HasVmt<T> for WithVmt<T> {
+    fn get_vmt(&self) -> &'static T {
         self.vmt
     }
-    fn set_vmt(&mut self, vmt: *mut T) {
+    fn set_vmt(&mut self, vmt: &'static T) {
         self.vmt = vmt
     }
     unsafe fn c(&mut self) -> T {

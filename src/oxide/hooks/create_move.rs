@@ -1,5 +1,3 @@
-use std::f32::consts::PI;
-
 use crate::*;
 
 pub unsafe extern "C-unwind" fn create_move_hook(

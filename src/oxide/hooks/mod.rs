@@ -34,7 +34,7 @@ pub struct Hooks {
 impl Hooks {
     pub unsafe fn init(interfaces: &Interfaces) -> Result<Hooks, std::boxed::Box<dyn Error>> {
         let create_move = Hook::init(
-            addr_of_mut!((*interfaces.client_mode.get_vmt()).CreateMove) as *mut *const c_void,
+            addr_of!((*interfaces.client_mode.get_vmt()).CreateMove) as *mut *const c_void,
             create_move_hook as *const c_void,
         );
         let sdl_handle =

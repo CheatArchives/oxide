@@ -36,7 +36,7 @@ pub struct VMTPrediction {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Prediction {
-    vmt: *mut VMTPrediction,
+    vmt: &'static VMTPrediction,
     m_hLastGround: c_int,
     m_bInPrediction: bool,
     m_bFirstTimePredicted: bool,

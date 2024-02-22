@@ -1,5 +1,3 @@
-use crate::*;
-
 #[macro_export]
 macro_rules! cfn {
     ($r:ty,$($t:ty),*) => {unsafe extern "C-unwind" fn($($t), *) -> $r}
@@ -36,7 +34,7 @@ macro_rules! interface_vmt {
 #[macro_export]
 macro_rules! interface_ref {
     ($n:ident) => {
-        o!().interfaces.$n.interface_ref
+        o!().interfaces.$n.interface_ref()
     };
 }
 
@@ -49,7 +47,7 @@ macro_rules! call_interface {
 #[macro_export]
 macro_rules! call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        ((*$i).c().$f)($i,$($args),*)
+        ((*$i).vmt.$f)($i,$($args),*)
     };
 }
 
@@ -57,11 +55,11 @@ macro_rules! call {
 macro_rules! impl_has_vmt {
     ($t:tt,$tv:tt) => {
         impl HasVmt<$tv> for $t {
-            fn get_vmt(&self) -> *mut $tv {
+            fn get_vmt(&self) -> &'static $tv {
                 self.vmt
             }
 
-            fn set_vmt(&mut self, vmt: *mut $tv) {
+            fn set_vmt(&mut self, vmt: &'static $tv) {
                 self.vmt = vmt
             }
 

@@ -1,12 +1,9 @@
-use std::mem::MaybeUninit;
 
 use libc::{dlclose, dlerror, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 
 use crate::*;
 
 pub mod macros;
-pub use macros::*;
-
 
 pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let mut funcs = transmute::<_, *const *const c_void>(vmt);
@@ -34,9 +31,12 @@ pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn 
     Ok(handle)
 }
 
-
 pub unsafe fn get_plocal() -> Option<&'static mut Entity> {
-    let ent = call!(interface_ref!(entity_list), GetClientEntity, call!(interface_ref!(base_engine), GetLocalPlayer));
+    let ent = call!(
+        interface_ref!(entity_list),
+        GetClientEntity,
+        call!(interface_ref!(base_engine), GetLocalPlayer)
+    );
     if ent.is_null() {
         return None;
     }

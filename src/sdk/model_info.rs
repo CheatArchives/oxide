@@ -1,5 +1,3 @@
-use libc::wait;
-
 use crate::*;
 
 pub type ModelInfo = WithVmt<VMTModelInfo>;
@@ -13,11 +11,6 @@ pub struct HitboxSet {
 }
 
 impl HitboxSet {
-    ///* Wrapper for studiohdr_pHitboxSet and studiohitboxset_pHitbox */
-    //static inline studiobbox_t* studiohitboxset_pHitbox(studiohitboxset_t* thisptr,
-    //                                                    int i) {
-    //    return (studiobbox_t*)(((void*)thisptr) + thisptr->hitboxindex) + i;
-    //};
     pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<&Hitbox> {
         let addr = self as *const _ as usize + self.hitboxindex + id as usize;
         let ptr = transmute::<usize, *const Hitbox>(addr);
@@ -41,7 +34,6 @@ pub struct Hitbox {
 
 impl Hitbox {
     pub unsafe fn center(&self, bones: [Matrix3x4; MAX_STUDIO_BONES]) -> Vector3 {
-
         let bone = bones[self.bone];
         let min = bone.transform(self.bbmin);
         let max = bone.transform(self.bbmax);
@@ -139,7 +131,7 @@ pub struct Bone {
 }
 impl StudioHdr {
     pub unsafe fn bone(&self, i: usize) -> Option<&Bone> {
-        if i < 0 || i >= self.numbones {
+        if i >= self.numbones {
             return None;
         }
 
@@ -147,7 +139,7 @@ impl StudioHdr {
     }
 
     pub unsafe fn hitbox_set(&self, i: usize) -> Option<&HitboxSet> {
-        if i < 0 || i >= self.numhitboxsets {
+        if i >= self.numhitboxsets {
             return None;
         }
 

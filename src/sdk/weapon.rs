@@ -25,7 +25,7 @@ pub struct VMTWeapon {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Weapon {
-    pub vmt: *mut VMTWeapon,
+    pub vmt: &'static VMTWeapon,
     _pad1: [u8; 0x924],
     pub m_iItemDefinitionIndex: c_int,
     _pad2: [u8; 0x10C],

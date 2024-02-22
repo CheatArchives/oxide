@@ -21,7 +21,8 @@ impl Menu {
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
         let renderer = SDL_CreateRenderer(window, -1, 0);
-        SDL_SetWindowTitle(window, CString::new("Team Fortress 2 - [OXIDE]").unwrap().as_ptr());
+        let title = CString::new("Team Fortress 2 - [OXIDE]").unwrap();
+        SDL_SetWindowTitle(window, title.as_ptr());
 
         let menu = Menu{
                 old_ctx,
