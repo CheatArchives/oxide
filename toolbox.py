@@ -94,7 +94,7 @@ parser = argparse.ArgumentParser(
     prog='oxide toolbox')
 
 parser.add_argument('action', choices=[
-                    'inject', 'unload', 'build', 'start_tf2'], default=inject)
+                    'inject', 'unload', 'build', 'start_tf2', 'reload'], default=inject)
 parser.add_argument(
     '-d', '--debug', help='build for debug ', action='store_true')
 args = parser.parse_args()
