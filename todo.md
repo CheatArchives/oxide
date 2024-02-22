@@ -1,3 +1,2 @@
 - brute force interface 
 - fix sdl not loading on hot reload 
-- rethink if oxide.lock was a good idea (i dont thinkg so)

@@ -3,21 +3,15 @@
 import argparse
 from subprocess import run
 from pathlib import Path
-from datetime import datetime
 from time import sleep
 import os
 
 
-LOCK_FILE = Path("/tmp") / "oxide.lock"
 TF2_DIR = Path.home() / '.local'/'share'/'Steam' / \
     'steamapps'/'common'/'Team Fortress 2'
 
 
 def inject(pid, lib):
-    if LOCK_FILE.exists():
-        print('lock file exists reloading')
-        unload(pid, lib)
-        sleep(2)
 
     command = ['sudo', 'gdb', '-n', '-q', '-batch',
                '-ex', 'attach ' + pid,
@@ -30,10 +24,7 @@ def inject(pid, lib):
 
     result = run(command).returncode
 
-    if result == 0:
-        with open(LOCK_FILE, "w") as f:
-            f.write(datetime.now().__str__())
-    else:
+    if not result == 0:
         print("failed to inject")
         exit(result)
 
@@ -57,9 +48,7 @@ def unload(pid, lib):
     result = run(command).returncode
 
     print(result)
-    if result == 0 and LOCK_FILE.exists():
-        os.remove(LOCK_FILE)
-    else:
+    if not result == 0:
         print("failed to unload")
         exit(result)
 
@@ -121,6 +110,13 @@ match args.action:
         lib = get_lib(args.debug)
 
         unload(pid, lib)
+    case 'reload':
+        pid = get_pid()
+        lib = get_lib(args.debug)
+
+        unload(pid, lib)
+        sleep(2)
+        inject(pid, lib)
     case 'build':
         build(args.debug)
     case 'start_tf2':
