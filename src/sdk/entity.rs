@@ -106,7 +106,7 @@ impl_has_vmt!(Entity, VMTEntity);
 
 impl Entity {
     pub unsafe fn get(id: i32) -> Option<&'static mut Entity> {
-        let ent_ptr = call!(interface_ref!(entity_list), GetClientEntity, id);
+        let ent_ptr = call!(interface_ref!(entity_list), get_client_entity, id);
         if ent_ptr.is_null() {
             return None;
         }
@@ -114,7 +114,7 @@ impl Entity {
         let net = ent.networkabe();
 
         if ent_ptr.is_null()
-            || call!(net, IsDormant)
+            || call!(net, is_dormant)
             || !call!(ent, is_alive)
             || !call!(ent, is_player)
         {
@@ -130,7 +130,7 @@ impl Entity {
             return false;
         }
         let weapon = call!(self, get_weapon);
-        self.next_attack <= now && weapon.flNextPrimaryAttack <= now
+        self.next_attack <= now && weapon.next_primary_attack <= now
     }
     pub unsafe fn networkabe(&self) -> &'static mut Networkable {
         &mut *((self as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable)
@@ -145,7 +145,7 @@ impl Entity {
         let rend = self.renderable();
         if !call!(
             rend,
-            SetupBones,
+            setup_bones,
             &bones,
             MAX_STUDIO_BONES,
             BoneMask::BoneUsedByHitbox,
@@ -153,8 +153,8 @@ impl Entity {
         ) {
             return None;
         }
-        let model = call!(rend, GetModel);
-        let hdr = call_interface!(model_info, GetStudioModel, model);
+        let model = call!(rend, get_model);
+        let hdr = call_interface!(model_info, get_studio_model, model);
         let Some(hitbox_set) = hdr.hitbox_set(HITBOX_SET) else {
             return None;
         };

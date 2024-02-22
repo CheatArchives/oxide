@@ -6,22 +6,21 @@ pub struct MoveHelper {
     vmt: *mut VMTMoveHelper,
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTPrediction {
     _pad1: [u32; 13],
-    pub GetLocalViewAngles: cfn!(c_void, *mut Prediction, *mut Angles),
-    pub SetLocalViewAngles: cfn!(c_void, *const Prediction, *mut Angles),
+    pub get_local_view_angles: cfn!(c_void, *mut Prediction, *mut Angles),
+    pub set_local_view_angles: cfn!(c_void, *const Prediction, *mut Angles),
     _pad2: [u32; 3],
-    pub RunCommand: cfn!(
+    pub run_command: cfn!(
         c_void,
         *mut Prediction,
         *mut Entity,
         *mut UserCmd,
         *mut MoveHelper
     ),
-    pub SetupMove: cfn!(
+    pub setup_move: cfn!(
         c_void,
         *mut Prediction,
         *mut Entity,
@@ -29,25 +28,24 @@ pub struct VMTPrediction {
         *mut MoveHelper,
         *mut CMoveData
     ),
-    pub FinishMove: cfn!(c_void, *mut Prediction, *mut Entity, *mut UserCmd),
+    pub finish_move: cfn!(c_void, *mut Prediction, *mut Entity, *mut UserCmd),
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Prediction {
     vmt: &'static VMTPrediction,
-    m_hLastGround: c_int,
-    m_bInPrediction: bool,
-    m_bFirstTimePredicted: bool,
-    m_bOldCLPredictValue: bool,
-    m_bEnginePaused: bool,
-    m_nPreviousStartFrame: c_int,
-    m_nCommandsPredicted: c_int,
-    m_nServerCommandsAcknowledged: c_int,
-    m_bPreviousAckHadErrors: c_int,
-    m_nIncomingPacketNumber: c_int,
-    m_flIdealPitch: c_float,
+    last_ground: c_int,
+    in_prediction: bool,
+    first_time_predicted: bool,
+    old_cl_predict_value: bool,
+    engine_paused: bool,
+    previous_start_frame: c_int,
+    commands_predicted: c_int,
+    server_commands_acknowledged: c_int,
+    previous_ack_had_errors: c_int,
+    incoming_packet_number: c_int,
+    ideal_pitch: c_float,
 }
 unsafe impl Send for Prediction {}
 

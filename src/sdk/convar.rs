@@ -1,36 +1,34 @@
 use crate::*;
 
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTConVar {
     _pad: [u8; 4*14],
-    pub InternalSetValue: cfn!(c_void, *const ConVar , *const c_char),
-    pub InternalSetFloatValue: cfn!(c_void, *const ConVar,c_float , bool),
-    pub InternalSetIntValue: cfn!(c_void, *const ConVar, c_int),
+    pub internal_set_value: cfn!(c_void, *const ConVar , *const c_char),
+    pub internal_set_float_value: cfn!(c_void, *const ConVar,c_float , bool),
+    pub internal_set_int_value: cfn!(c_void, *const ConVar, c_int),
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct ConVar {
-    vmt: VMTConVar,
+    vmt: &'static VMTConVar,
     _pad: [u8; 0x18],
-    m_pParent: *const ConVar,
-    m_pszDefaultValue: *const c_char,
-    m_pszString: *const c_char,
-    m_StringLength: c_int,
-    m_fValue: c_float,
-    m_nValue: c_int,
-    m_bHasMin: bool,
-    m_fMinVal: c_float,
-    m_bHasMax: bool,
-    m_fMaxVal: c_float,
-    m_bHasCompMin: bool,
-    m_fCompMinVal: c_float,
-    m_bHasCompMax: bool,
-    m_fCompMaxVal: c_float,
-    m_bCompetitiveRestrictions: bool,
-    m_fnChangeCallback: *const c_void,
+    parent: *const ConVar,
+    default_value: *const c_char,
+    string: *const c_char,
+    string_length: c_int,
+    float_value: c_float,
+    int_value: c_int,
+    has_min: bool,
+    min_val: c_float,
+    has_max: bool,
+    max_val: c_float,
+    has_comp_min: bool,
+    comp_min_val: c_float,
+    has_comp_max: bool,
+    comp_max_val: c_float,
+    competitive_restrictions: bool,
+    change_callback: *const c_void,
 }

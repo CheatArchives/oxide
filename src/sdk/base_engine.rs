@@ -20,25 +20,24 @@ pub struct PlayerInfo {
     files_downloaded: c_uchar,
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTBaseEngine {
     _pad1: [u32; 5],
-    pub GetScreenSize: cfn!(c_void, *const BaseEngine, *const c_int, *const c_int),
+    pub get_screen_size: cfn!(c_void, *const BaseEngine, *const c_int, *const c_int),
     _pad2: [u32; 2],
-    pub GetPlayerInfo: cfn!(bool, *const BaseEngine, *const c_int, *const PlayerInfo),
+    pub get_player_info: cfn!(bool, *const BaseEngine, *const c_int, *const PlayerInfo),
     _pad3: [u32; 3],
-    pub GetLocalPlayer: cfn!(c_int, *const BaseEngine),
+    pub get_local_player: cfn!(c_int, *const BaseEngine),
     _pad4: [u32; 6],
-    pub GetViewAngles: cfn!(c_void, *const BaseEngine, Angles),
-    pub SetViewAngles: cfn!(c_void, *const BaseEngine, Angles),
-    pub GetMaxClients: cfn!(c_int, *const BaseEngine),
+    pub get_view_angles: cfn!(c_void, *const BaseEngine, Angles),
+    pub set_view_angles: cfn!(c_void, *const BaseEngine, Angles),
+    pub get_max_clients: cfn!(c_int, *const BaseEngine),
     _pad5: [u32; 4],
-    pub IsInGame: cfn!(bool, *const BaseEngine),
-    pub IsConnected: cfn!(bool, *const BaseEngine),
+    pub is_in_game: cfn!(bool, *const BaseEngine),
+    pub is_connected: cfn!(bool, *const BaseEngine),
     _pad6: [u32; 8],
-    pub WorldToScreenMatrix: cfn!(VMatrix, *const BaseEngine),
+    pub world_to_screen_matrix: cfn!(VMatrix, *const BaseEngine),
     _pad7: [u32; 48],
-    pub IsTakingScreenshot: cfn!(bool, *const BaseEngine),
+    pub is_taking_screenshot: cfn!(bool, *const BaseEngine),
 }

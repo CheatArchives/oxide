@@ -6,12 +6,11 @@ pub type Panel = WithVmt<VMTPanel>;
 type VPanel = c_uint;
 
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTPanel {
     _pad1: [u32; 37],
-    pub GetName: cfn!(*const char, *const Panel, VPanel),
+    pub get_name: cfn!(*const char, *const Panel, VPanel),
     _pad2: [u32; 4],
-    pub PaintTraverse: cfn!(c_void, *const Panel, VPanel, bool, bool),
+    pub paint_traverse: cfn!(c_void, *const Panel, VPanel, bool, bool),
 }

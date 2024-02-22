@@ -69,7 +69,6 @@ pub enum HitboxId {
     HitboxMax,
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Model {
@@ -84,7 +83,6 @@ pub struct Model {
     radius: c_float,
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct StudioHdr {
@@ -147,12 +145,11 @@ impl StudioHdr {
     }
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTModelInfo {
     _pad1: [u8; 4 * 3],
-    pub GetModelIndex: cfn!(c_int, *const ModelInfo, *const c_char),
+    pub get_model_index: cfn!(c_int, *const ModelInfo, *const c_char),
     _pad2: [u8; 4 * 25],
-    pub GetStudioModel: cfn!(&'static StudioHdr, *const ModelInfo, *const Model),
+    pub get_studio_model: cfn!(&'static StudioHdr, *const ModelInfo, *const Model),
 }

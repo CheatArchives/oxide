@@ -33,7 +33,7 @@ impl Oxide {
         Ok(oxide)
     }
     unsafe fn get_global_vars(base_client: BaseClient) -> &'static mut GlobalVars {
-        let hud_update_addr = (*base_client.vmt).HudUpdate as usize;
+        let hud_update_addr = (*base_client.vmt).hud_update as usize;
         let global_vars:&'static mut &'static mut &'static mut GlobalVars = transmute(hud_update_addr + 9);
         **global_vars
     }

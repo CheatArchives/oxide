@@ -1,6 +1,5 @@
 use crate::*;
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct UserCmd {
@@ -21,7 +20,6 @@ pub struct UserCmd {
     pub hasbeenpredicted: bool,
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Buttons(u32);
@@ -30,7 +28,7 @@ impl Buttons {
     pub fn get(&self, flag: ButtonFlags) -> bool {
         let flag = flag as u8;
         let shifted = 1 << flag;
-        ButtonFlags::IN_ATTACK as u8;
+        ButtonFlags::InAttack as u8;
         let Buttons(s) = *self;
         s & shifted == shifted
     }
@@ -45,33 +43,32 @@ impl Buttons {
     }
 }
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub enum ButtonFlags {
-    IN_ATTACK,
-    IN_JUMP,
-    IN_DUCK,
-    IN_FORWARD,
-    IN_BACK,
-    IN_USE,
-    IN_CANCEL,
-    IN_LEFT,
-    IN_RIGHT,
-    IN_MOVELEFT,
-    IN_MOVERIGHT,
-    IN_ATTACK2,
-    IN_RUN,
-    IN_RELOAD,
-    IN_ALT1,
-    IN_ALT2,
-    IN_SCORE,
-    IN_SPEED,
-    IN_WALK,
-    IN_ZOOM,
-    IN_WEAPON1,
-    IN_WEAPON2,
-    IN_BULLRUSH,
-    IN_GRENADE1,
-    IN_GRENADE2,
-    IN_ATTACK3,
+    InAttack,
+    InJump,
+    InDuck,
+    InForward,
+    InBack,
+    InUse,
+    InCancel,
+    InLeft,
+    InRight,
+    InMoveleft,
+    InMoveright,
+    InAttack2,
+    InRun,
+    InReload,
+    InAlt1,
+    InAlt2,
+    InScore,
+    InSpeed,
+    InWalk,
+    InZoom,
+    InWeapon1,
+    InWeapon2,
+    InBullrush,
+    InGrenade1,
+    InGrenade2,
+    InAttack3,
 }

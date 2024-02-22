@@ -6,17 +6,16 @@ pub type RenderView = WithVmt<VMTRenderView>;
 #[derive(Debug, Clone, Copy)]
 pub struct FloatRGBA(c_float, c_float, c_float, c_float);
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTRenderView {
     _pad1: [u32; 4],
-    pub SetBlend: cfn!(c_void, *const RenderView, c_float),
-    pub GetBlend: cfn!(c_float, *const RenderView),
-    pub SetColorModulation: cfn!(c_void, *const RenderView, *const FloatRGBA),
-    pub GetColorModulation: cfn!(c_void, *const RenderView, *mut FloatRGBA),
+    pub set_blend: cfn!(c_void, *const RenderView, c_float),
+    pub get_blend: cfn!(c_float, *const RenderView),
+    pub set_color_modulation: cfn!(c_void, *const RenderView, *const FloatRGBA),
+    pub get_color_modulation: cfn!(c_void, *const RenderView, *mut FloatRGBA),
     _pad2: [u32; 42],
-    pub GetMatricesForView: cfn!(
+    pub get_matrices_for_view: cfn!(
         c_void,
         *const RenderView,
         *const VMatrix,

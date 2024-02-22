@@ -34,8 +34,8 @@ pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn 
 pub unsafe fn get_plocal() -> Option<&'static mut Entity> {
     let ent = call!(
         interface_ref!(entity_list),
-        GetClientEntity,
-        call!(interface_ref!(base_engine), GetLocalPlayer)
+        get_client_entity,
+        call!(interface_ref!(base_engine), get_local_player)
     );
     if ent.is_null() {
         return None;

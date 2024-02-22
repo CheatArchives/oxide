@@ -1,45 +1,73 @@
-
 use crate::*;
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub enum FontDrawType {
-    FONT_DRAW_DEFAULT = 0,
-    FONT_DRAW_NONADDITIVE,
-    FONT_DRAW_TYPE_COUNT = 2,
-    FONT_DRAW_ADDITIVE,
+    Default,
+    NonAdditive,
+    TypeCount,
+    Additive,
+}
+
+impl Default for FontDrawType {
+    fn default() -> Self {
+        Self::Additive
+    }
 }
 
 pub type MatSurface = WithVmt<VMTMatSurface>;
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTMatSurface {
     _pad1: [u32; 10],
-    pub SetColor: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
+    pub set_color: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
     _pad2: [u32; 1],
-    pub DrawFilledRect: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
+    pub draw_filled_rect: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
     _pad3: [u32; 1],
-    pub DrawRect: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
-    pub DrawLine: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
+    pub draw_rect: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
+    pub draw_line: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
     _pad4: [u32; 1],
-    pub SetTextFont: cfn!(c_void, *const MatSurface, HFont),
-    pub SetTextColor: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
+    pub set_text_font: cfn!(c_void, *const MatSurface, HFont),
+    pub set_text_color: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
     _pad5: [u32; 1],
-    pub SetTextPos: cfn!(c_void, *const MatSurface, c_int, c_int),
-    pub GetTextPos: cfn!(c_void, *const MatSurface, c_int, c_int),
-    pub PrintText: cfn!(c_void, *const MatSurface, *const wchar_t, c_int, FontDrawType),
+    pub set_text_pos: cfn!(c_void, *const MatSurface, c_int, c_int),
+    pub get_text_pos: cfn!(c_void, *const MatSurface, c_int, c_int),
+    pub print_text: cfn!(
+        c_void,
+        *const MatSurface,
+        *const wchar_t,
+        c_int,
+        FontDrawType
+    ),
     _pad6: [u32; 29],
-    pub SetCursorAlwaysVisible: cfn!(c_void, *const MatSurface, bool),
+    pub set_cursor_always_visible: cfn!(c_void, *const MatSurface, bool),
     _pad7: [u32; 13],
-    pub CreateFont: cfn!(HFont, *const MatSurface),
-    pub SetFontGlyphSet: cfn!(bool, *const MatSurface, HFont,*const c_char,c_int,c_int,c_int,c_int,c_int,c_int,c_int),
+    pub create_font: cfn!(HFont, *const MatSurface),
+    pub set_font_glyph_set: cfn!(
+        bool,
+        *const MatSurface,
+        HFont,
+        *const c_char,
+        c_int,
+        c_int,
+        c_int,
+        c_int,
+        c_int,
+        c_int,
+        c_int
+    ),
     _pad8: [u32; 7],
-    pub GetTextSize: cfn!(c_void, *const MatSurface, HFont,*const wchar_t,*mut c_int,*mut c_int),
+    pub get_text_size: cfn!(
+        c_void,
+        *const MatSurface,
+        HFont,
+        *const wchar_t,
+        *mut c_int,
+        *mut c_int
+    ),
     _pad9: [u32; 23],
-    pub DrawCircle: cfn!(c_void, *const MatSurface, c_int,c_int,c_int,c_int),
+    pub draw_circle: cfn!(c_void, *const MatSurface, c_int, c_int, c_int, c_int),
     _pad10: [u32; 11],
-    pub OnScreenSizeChanged: cfn!(c_void, *const MatSurface, c_int,c_int),
+    pub on_screen_size_changed: cfn!(c_void, *const MatSurface, c_int, c_int),
 }

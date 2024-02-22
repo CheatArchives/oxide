@@ -1,4 +1,3 @@
-#[allow(unused)]
 use std::fmt::Debug;
 
 use crate::*;
@@ -32,7 +31,6 @@ pub type CBaseHandle = c_uint;
 pub type ConCommand = *const c_void;
 pub type HFont = c_uint;
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMatrix([[f32; 4]; 4]);

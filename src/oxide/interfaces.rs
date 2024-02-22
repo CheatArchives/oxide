@@ -54,7 +54,6 @@ impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
 }
 
 #[derive(Debug, Clone, Copy)]
-#[allow(unused)]
 pub struct Interfaces {
     pub base_client: Interface<BaseClient, VMTBaseClient>,
     pub base_engine: Interface<BaseEngine, VMTBaseEngine>,
@@ -122,7 +121,7 @@ impl Interfaces {
         self.client_mode.restore();
     }
     unsafe fn get_client_mode(base_client: BaseClient) -> &'static mut ClientMode {
-        **transmute::<usize,&'static mut &'static mut &'static mut ClientMode>((*base_client.vmt).HudProcessInput as usize + 1)
+        **transmute::<usize,&'static mut &'static mut &'static mut ClientMode>((*base_client.vmt).hud_process_input as usize + 1)
 
     }
 }
