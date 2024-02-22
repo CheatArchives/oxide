@@ -133,7 +133,7 @@ impl Entity {
             return false;
         }
         let weapon = call!(self, GetWeapon);
-        self.flNextAttack < now && weapon.flNextPrimaryAttack < now
+        self.flNextAttack <= now && weapon.flNextPrimaryAttack <= now
     }
     pub unsafe fn networkabe(&self) -> &'static mut Networkable {
         &mut *((self as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable)
@@ -156,7 +156,6 @@ impl Entity {
         ) {
             return None;
         }
-        dbg!(bones[hitbox_id as usize]);
         let model = call!(rend, GetModel);
         let hdr = call_interface!(model_info, GetStudioModel, model);
         let Some(hitbox_set) = hdr.hitbox_set(HITBOX_SET) else {

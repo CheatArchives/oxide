@@ -1,4 +1,4 @@
 use crate::*;
 
-mea!(angles);
-mea!(vector);
+module_export!(angles);
+module_export!(vector);

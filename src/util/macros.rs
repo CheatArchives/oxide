@@ -5,7 +5,7 @@ macro_rules! cfn {
     ($r:ty,$($t:ty),*) => {unsafe extern "C-unwind" fn($($t), *) -> $r}
 }
 #[macro_export]
-macro_rules! mea {
+macro_rules! module_export {
     ($m:ident) => {
         pub mod $m;
         pub use $m::*;

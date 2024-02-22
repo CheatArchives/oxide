@@ -17,10 +17,10 @@ mod util;
 pub use util::*;
 
 
-mea!(oxide);
-mea!(sdk);
-mea!(error);
-mea!(math);
+module_export!(oxide);
+module_export!(sdk);
+module_export!(error);
+module_export!(math);
 
 static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 static mut MENU: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
