@@ -9,6 +9,8 @@ import os
 
 
 LOCK_FILE = Path("/tmp") / "oxide.lock"
+TF2_DIR = Path.home() / '.local'/'share'/'Steam' / \
+    'steamapps'/'common'/'Team Fortress 2'
 
 
 def inject(pid, lib):
@@ -75,7 +77,7 @@ def get_pid():
 
 def get_lib(debug=False):
 
-    lib = Path.cwd()/'target'/'i686-unknown-linux-gnu' / \
+    lib = Path(os.path.realpath(__file__))/'target'/'i686-unknown-linux-gnu' /\
         ('debug' if debug else 'release') / 'liboxide.so'
     if not lib.exists():
         build(debug)
@@ -93,27 +95,33 @@ def build(dev=False):
         exit(0)
 
 
+def start_tf2():
+    run(["bash", "./hl2.sh", "-game", "tf"], cwd=TF2_DIR,
+        env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
+
+
 parser = argparse.ArgumentParser(
     prog='oxide toolbox')
 
 parser.add_argument('action', choices=[
-                    'inject', 'unload', 'build'], default=inject)
-parser.add_argument('-r', '--release', action='store_true')
+                    'inject', 'unload', 'build', 'start_tf2'], default=inject)
+parser.add_argument(
+    '-d', '--debug', help='build for debug ', action='store_true')
 args = parser.parse_args()
 
 print(args)
 match args.action:
     case 'inject':
         pid = get_pid()
-        lib = get_lib(not args.release)
+        lib = get_lib(args.debug)
 
         inject(pid, lib, )
     case 'unload':
-
         pid = get_pid()
-        lib = get_lib(not args.release)
+        lib = get_lib(args.debug)
 
         unload(pid, lib)
     case 'build':
-
-        build(not args.release)
+        build(args.debug)
+    case 'start_tf2':
+        start_tf2()
