@@ -66,8 +66,9 @@ def get_pid():
 
 def get_lib(debug=False):
 
-    lib = Path(os.path.realpath(__file__))/'target'/'i686-unknown-linux-gnu' /\
-        ('debug' if debug else 'release') / 'liboxide.so'
+    lib = Path(os.path.dirname(os.path.realpath(__file__))) / 'target' \
+        / 'i686-unknown-linux-gnu' / ('debug' if debug else 'release') \
+        / 'liboxide.so'
     if not lib.exists():
         build(debug)
     return lib
