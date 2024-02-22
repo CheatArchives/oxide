@@ -1,4 +1,4 @@
 ```sh
-./toolbox inject -r
+./toolbox inject
 ```
 enjoy

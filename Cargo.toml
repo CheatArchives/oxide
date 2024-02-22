@@ -1,7 +1,10 @@
 [package]
 name = "oxide"
-version = "0.1.0"
+authors = ["SNIAPA"]
+version = "0.5.0"
 edition = "2021"
+homepage = "https://github.com/SNIAPA/oxide"
+repository = "https://github.com/SNIAPA/oxide"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

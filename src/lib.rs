@@ -26,6 +26,10 @@ module_export!(sdk);
 module_export!(error);
 module_export!(math);
 
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const NAME: &str = env!("CARGO_PKG_NAME");
+pub const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
+
 static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 static mut MENU: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
 

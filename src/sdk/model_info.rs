@@ -114,7 +114,7 @@ pub struct Bone {
     bonecontroller: [usize; 6],
     pos: Vector3,
     quat: Vector4,
-    rot: Vector3, /* RadianEuler */
+    rot: Vector3,
     posscale: Vector3,
     rotscale: Vector3,
     pose_to_bone: Matrix3x4,

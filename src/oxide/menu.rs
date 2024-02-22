@@ -7,8 +7,6 @@ static BLACK: usize = 0x0C0F0A;
 use crate::*;
 use sdl2_sys::*;
 
-
-
 #[derive(Debug, Clone, Copy)]
 pub struct Menu {
     pub old_ctx: *mut c_void,
@@ -17,19 +15,24 @@ pub struct Menu {
 }
 impl Menu {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Menu, std::boxed::Box<dyn Error>> {
-
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
-        let renderer = SDL_CreateRenderer(window, -1, 0);
-        let title = CString::new("Team Fortress 2 - [OXIDE]").unwrap();
+        let mut renderer = SDL_CreateRenderer(window, -1, 0);
+        if renderer.is_null() {
+            renderer = SDL_GetRenderer(window)
+        }
+        let title = CString::new(format!(
+            "Team Fortress 2 - [{}] v{} by {}",
+            NAME, VERSION, AUTHOR
+        ))
+        .unwrap();
         SDL_SetWindowTitle(window, title.as_ptr());
 
-        let menu = Menu{
-                old_ctx,
-                ctx,
-                renderer,
-            };
-
+        let menu = Menu {
+            old_ctx,
+            ctx,
+            renderer,
+        };
 
         Ok(menu)
     }
@@ -37,7 +40,7 @@ impl Menu {
         SDL_GL_DeleteContext(self.ctx);
     }
 
-    pub unsafe fn run(&mut self,window: *mut SDL_Window) {
+    pub unsafe fn run(&mut self, window: *mut SDL_Window) {
         let r = self.renderer;
 
         let rect = SDL_Rect {
@@ -47,7 +50,7 @@ impl Menu {
             h: 500,
         };
 
-        SDL_SetRenderDrawColor( r, (BLACK >> 16) as u8, (BLACK >> 8 ) as u8, BLACK as u8, 200 );
+        SDL_SetRenderDrawColor(r, (BLACK >> 16) as u8, (BLACK >> 8) as u8, BLACK as u8, 200);
         SDL_RenderFillRect(r, &rect);
         SDL_RenderPresent(r);
     }
