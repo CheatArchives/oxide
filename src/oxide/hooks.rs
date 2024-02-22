@@ -1,4 +1,7 @@
-use std::{f32::consts::PI, thread::sleep, time::Duration};
+use std::{
+    f32::consts::PI, intrinsics::transmute_unchecked, mem::MaybeUninit, thread::sleep,
+    time::Duration,
+};
 
 use crate::*;
 use bitflags::Flags;
@@ -41,8 +44,12 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     {
         return true;
     }
-    let p_angles = call!(p_local, GetAbsAngles);
+    let my_angles = call!(p_local, GetAbsAngles);
     let entity_count = call!(interface_ref!(entity_list), GetMaxEntities);
+    my_angles.pitch += p_local.vecPunchAngle.roll;
+    my_angles.yaw += p_local.vecPunchAngle.yaw;
+    my_angles.roll += p_local.vecPunchAngle.roll;
+    let my_eyes = call!(p_local, EyePosition);
     for i in 0..entity_count {
         let Some(ent) = Entity::get(i) else {
             continue;
@@ -51,15 +58,16 @@ pub unsafe extern "C-unwind" fn create_move_hook(
             continue;
         }
 
-        dbg!(ent.m_vecOrigin);
         let Some(hitbox) = ent.get_hitbox(HitboxId::HitboxHead) else {
             return true;
         };
-        let diff = p_local.m_vecOrigin - ent.m_vecOrigin;
-        let mut ang = p_angles.clone();
+
+        let diff = my_eyes - hitbox;
+        let mut ang = my_angles.clone();
         ang.yaw = diff.y.atan2(diff.x) / PI * 180f32 + 180f32;
         let dist2d = (diff.x.powi(2) + diff.y.powi(2)).sqrt();
         ang.pitch = diff.z.atan2(dist2d) / PI * 180f32;
+
         cmd.viewangles = ang;
 
         cmd.buttons.set(ButtonFlags::IN_ATTACK, true);

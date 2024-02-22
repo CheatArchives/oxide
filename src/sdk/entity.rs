@@ -51,7 +51,7 @@ pub struct VMTEntity {
     _pad9: [u32; 2],
     pub IsWeapon: cfn!(bool, *const Entity),
     _pad10: [u32; 3],
-    pub EyePosition: cfn!(*const Vector3, *const Entity),
+    pub EyePosition: cfn!(Vector3, *const Entity),
     pub EyeAngles: cfn!(*const Vector3, *const Entity),
     _pad11: [u32; 12],
     pub ThirdPersonSwitch: cfn!(c_void, *const Entity, bool),
@@ -144,7 +144,7 @@ impl Entity {
     }
 
     pub unsafe fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<Vector3> {
-        let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::uninit().assume_init();
+        let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::zeroed().assume_init();
         let rend = self.renderable();
         if !call!(
             rend,
@@ -159,19 +159,13 @@ impl Entity {
         dbg!(bones[hitbox_id as usize]);
         let model = call!(rend, GetModel);
         let hdr = call_interface!(model_info, GetStudioModel, model);
-        let Some(set) = hdr.hitbox_set(HITBOX_SET) else {
+        let Some(hitbox_set) = hdr.hitbox_set(HITBOX_SET) else {
             return None;
         };
-        let Some(box_set) = set.get_box(hitbox_id) else {
+        let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
             return None;
         };
-        let center = box_set.center(bones);
-        Some(center)
+        Some(hitbox.center(bones))
     }
 
-    //studiohdr_t* hdr = METHOD_ARGS(i_modelinfo, GetStudioModel, model);
-    //if (!hdr)
-    //    return VEC_ZERO;
-
-    //return center_of_hitbox(hdr, bones, HITBOX_SET, hitbox_idx);
 }

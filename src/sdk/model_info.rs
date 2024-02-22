@@ -18,7 +18,7 @@ impl HitboxSet {
     //                                                    int i) {
     //    return (studiobbox_t*)(((void*)thisptr) + thisptr->hitboxindex) + i;
     //};
-    pub unsafe fn get_box(&self, id: HitboxId) -> Option<&Hitbox> {
+    pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<&Hitbox> {
         let addr = self as *const _ as usize + self.hitboxindex + id as usize;
         let ptr = transmute::<usize, *const Hitbox>(addr);
         if ptr.is_null() {

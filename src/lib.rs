@@ -1,4 +1,6 @@
 #![feature(associated_type_defaults)]
+#![feature(core_intrinsics)]
+
 
 use std::{
     alloc::{self, alloc, Layout},

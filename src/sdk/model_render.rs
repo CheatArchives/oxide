@@ -1,4 +1,4 @@
-use std::{ops::Index, usize};
+use std::{intrinsics::transmute_unchecked, ops::Index, usize};
 
 use libc::c_ushort;
 
@@ -6,26 +6,21 @@ use crate::*;
 
 pub type ModelRender = WithVmt<VMTModelRender>;
 
-#[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct Matrix3x4([Vector3; 4]);
+pub struct Matrix3x4([[f32;4]; 3]);
 
-impl Index<usize> for Matrix3x4 {
-    type Output = Vector3;
-
-    fn index(&self, index: usize) -> &Vector3 {
-        &self.0[index]
-    }
-}
 
 impl Matrix3x4 {
     pub unsafe fn transform(&self, vec:Vector3) -> Vector3{
         let matrix = self.0;
+        let vec1 = Vector3::new(matrix[0][0],matrix[0][1],matrix[0][2]);
+        let vec2 = Vector3::new(matrix[1][0],matrix[1][1],matrix[1][2]);
+        let vec3 = Vector3::new(matrix[2][0],matrix[2][1],matrix[2][2]);
         Vector3{
-            x: vec.dot(matrix[0]) + matrix[0].z,
-            y: vec.dot(matrix[1]) + matrix[1].z,
-            z: vec.dot(matrix[2]) + matrix[2].z,
+            x: vec.dot(vec1) + matrix[0][3],
+            y: vec.dot(vec2) + matrix[1][3],
+            z: vec.dot(vec3) + matrix[2][3],
         }
     }
 }
@@ -41,7 +36,7 @@ pub struct VMTRenderable {
     pub SetupBones: cfn!(
         bool,
         *const Renderable,
-        & [Matrix3x4; MAX_STUDIO_BONES],
+        &[Matrix3x4; MAX_STUDIO_BONES],
         usize,
         BoneMask,
         f32

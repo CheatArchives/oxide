@@ -1,3 +1,5 @@
+use std::mem::MaybeUninit;
+
 use libc::{dlclose, dlerror, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 
 use crate::*;

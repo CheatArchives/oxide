@@ -34,7 +34,7 @@ pub type HFont = c_uint;
 #[allow(non_snake_case, non_camel_case_types, dead_code)]
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
-pub struct VMatrix([[c_float; 4]; 4]);
+pub struct VMatrix([[f32; 4]; 4]);
 
 
 #[repr(C)]
