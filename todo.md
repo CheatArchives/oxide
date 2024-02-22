@@ -1,3 +1,2 @@
-- [ ] defines? file with all the strings n offsets
 - [ ] brute force interface 
 - [ ] fix sdl not loading on hot reload 
