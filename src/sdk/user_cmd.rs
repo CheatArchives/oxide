@@ -3,13 +3,13 @@ use crate::*;
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct UserCmd {
-    pub vmt: *const c_void,
-    pub command_number: c_int,
-    pub tick_count: c_int,
+    pub vmt: &'static c_void,
+    pub command_number: isize,
+    pub tick_count: isize,
     pub viewangles: Angles,
-    pub forwardmove: c_float,
-    pub sidemove: c_float,
-    pub upmove: c_float,
+    pub forwardmove: f32,
+    pub sidemove: f32,
+    pub upmove: f32,
     pub buttons: Buttons,
     pub impulse: u8,
     pub weaponselect: isize,
@@ -35,9 +35,9 @@ impl Buttons {
     pub fn set(&mut self, flag: ButtonFlags, val: bool)  {
         let flag = flag as u8;
         unsafe{
-            let s = self as  *mut _ as *mut u32;
+            let mut s:usize = transmute(*self);
             let val = if val {1} else {0};
-            *s |= val << flag
+            s |= val << flag
         }
 
     }

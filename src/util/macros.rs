@@ -32,24 +32,24 @@ macro_rules! interface_vmt {
 }
 
 #[macro_export]
-macro_rules! interface_ref {
+macro_rules! interface {
     ($n:ident) => {
-        o!().interfaces.$n.interface_ref()
-    };
-}
-
-#[macro_export]
-macro_rules! call_interface {
-    ($i:ident,$f:ident $(,$args: expr)*) => {
-        call!(interface_ref!($i),$f $(,$args)*)
+        *o!().interfaces.$n.interface_ref()
     };
 }
 #[macro_export]
 macro_rules! call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        ((*$i).vmt.$f)($i,$($args),*)
+        (($i).vmt.$f)(transmute(addr_of!($i)),$($args),*)
     };
 }
+#[macro_export]
+macro_rules! call_interface {
+    ($i:ident,$f:ident $(,$args: expr)*) => {
+        ((*interface_ref!($i)).vmt.$f)(interface_ref!($i),$($args),*)
+    };
+}
+
 
 #[macro_export]
 macro_rules! impl_has_vmt {

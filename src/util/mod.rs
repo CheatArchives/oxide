@@ -31,12 +31,23 @@ pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn 
     Ok(handle)
 }
 
+pub unsafe fn get_entity(id: isize) -> Option<&'static mut Entity> {
+    let ent = call!(
+        interface!(entity_list),
+        get_client_entity,
+        id
+    ) as *mut Entity;
+    if ent.is_null() {
+        return None;
+    }
+    Some(&mut *ent)
+}
 pub unsafe fn get_plocal() -> Option<&'static mut Entity> {
     let ent = call!(
-        interface_ref!(entity_list),
+        interface!(entity_list),
         get_client_entity,
-        call!(interface_ref!(base_engine), get_local_player)
-    );
+        call!(interface!(base_engine), get_local_player)
+    ) as *mut Entity;
     if ent.is_null() {
         return None;
     }

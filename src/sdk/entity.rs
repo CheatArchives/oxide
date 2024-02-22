@@ -28,38 +28,38 @@ pub enum BoneMask {
 #[derive(Debug, Clone, Copy)]
 pub struct VMTEntity {
     _pad1: [u32; 4],
-    pub get_collideable: cfn!(*const Collideable, *const Entity),
+    pub get_collideable: cfn!(&Collideable, &Entity),
     _pad2: [u32; 6],
-    pub get_abs_origin: cfn!(*const Vector3, *const Entity),
-    pub get_abs_angles: cfn!(&'static mut Angles, *const Entity),
+    pub get_abs_origin: cfn!(&Vector3, &Entity),
+    pub get_abs_angles: cfn!(&mut Angles, &Entity),
     _pad3: [u32; 66],
-    pub get_index: cfn!(*const c_int, *const Entity),
+    pub get_index: cfn!(&isize, &Entity),
     _pad4: [u32; 26],
-    pub world_space_center: cfn!(*const Vector3, *const Entity),
+    pub world_space_center: cfn!(&Vector3, &Entity),
     _pad5: [u32; 10],
-    pub get_team_number: cfn!(isize, *const Entity),
+    pub get_team_number: cfn!(isize, &Entity),
     _pad6: [u32; 34],
-    pub get_health: cfn!(*const c_int, *const Entity),
-    pub get_max_health: cfn!(*const c_int, *const Entity),
+    pub get_health: cfn!(&isize, &Entity),
+    pub get_max_health: cfn!(&isize, &Entity),
     _pad7: [u32; 29],
-    pub is_alive: cfn!(bool, *const Entity),
-    pub is_player: cfn!(bool, *const Entity),
+    pub is_alive: cfn!(bool, &Entity),
+    pub is_player: cfn!(bool, &Entity),
     _pad8: [u32; 2],
-    pub is_npc: cfn!(bool, *const Entity),
+    pub is_npc: cfn!(bool, &Entity),
     _pad9: [u32; 2],
-    pub is_weapon: cfn!(bool, *const Entity),
+    pub is_weapon: cfn!(bool, &Entity),
     _pad10: [u32; 3],
-    pub eye_position: cfn!(Vector3, *const Entity),
-    pub eye_angles: cfn!(*const Vector3, *const Entity),
+    pub eye_position: cfn!(Vector3, &Entity),
+    pub eye_angles: cfn!(&Vector3, &Entity),
     _pad11: [u32; 12],
-    pub third_person_switch: cfn!(c_void, *const Entity, bool),
+    pub third_person_switch: cfn!(c_void, &Entity, bool),
     _pad12: [u32; 82],
-    pub get_weapon: cfn!(&'static mut Weapon, *const Entity),
+    pub get_weapon: cfn!(&mut Weapon, &Entity),
     _pad13: [u32; 10],
-    pub get_shoot_pos: cfn!(Vector3, *const Entity),
+    pub get_shoot_pos: cfn!(Vector3, &Entity),
     _pad14: [u32; 6],
-    pub get_observer_mode: cfn!(c_int, *const Entity),
-    pub get_observer_target: cfn!(*const Entity, *const Entity),
+    pub get_observer_mode: cfn!(isize, &Entity),
+    pub get_observer_target: cfn!(&Entity, &Entity),
 }
 
 #[repr(C)]
@@ -67,31 +67,31 @@ pub struct VMTEntity {
 pub struct Entity {
     pub vmt: &'static VMTEntity,
     _pad1: [u8; 0x7C],
-    pub model_idx: c_int,
+    pub model_idx: isize,
     _pad2: [u8; 0x8C],
     pub velocity: Vector3,
     _pad3: [u8; 0x7C],
-    pub water_level: c_uint,
+    pub water_level: usize,
     _pad4: [u8; 0x1B8],
     pub vec_origin: Vector3,
     _pad5: [u8; 0xC],
-    pub flags: c_int,
+    pub flags: isize,
     _pad6: [u8; 0x8E4],
-    pub next_attack: c_float,
+    pub next_attack: f32,
     _pad7: [u8; 0x84],
     pub my_weapons: [CBaseHandle; MAX_WEAPONS],
     _pad8: [u8; 0xD0],
     pub vec_punch_angle: Angles,
     _pad9: [u8; 0xD0],
-    pub object_mode: c_int,
+    pub object_mode: isize,
     _pad10: [u8; 0x1C4],
     pub angle: Angles,
     _pad11: [u8; 0x48],
     pub current_command: *const UserCmd,
     _pad12: [u8; 0xCC],
-    pub tick_base: c_int,
+    pub tick_base: isize,
     _pad13: [u8; 0x3F8],
-    pub player_class: c_int,
+    pub player_class: isize,
     _pad14: [u8; 0x36C],
     pub player_cond: Condition,
     _pad15: [u8; 0x18],
@@ -99,29 +99,25 @@ pub struct Entity {
     _pad16: [u8; 0x418],
     pub allow_move_during_taunt: bool,
     _pad17: [u8; 0x18],
-    pub force_taunt_cam: c_int,
+    pub force_taunt_cam: isize,
 }
 
 impl_has_vmt!(Entity, VMTEntity);
 
 impl Entity {
-    pub unsafe fn get(id: i32) -> Option<&'static mut Entity> {
-        let ent_ptr = call!(interface_ref!(entity_list), get_client_entity, id);
-        if ent_ptr.is_null() {
+    pub unsafe fn get(id: isize) -> Option<&'static mut Entity> {
+        let Some(mut ent) = get_entity(id) else {
             return None;
-        }
-        let ent = &mut *ent_ptr;
+        };
         let net = ent.networkabe();
 
-        if ent_ptr.is_null()
-            || call!(net, is_dormant)
-            || !call!(ent, is_alive)
-            || !call!(ent, is_player)
         {
-            return None;
+            if call!(net, is_dormant) || !call!(ent, is_alive) || !call!(ent, is_player) {
+                return None;
+            }
         }
 
-        Some(ent)
+        Some(transmute(addr_of_mut!(ent)))
     }
 
     pub unsafe fn can_attack(&mut self) -> bool {
@@ -132,12 +128,12 @@ impl Entity {
         let weapon = call!(self, get_weapon);
         self.next_attack <= now && weapon.next_primary_attack <= now
     }
-    pub unsafe fn networkabe(&self) -> &'static mut Networkable {
-        &mut *((self as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable)
+    pub unsafe fn networkabe(&self) -> Networkable {
+        *((self as *const Entity as usize + 0x8) as *mut c_void as *mut _ as *mut Networkable)
     }
 
-    pub unsafe fn renderable(&self) -> &'static mut Renderable {
-        &mut *((self as *const Entity as usize + 0x4) as *mut c_void as *mut _ as *mut Renderable)
+    pub unsafe fn renderable(&self) -> Renderable {
+        *((self as *const Entity as usize + 0x4) as *mut c_void as *mut _ as *mut Renderable)
     }
 
     pub unsafe fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<Vector3> {
@@ -154,7 +150,7 @@ impl Entity {
             return None;
         }
         let model = call!(rend, get_model);
-        let hdr = call_interface!(model_info, get_studio_model, model);
+        let hdr = call!(interface!(model_info), get_studio_model, model);
         let Some(hitbox_set) = hdr.hitbox_set(HITBOX_SET) else {
             return None;
         };
@@ -163,5 +159,4 @@ impl Entity {
         };
         Some(hitbox.center(bones))
     }
-
 }

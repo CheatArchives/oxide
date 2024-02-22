@@ -72,15 +72,15 @@ pub enum HitboxId {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Model {
-    handle: *const c_void,
-    name: *const c_char,
-    load_flags: c_int,
-    server_count: c_int,
-    r#type: c_int,
-    flags: c_int,
+    handle: &'static c_void,
+    name: &'static CStr,
+    load_flags: isize,
+    server_count: isize,
+    r#type: isize,
+    flags: isize,
     vec_mins: Vector3,
     vec_maxs: Vector3,
-    radius: c_float,
+    radius: f32,
 }
 
 #[repr(C)]
@@ -149,7 +149,7 @@ impl StudioHdr {
 #[derive(Debug, Clone, Copy)]
 pub struct VMTModelInfo {
     _pad1: [u8; 4 * 3],
-    pub get_model_index: cfn!(c_int, *const ModelInfo, *const c_char),
+    pub get_model_index: cfn!(isize, &'static ModelInfo, &CStr),
     _pad2: [u8; 4 * 25],
-    pub get_studio_model: cfn!(&'static StudioHdr, *const ModelInfo, *const Model),
+    pub get_studio_model: cfn!(&'static StudioHdr, &'static ModelInfo, &'static Model),
 }

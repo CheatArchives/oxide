@@ -20,7 +20,8 @@ impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
         let old = (*interface_ref).get_vmt();
         let size = vmt_size(transmute(old));
 
-        let new: &'static mut V = transmute(alloc(Layout::new::<V>()));
+        let layout = Layout::from_size_align(size,8).unwrap();
+        let new: &'static mut V = transmute(alloc(layout));
 
         libc::memcpy(transmute(&mut *new), transmute(old), size);
         (*interface_ref).set_vmt(new);
@@ -34,10 +35,11 @@ impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
         handle: *mut c_void,
         name: &str,
     ) -> Result<Interface<T, V>, std::boxed::Box<dyn Error>> {
-        let create_interface_fn: cfn!(*const c_void, *const c_char, *const c_int) =
+        let create_interface_fn: cfn!(*const c_void, *const i8, *const isize) =
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
 
-        let interface_ref: &'static mut T = transmute(create_interface_fn(CString::new(name)?.as_ptr(), std::ptr::null()));
+        let name = CString::new(name).unwrap();
+        let interface_ref: &'static mut T = transmute(create_interface_fn(name.as_ptr(), std::ptr::null()));
 
         Ok(Interface::new(interface_ref))
     }

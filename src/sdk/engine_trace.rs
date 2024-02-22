@@ -2,17 +2,14 @@ use crate::*;
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
-#[repr(C,align(16))]
-#[derive(Debug, Clone, Copy)]
-pub struct VectorAligned(c_float, c_float, c_float);
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
-    start: VectorAligned,
-    delta: VectorAligned,
-    start_offset: VectorAligned,
-    extents: VectorAligned,
+    start: Vector3,
+    delta: Vector3,
+    start_offset: Vector3,
+    extents: Vector3,
     is_ray: bool,
     is_swept: bool,
 }
@@ -21,5 +18,5 @@ pub struct Ray {
 #[derive(Debug, Clone, Copy)]
 pub struct VMTEngineTrace {
     _pad1: [u8;4 * 4],
-    pub trace_ray: cfn!(c_int, *const EngineTrace , *const Ray, c_uint),
+    pub trace_ray: cfn!(isize, &'static EngineTrace , &'static Ray, usize),
 }

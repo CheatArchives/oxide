@@ -9,7 +9,7 @@ impl Aimbot {
     }
     pub unsafe fn run(&self, p_local: &mut Entity) -> Result<Option<Angles>, OxideError> {
         let my_angles = call!(p_local, get_abs_angles);
-        let entity_count = call!(interface_ref!(entity_list), get_max_entities);
+        let entity_count = call!(interface!(entity_list), get_max_entities);
         my_angles.pitch += p_local.vec_punch_angle.roll;
         my_angles.yaw += p_local.vec_punch_angle.yaw;
         my_angles.roll += p_local.vec_punch_angle.roll;
@@ -33,7 +33,7 @@ impl Aimbot {
         Ok(None)
     }
 
-    pub unsafe fn create_move(&mut self, cmd: &'static mut UserCmd) -> Result<(), OxideError> {
+    pub unsafe fn create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
         let p_local = get_plocal().unwrap();
         if !call!(p_local, is_alive) {
             return Ok(());
@@ -43,14 +43,11 @@ impl Aimbot {
         if let Some(new_angle) = self.run(p_local)? {
             if !p_local.player_cond.get(ConditionFlags::Zoomed) {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
-                dbg!("zoom");
                 return Ok(());
             }
             if !p_local.can_attack() || !call!(weapon, can_fire_critical_shot, true) {
                 return Ok(());
             }
-            dbg!("shooting");
-            dbg!(&cmd);
             cmd.viewangles = new_angle;
             cmd.buttons.set(ButtonFlags::InAttack, true);
         }

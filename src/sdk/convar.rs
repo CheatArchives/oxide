@@ -5,9 +5,9 @@ use crate::*;
 #[derive(Debug, Clone, Copy)]
 pub struct VMTConVar {
     _pad: [u8; 4*14],
-    pub internal_set_value: cfn!(c_void, *const ConVar , *const c_char),
-    pub internal_set_float_value: cfn!(c_void, *const ConVar,c_float , bool),
-    pub internal_set_int_value: cfn!(c_void, *const ConVar, c_int),
+    pub internal_set_value: cfn!(c_void, &'static ConVar , &CStr),
+    pub internal_set_float_value: cfn!(c_void, &'static ConVar,f32 , bool),
+    pub internal_set_int_value: cfn!(c_void, &'static ConVar, isize),
 }
 
 #[repr(C)]
@@ -15,20 +15,20 @@ pub struct VMTConVar {
 pub struct ConVar {
     vmt: &'static VMTConVar,
     _pad: [u8; 0x18],
-    parent: *const ConVar,
-    default_value: *const c_char,
-    string: *const c_char,
-    string_length: c_int,
-    float_value: c_float,
-    int_value: c_int,
+    parent: &'static ConVar,
+    default_value: &'static CStr,
+    string: &'static CStr,
+    string_length: isize,
+    float_value: f32,
+    int_value: isize,
     has_min: bool,
-    min_val: c_float,
+    min_val: f32,
     has_max: bool,
-    max_val: c_float,
+    max_val: f32,
     has_comp_min: bool,
-    comp_min_val: c_float,
+    comp_min_val: f32,
     has_comp_max: bool,
-    comp_max_val: c_float,
+    comp_max_val: f32,
     competitive_restrictions: bool,
-    change_callback: *const c_void,
+    change_callback: &'static c_void,
 }

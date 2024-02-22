@@ -2,7 +2,7 @@ use crate::*;
 
 pub unsafe extern "C-unwind" fn create_move_hook(
     client_mode: *mut ClientMode,
-    input_sample_time: c_float,
+    input_sample_time: f32,
     cmd: &'static mut UserCmd,
 ) -> bool {
     if cmd.command_number == 0 {

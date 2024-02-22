@@ -27,9 +27,9 @@ module_export!(networkable);
 module_export!(condition);
 module_export!(global_vars);
 
-pub type CBaseHandle = c_uint;
+pub type CBaseHandle = usize;
 pub type ConCommand = *const c_void;
-pub type HFont = c_uint;
+pub type HFont = usize;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
