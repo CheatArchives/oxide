@@ -1,5 +1,5 @@
 ```sh
-./toolbox inject
+./toolbox.sh inject
 ```
 enjoy
 

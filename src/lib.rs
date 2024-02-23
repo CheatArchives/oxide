@@ -1,14 +1,12 @@
 #![feature(associated_type_defaults)]
-
 #![allow(unused)]
 #![allow(improper_ctypes_definitions)]
-
 #![deny(warnings)]
 
 use std::{
     alloc::{alloc, Layout},
     error::Error,
-    thread,
+    thread, time::Duration,
 };
 
 pub use libc::wchar_t;
@@ -63,8 +61,10 @@ static LOAD: unsafe extern "C" fn() = {
 extern "C" fn unload() {
     unsafe {
         println!("unloading");
+
         oxide!().unload();
         menu!().unload();
+
         println!("unloaded");
     }
 }

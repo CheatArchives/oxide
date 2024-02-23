@@ -63,5 +63,6 @@ impl Hooks {
     pub unsafe fn restore(&self) {
         self.swap_window.restore();
         self.create_move.restore();
+        self.poll_event.restore();
     }
 }

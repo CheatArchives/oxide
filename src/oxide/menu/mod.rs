@@ -4,7 +4,11 @@ static LGREEN: usize = 0x5B9279;
 static DGREEN: usize = 0x1E2D2F;
 static BLACK: usize = 0x0C0F0A;
 
+use std::{mem::MaybeUninit, ptr::null};
+
 use crate::*;
+use libc::CS;
+use freetype_sys::*;
 use sdl2_sys::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -28,6 +32,8 @@ impl Menu {
         .unwrap();
         SDL_SetWindowTitle(window, title.as_ptr());
 
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+
         let menu = Menu {
             old_ctx,
             ctx,
@@ -43,18 +49,18 @@ impl Menu {
     pub unsafe fn run(&mut self, window: *mut SDL_Window) {
         let r = self.renderer;
 
-        let rect = SDL_Rect {
-            x: 10,
-            y: 10,
-            w: 500,
-            h: 500,
-        };
-
-        SDL_SetRenderDrawColor(r, (BLACK >> 16) as u8, (BLACK >> 8) as u8, BLACK as u8, 200);
-        SDL_RenderFillRect(r, &rect);
         SDL_RenderPresent(r);
     }
-    pub unsafe fn handle_event(&self, event: *mut SDL_Event) {
 
+    pub unsafe fn handle_event(&self, event: *mut SDL_Event) {
+        match transmute::<u32, SDL_EventType>((*event).type_) {
+            SDL_EventType::SDL_KEYUP => {
+                let key = (*event).key.keysym.scancode;
+            }
+            SDL_EventType::SDL_MOUSEMOTION => {
+                let motion = (*event).motion;
+            }
+            _ => (),
+        };
     }
 }

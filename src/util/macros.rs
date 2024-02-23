@@ -50,7 +50,6 @@ macro_rules! call_interface {
     };
 }
 
-
 #[macro_export]
 macro_rules! impl_has_vmt {
     ($t:tt,$tv:tt) => {
@@ -67,5 +66,12 @@ macro_rules! impl_has_vmt {
                 *self.vmt
             }
         }
+    };
+}
+
+#[macro_export]
+macro_rules! hex_to_rgb {
+    ($h:expr) => {
+        (($h >> 16) as u8, ($h >> 8) as u8, $h as u8)
     };
 }
