@@ -121,7 +121,7 @@ impl Entity {
     }
 
     pub unsafe fn can_attack(&mut self) -> bool {
-        let now = o!().global_vars.interval_per_tick * self.tick_base as f32;
+        let now = oxide!().global_vars.interval_per_tick * self.tick_base as f32;
         if !call!(self, is_alive) {
             return false;
         }

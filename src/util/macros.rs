@@ -11,14 +11,14 @@ macro_rules! module_export {
 }
 
 #[macro_export]
-macro_rules! o {
+macro_rules! oxide {
     () => {
         *(OXIDE as *mut _ as *mut Oxide)
     };
 }
 
 #[macro_export]
-macro_rules! m {
+macro_rules! menu {
     () => {
         *(MENU as *mut _ as *mut Menu)
     };
@@ -27,14 +27,14 @@ macro_rules! m {
 #[macro_export]
 macro_rules! interface_vmt {
     ($n:ident) => {
-        (*o!().interfaces.$n.get_vmt())
+        (*oxide!().interfaces.$n.get_vmt())
     };
 }
 
 #[macro_export]
 macro_rules! interface {
     ($n:ident) => {
-        *o!().interfaces.$n.interface_ref()
+        *oxide!().interfaces.$n.interface_ref()
     };
 }
 #[macro_export]

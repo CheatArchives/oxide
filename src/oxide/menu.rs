@@ -54,4 +54,7 @@ impl Menu {
         SDL_RenderFillRect(r, &rect);
         SDL_RenderPresent(r);
     }
+    pub unsafe fn handle_event(&self, event: *mut SDL_Event) {
+
+    }
 }

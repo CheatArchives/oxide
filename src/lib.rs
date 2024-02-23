@@ -63,8 +63,8 @@ static LOAD: unsafe extern "C" fn() = {
 extern "C" fn unload() {
     unsafe {
         println!("unloading");
-        o!().unload();
-        m!().unload();
+        oxide!().unload();
+        menu!().unload();
         println!("unloaded");
     }
 }
