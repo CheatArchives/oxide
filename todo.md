@@ -5,6 +5,3 @@
   kinda fixed it by getting the renderer if i cant create a new one but this needs more investigation and why is it not getting deleted propperly on unload
 - [ ] release segfaults
 - [ ] auto versioning
-
-- [ ] maybe and maybe gen bindings for imgui and use that but idk seems like a lot of bullshit
-- [ ] crash wehn unloading while there is a lot of prints going on

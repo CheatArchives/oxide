@@ -1,6 +1,8 @@
 #![feature(associated_type_defaults)]
 #![allow(unused)]
 #![allow(improper_ctypes_definitions)]
+#![allow(internal_features)]
+#![feature(core_intrinsics)]
 #![deny(warnings)]
 
 use std::{
