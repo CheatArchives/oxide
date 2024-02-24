@@ -22,6 +22,7 @@ pub struct Menu {
 }
 impl Menu {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Menu, std::boxed::Box<dyn Error>> {
+        println!("loading menu");
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
         let mut renderer = SDL_CreateRenderer(window, -1, 0);
@@ -46,6 +47,7 @@ impl Menu {
             draw,
         };
 
+        println!("loaded menu");
         Ok(menu)
     }
     pub unsafe fn unload(self) {
@@ -62,18 +64,26 @@ impl Menu {
     }
 
     pub unsafe fn draw_watermark(&mut self) {
-        let text_size = self.draw.get_text_size(NAME, FontSize::Small);
-        self.draw
-            .draw_rect(10, 10, text_size.0 + 8, text_size.1 + 8, LGREEN, 255);
-        self.draw
-            .draw_rect(11, 11, text_size.0 + 6, text_size.1 + 6, BLACK, 255);
-        self.draw.draw_text(
-            NAME.to_uppercase().as_str(),
-            14,
-            14,
-            FontSize::Small,
-            ORANGE,
+        let text = format!("{} v{} by {}", NAME, VERSION, AUTHOR);
+        let text_size = self.draw.get_text_size(&text, FontSize::Small);
+
+        self.draw.draw_rect(
+            10,
+            10,
+            text_size.0 + 8,
+            text_size.1 + text_size.2 + 8,
+            LGREEN,
+            255,
         );
+        self.draw.draw_rect(
+            11,
+            11,
+            text_size.0 + 6,
+            text_size.1 + text_size.2 + 6,
+            BLACK,
+            255,
+        );
+        self.draw.draw_text(&text, 14, 14, FontSize::Small, ORANGE);
     }
 
     pub unsafe fn handle_event(&self, event: *mut SDL_Event) {

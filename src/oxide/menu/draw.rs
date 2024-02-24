@@ -26,20 +26,38 @@ impl Draw {
         let mut free_type = MaybeUninit::zeroed().assume_init();
         FT_Init_FreeType(&mut free_type);
 
-        let font_file = CString::new("/usr/share/fonts/TTF/HackNerdFontMono-Regular.ttf").unwrap();
+        let font_file = include_bytes!("./../../../HackNerdFont-Regular.ttf");
 
         let mut face_large = MaybeUninit::zeroed().assume_init();
-        FT_New_Face(free_type, font_file.as_ptr(), 0, &mut face_large);
+        let err = FT_New_Memory_Face(
+            free_type,
+            font_file as *const u8,
+            2215536,
+            0,
+            &mut face_large,
+        );
         let size = ((FontSize::Large as isize) << 6) as i32;
         FT_Set_Char_Size(face_large, size, size, 72, 72);
 
         let mut face_medium = MaybeUninit::zeroed().assume_init();
-        FT_New_Face(free_type, font_file.as_ptr(), 0, &mut face_medium);
+        FT_New_Memory_Face(
+            free_type,
+            font_file as *const u8,
+            2215536,
+            0,
+            &mut face_medium,
+        );
         let size = ((FontSize::Medium as isize) << 6) as i32;
         FT_Set_Char_Size(face_medium, size, size, 72, 72);
 
         let mut face_small = MaybeUninit::zeroed().assume_init();
-        FT_New_Face(free_type, font_file.as_ptr(), 0, &mut face_small);
+        FT_New_Memory_Face(
+            free_type,
+            font_file as *const u8,
+            2215536,
+            0,
+            &mut face_small,
+        );
         let size = ((FontSize::Small as isize) << 6) as i32;
         FT_Set_Char_Size(face_small, size, size, 72, 73);
 
@@ -63,13 +81,17 @@ impl Draw {
         let face = self.get_face(size);
 
         let mut x_offset = 0;
-        let mut y_offset = self.get_text_size(text, size).1; 
+        let mut y_offset = self.get_text_size(text, size).1;
         for (i, letter) in text.chars().enumerate() {
+            if letter == ' ' {
+                x_offset += (face.read().size.read().metrics.max_advance >> 6) as isize;
+                continue;
+            }
             FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
 
             let x = x + x_offset;
-            let y = y - (glyph.metrics.height >> 6) as isize + y_offset;
+            let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
 
             x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
             self.draw_bitmap(glyph.bitmap, x, y, color);
@@ -82,17 +104,19 @@ impl Draw {
             FontSize::Large => self.face_large,
         }
     }
-    pub unsafe fn get_text_size(&mut self,text: &str,size:FontSize) -> (isize,isize) {
+    pub unsafe fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
         let face = self.get_face(size);
-        let mut x_offset = 0;
-        let mut y_offset = 0; 
+        let mut x = 0;
+        let mut y_min = 0;
+        let mut y_max = 0;
         for (i, letter) in text.chars().enumerate() {
             FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
-            x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
-            y_offset = std::cmp::max((glyph.metrics.height >> 6) as isize,y_offset);
+            x += (glyph.metrics.horiAdvance >> 6) as isize;
+            y_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, y_min);
+            y_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, y_max);
         }
-        return (x_offset,y_offset)
+        return (x, y_min, y_max);
     }
 
     pub unsafe fn draw_bitmap(&mut self, bitmap: FT_Bitmap, x: isize, y: isize, color: usize) {
@@ -100,6 +124,7 @@ impl Draw {
 
         let len = (bitmap.width * bitmap.rows * 4) as usize;
         let mut rgba = vec![0u8; len];
+
         let buffer = std::slice::from_raw_parts(bitmap.buffer, len);
         for i in (0..len).step_by(4) {
             let val = buffer[i / 4];
