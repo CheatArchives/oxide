@@ -80,7 +80,9 @@ impl Draw {
     ) {
         let face = self.get_face(size);
 
-        let mut x_offset = 0;
+        FT_Load_Char(face, text.chars().next().unwrap() as u32, FT_LOAD_RENDER);
+        let glyph = (*face).glyph.read_volatile();
+        let mut x_offset = - (glyph.metrics.vertBearingX >> 6) as isize;
         let mut y_offset = self.get_text_size(text, size).1;
         for (i, letter) in text.chars().enumerate() {
             if letter == ' ' {
@@ -90,7 +92,7 @@ impl Draw {
             FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
 
-            let x = x + x_offset;
+            let x = x + x_offset + (glyph.metrics.vertBearingX >> 6) as isize;
             let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
 
             x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
