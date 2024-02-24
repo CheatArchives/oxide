@@ -28,7 +28,7 @@ pub struct VMTBaseEngine {
     _pad2: [u32; 2],
     pub get_player_info: cfn!(bool, &'static BaseEngine, &'static isize, &'static PlayerInfo),
     _pad3: [u32; 3],
-    pub get_local_player: cfn!(isize, &'static BaseEngine),
+    pub get_local_player: cfn!(isize, *const BaseEngine),
     _pad4: [u32; 6],
     pub get_view_angles: cfn!(c_void, &'static BaseEngine, Angles),
     pub set_view_angles: cfn!(c_void, &'static BaseEngine, Angles),

@@ -20,7 +20,7 @@ impl Vector3 {
     pub fn dist2d(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
-    pub fn ang(&self) -> Angles {
+    pub fn angle(&self) -> Angles {
         Angles {
             pitch: self.z.atan2(self.dist2d()) / PI * 180f32,
             yaw: self.y.atan2(self.x) / PI * 180f32 + 180f32,

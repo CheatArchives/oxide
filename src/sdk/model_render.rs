@@ -22,32 +22,37 @@ impl Matrix3x4 {
     }
 }
 
-pub type Renderable = WithVmt<VMTRenderable>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Derivative, Clone, Copy)]
+#[derivative(Debug)]
 pub struct VMTRenderable {
+    #[derivative(Debug = "ignore")]
     _pad1: [u8; 4 * 9],
-    pub get_model: cfn!(&Model, &Renderable),
+    pub get_model: cfn!(*const Model, *const Renderable),
+    #[derivative(Debug = "ignore")]
     _pad2: [u8; 4 * 6],
     pub setup_bones: cfn!(
         bool,
-        &Renderable,
+        *const Renderable,
         &[Matrix3x4; MAX_STUDIO_BONES],
         usize,
         BoneMask,
         f32
     ),
+    #[derivative(Debug = "ignore")]
     _pad3: [u8; 4 * 17],
     pub renderable_to_world_transform: cfn!(&mut Matrix3x4, &'static Renderable),
 }
+
+pub type Renderable = WithVmt<VMTRenderable>;
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct ModelRenderInfo {
     origin: Vector3,
     angles: Angles,
-    renderable: &'static Renderable,
+    renderable: &'static c_void,
     model: &'static Model,
     model_to_world: &'static Matrix3x4,
     lighting_offset: &'static Matrix3x4,
@@ -63,11 +68,11 @@ pub struct ModelRenderInfo {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct DrawModelState {
-    studio_hdr:  *mut StudioHdr,
+    studio_hdr: *mut StudioHdr,
     studio_hw_data: *mut c_void,
-    renderable:  *mut Renderable,
+    renderable: *mut c_void,
     model_to_world: &'static Matrix3x4,
-    decals:  *mut c_void,
+    decals: *mut c_void,
     draw_flags: isize,
     lod: isize,
 }

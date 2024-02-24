@@ -1,4 +1,3 @@
-
 use libc::{dlclose, dlerror, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 
 use crate::*;
@@ -31,25 +30,3 @@ pub unsafe fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn 
     Ok(handle)
 }
 
-pub unsafe fn get_entity(id: isize) -> Option<&'static mut Entity> {
-    let ent = call!(
-        interface!(entity_list),
-        get_client_entity,
-        id
-    ) as *mut Entity;
-    if ent.is_null() {
-        return None;
-    }
-    Some(&mut *ent)
-}
-pub unsafe fn get_plocal() -> Option<&'static mut Entity> {
-    let ent = call!(
-        interface!(entity_list),
-        get_client_entity,
-        call!(interface!(base_engine), get_local_player)
-    ) as *mut Entity;
-    if ent.is_null() {
-        return None;
-    }
-    Some(&mut *ent)
-}

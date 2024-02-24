@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::{ops::Deref, usize};
 
 use crate::*;
 
@@ -29,6 +29,8 @@ impl Oxide {
             global_vars,
             cheats,
         };
+
+        println!("{:#x}",*(get_handle("./tf/bin/client.so")? as *const _ as *const usize));
 
         Ok(oxide)
     }

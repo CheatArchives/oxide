@@ -19,3 +19,9 @@ pub struct GlobalVars {
     pub n_timestamp_networking_base: i32,
     pub n_timestamp_randomize_window: i32,
 }
+
+impl GlobalVars {
+    pub fn now(&self) -> f32 {
+        self.interval_per_tick * self.tickcount as f32
+    }
+}

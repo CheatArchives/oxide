@@ -70,33 +70,41 @@ impl Draw {
         }
     }
 
-    pub unsafe fn draw_text(
+    pub fn draw_text(
         &mut self,
         text: &str,
         x: isize,
         y: isize,
         size: FontSize,
         color: usize,
-    ) {
-        let face = self.get_face(size);
+    ) -> SDL_Rect {
+        unsafe {
+            let face = self.get_face(size);
 
-        FT_Load_Char(face, text.chars().next().unwrap() as u32, FT_LOAD_RENDER);
-        let glyph = (*face).glyph.read_volatile();
-        let mut x_offset = - (glyph.metrics.vertBearingX >> 6) as isize;
-        let mut y_offset = self.get_text_size(text, size).1;
-        for (i, letter) in text.chars().enumerate() {
-            if letter == ' ' {
-                x_offset += (face.read().size.read().metrics.max_advance >> 6) as isize;
-                continue;
-            }
-            FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
+            FT_Load_Char(face, text.chars().next().unwrap() as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
+            let mut x_offset = -(glyph.metrics.vertBearingX >> 6) as isize;
+            let mut y_offset = self.get_text_size(text, size).1 as isize;
+            for (i, letter) in text.chars().enumerate() {
+                if letter == ' ' {
+                    x_offset += (face.read().size.read().metrics.max_advance >> 6) as isize;
+                    continue;
+                }
+                FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
+                let glyph = (*face).glyph.read_volatile();
 
-            let x = x + x_offset + (glyph.metrics.vertBearingX >> 6) as isize;
-            let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
+                let x = x + x_offset + (glyph.metrics.vertBearingX >> 6) as isize;
+                let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
 
-            x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
-            self.draw_bitmap(glyph.bitmap, x, y, color);
+                x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
+                self.draw_bitmap(glyph.bitmap, x, y, color);
+            }
+            SDL_Rect {
+                x: x as i32,
+                y: y as i32,
+                w: x_offset as i32,
+                h: y_offset as i32,
+            }
         }
     }
     pub fn get_face(&mut self, size: FontSize) -> *mut FT_FaceRec {
@@ -108,17 +116,17 @@ impl Draw {
     }
     pub unsafe fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
         let face = self.get_face(size);
-        let mut x = 0;
-        let mut y_min = 0;
-        let mut y_max = 0;
+        let mut w = 0;
+        let mut h_min = 0;
+        let mut h_max = 0;
         for (i, letter) in text.chars().enumerate() {
             FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
-            x += (glyph.metrics.horiAdvance >> 6) as isize;
-            y_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, y_min);
-            y_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, y_max);
+            w += (glyph.metrics.horiAdvance >> 6) as isize;
+            h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
+            h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
         }
-        return (x, y_min, y_max);
+        (w, h_min, h_max)
     }
 
     pub unsafe fn draw_bitmap(&mut self, bitmap: FT_Bitmap, x: isize, y: isize, color: usize) {
@@ -160,21 +168,7 @@ impl Draw {
         SDL_FreeSurface(glyph);
     }
 
-    pub fn draw_rect(
-        &self,
-        x: isize,
-        y: isize,
-        w: isize,
-        h: isize,
-        color: usize,
-        alpah: u8,
-    ) {
-        let mut rect = SDL_Rect {
-            x: x as i32,
-            y: y as i32,
-            w: w as i32,
-            h: h as i32,
-        };
+    pub fn filled_rect(&self, rect: SDL_Rect, color: usize, alpah: u8) -> SDL_Rect {
         let r = self.renderer;
         let (red, g, b) = hex_to_rgb!(color);
         unsafe {
@@ -182,6 +176,17 @@ impl Draw {
             SDL_SetRenderDrawColor(r, red, g, b, alpah);
             SDL_RenderFillRect(r, &rect);
         }
+        return rect;
+    }
+    pub fn outlined_rect(&self, rect: SDL_Rect, color: usize, alpah: u8) -> SDL_Rect {
+        let r = self.renderer;
+        let (red, g, b) = hex_to_rgb!(color);
+        unsafe {
+            SDL_SetRenderDrawBlendMode(r, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(r, red, g, b, alpah);
+            SDL_RenderDrawRect(r, &rect);
+        }
+        return rect;
     }
     pub unsafe fn unload(self) {
         FT_Done_Face(self.face_small);

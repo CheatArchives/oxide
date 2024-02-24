@@ -1,23 +1,28 @@
 #!/bin/python3.11
 
 import argparse
-from subprocess import run
+from subprocess import run, PIPE, Popen
 from pathlib import Path
 from time import sleep
+import shutil
 import os
 
 
 TF2_DIR = Path.home() / '.local'/'share'/'Steam' / \
     'steamapps'/'common'/'Team Fortress 2'
 
+loaded_lib = Path("/tmp")/"liboxide.so"
+
 
 def inject(pid, lib):
+
+    shutil.copy(lib.__str__(), "/tmp")
 
     command = ['sudo', 'gdb', '-n', '-q', '-batch',
                '-ex', 'attach ' + pid,
                '-ex', 'set $dlopen = (void* (*)(char*, int))dlopen',
                '-ex', 'set $dlerror = (char* (*)(void))dlerror',
-               '-ex', 'call $dlopen("' + lib.__str__() + '", 2)',
+               '-ex', 'call $dlopen("' + loaded_lib.__str__() + '", 2)',
                '-ex', 'call $dlerror()',
                '-ex', 'detach',
                '-ex', 'quit']
@@ -31,12 +36,14 @@ def inject(pid, lib):
 
 def unload(pid, lib):
 
+    loaded_lib = Path("/tmp")/"liboxide.so"
+
     command = ['sudo', 'gdb', '-n', '-q', '-batch',
                '-ex', 'attach ' + pid,
                '-ex', 'set $dlopen = (void* (*)(char*, int))dlopen',
                '-ex', 'set $dlclose = (int (*)(void*))dlclose',
                '-ex', 'set $dlerror = (char* (*)(void))dlerror',
-               '-ex', 'set $self = $dlopen("'+lib.__str__()+'", 6)',
+               '-ex', 'set $self = $dlopen("'+loaded_lib.__str__()+'", 6)',
                '-ex', 'call $dlerror()',
                '-ex', 'call $dlclose($self)',
                '-ex', 'call $dlerror()',
@@ -47,10 +54,10 @@ def unload(pid, lib):
 
     result = run(command).returncode
 
-    print(result)
     if not result == 0:
         print("failed to unload")
         exit(result)
+    os.remove(loaded_lib)
 
 
 def get_pid():
@@ -90,6 +97,7 @@ def start_tf2():
         env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
 
 
+
 parser = argparse.ArgumentParser(
     prog='oxide toolbox')
 
@@ -98,7 +106,7 @@ parser.add_argument('action', choices=[
                     'unload',
                     'build',
                     'start_tf2',
-                    'reload'
+                    'reload',
                     ], default=inject)
 parser.add_argument(
     '-d', '--debug', help='build for debug ', action='store_true')

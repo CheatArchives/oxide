@@ -7,8 +7,8 @@ pub type EntityList = WithVmt<VMTEntityList>;
 #[derive(Debug, Clone, Copy)]
 pub struct VMTEntityList {
     _pad1: [u32; 3],
-    pub get_client_entity: cfn!(&'static mut Entity, &'static EntityList, isize),
+    pub get_client_entity: cfn!(*mut Entity, *const EntityList, isize),
     _pad2: [u32; 4],
-    pub get_max_entities: cfn!(isize, &'static EntityList),
+    pub get_max_entities: cfn!(isize, *const EntityList),
 
 }

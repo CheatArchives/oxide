@@ -1,8 +1,9 @@
 #![feature(associated_type_defaults)]
+#![feature(core_intrinsics)]
+#![feature(ptr_metadata)]
 #![allow(unused)]
 #![allow(improper_ctypes_definitions)]
 #![allow(internal_features)]
-#![feature(core_intrinsics)]
 #![deny(warnings)]
 
 use std::{
@@ -16,10 +17,12 @@ pub use std::{
     ffi::*,
     mem::transmute,
     ptr::{addr_of, addr_of_mut},
+    intrinsics::breakpoint
 };
 
 mod util;
 pub use util::*;
+pub use derivative::*;
 
 module_export!(oxide);
 module_export!(sdk);

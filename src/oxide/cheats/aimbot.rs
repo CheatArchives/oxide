@@ -7,18 +7,20 @@ impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {}
     }
-    pub unsafe fn run(&self, p_local: &mut Entity) -> Result<Option<Angles>, OxideError> {
-        let my_angles = call!(p_local, get_abs_angles);
+    pub unsafe fn get_target(&self, p_local: &Entity) -> Result<Option<Angles>, OxideError> {
+        let mut my_angles = *call!(*p_local, get_abs_angles);
         let entity_count = call!(interface!(entity_list), get_max_entities);
-        my_angles.pitch += p_local.vec_punch_angle.roll;
+
+        my_angles.pitch += p_local.vec_punch_angle.pitch;
         my_angles.yaw += p_local.vec_punch_angle.yaw;
         my_angles.roll += p_local.vec_punch_angle.roll;
-        let my_eyes = call!(p_local, eye_position);
+
+        let my_eyes = call!(*p_local, eye_position);
         for i in 0..entity_count {
-            let Some(ent) = Entity::get(i) else {
+            let Some(ent) = Entity::get_player(i) else {
                 continue;
             };
-            if call!(ent, get_team_number) == call!(p_local, get_team_number) {
+            if call!(*ent, get_team_number) == call!(*p_local, get_team_number) {
                 continue;
             }
 
@@ -28,19 +30,25 @@ impl Aimbot {
 
             let diff = my_eyes - hitbox;
 
-            return Ok(Some(diff.ang()));
+            return Ok(Some(diff.angle()));
         }
         Ok(None)
     }
 
     pub unsafe fn create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
-        let p_local = get_plocal().unwrap();
-        if !call!(p_local, is_alive) {
+        if !menu!().aimbot_checkbox.checked {
             return Ok(());
         }
-        let weapon = call!(p_local, get_weapon);
 
-        if let Some(new_angle) = self.run(p_local)? {
+        let Some(p_local) = Entity::local() else {
+            return Ok(());
+        };
+        if !call!(*p_local, is_alive) {
+            return Ok(());
+        }
+        let weapon = *call!(*p_local, get_weapon);
+
+        if let Some(new_angle) = self.get_target(p_local)? {
             if !p_local.player_cond.get(ConditionFlags::Zoomed) {
                 cmd.buttons.set(ButtonFlags::InAttack2, true);
                 return Ok(());

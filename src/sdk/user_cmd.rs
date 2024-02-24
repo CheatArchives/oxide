@@ -1,3 +1,5 @@
+use std::usize;
+
 use crate::*;
 
 #[repr(C)]
@@ -28,18 +30,18 @@ impl Buttons {
     pub fn get(&self, flag: ButtonFlags) -> bool {
         let flag = flag as u8;
         let shifted = 1 << flag;
-        ButtonFlags::InAttack as u8;
-        let Buttons(s) = *self;
-        s & shifted == shifted
+        let Buttons(b) = *self;
+        b & shifted == shifted
     }
-    pub fn set(&mut self, flag: ButtonFlags, val: bool)  {
+    pub fn set(&mut self, flag: ButtonFlags, val: bool) {
         let flag = flag as u8;
-        unsafe{
-            let mut s:usize = transmute(*self);
-            let val = if val {1} else {0};
-            s |= val << flag
+        let mut b: usize = unsafe { transmute(*self) };
+        if val {
+            b |= 1 << flag;
+        } else {
+            b &= !(1 << flag);
         }
-
+        *self = unsafe { transmute(b) };
     }
 }
 

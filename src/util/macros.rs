@@ -13,7 +13,9 @@ macro_rules! module_export {
 #[macro_export]
 macro_rules! oxide {
     () => {
-        *(OXIDE as *mut _ as *mut Oxide)
+        unsafe {
+        *(OXIDE as *mut _ as *mut Oxide) 
+        }
     };
 }
 
@@ -40,7 +42,7 @@ macro_rules! interface {
 #[macro_export]
 macro_rules! call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        (($i).vmt.$f)(transmute(addr_of!($i)),$($args),*)
+        ($i.vmt.$f)(addr_of!($i),$($args),*)
     };
 }
 #[macro_export]
@@ -79,6 +81,11 @@ macro_rules! hex_to_rgb {
 #[macro_export]
 macro_rules! hex_to_rgba {
     ($h:expr) => {
-        (($h >> 32) as u8,($h >> 16) as u8, ($h >> 8) as u8, $h as u8)
+        (
+            ($h >> 32) as u8,
+            ($h >> 16) as u8,
+            ($h >> 8) as u8,
+            $h as u8,
+        )
     };
 }

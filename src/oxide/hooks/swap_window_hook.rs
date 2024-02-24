@@ -1,4 +1,4 @@
-use sdl2_sys::SDL_GL_MakeCurrent;
+use sdl2_sys::{SDL_GL_MakeCurrent, SDL_ShowCursor, SDL_ENABLE};
 
 use crate::*;
 
@@ -13,9 +13,11 @@ pub unsafe extern "C-unwind" fn swap_window_hook(window: *mut sdl2_sys::SDL_Wind
     }
 
     SDL_GL_MakeCurrent(window, menu!().ctx);
+    SDL_ShowCursor(SDL_ENABLE as i32);
 
     menu!().run(window);
 
+    //SDL_ShowCursor(S);
     SDL_GL_MakeCurrent(window, menu!().old_ctx);
     (transmute::<*const c_void, SwapWindowFn>(oxide!().hooks.swap_window.org))(window)
 }
