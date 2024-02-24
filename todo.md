@@ -1,4 +1,4 @@
-## shit i shoudl do but dont rly want to
+## shit i should do but dont rly want to
 - [ ] brute force interface 
 - [x] fix sdl not loading on hot reload
 

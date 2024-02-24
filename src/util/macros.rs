@@ -75,3 +75,10 @@ macro_rules! hex_to_rgb {
         (($h >> 16) as u8, ($h >> 8) as u8, $h as u8)
     };
 }
+
+#[macro_export]
+macro_rules! hex_to_rgba {
+    ($h:expr) => {
+        (($h >> 32) as u8,($h >> 16) as u8, ($h >> 8) as u8, $h as u8)
+    };
+}

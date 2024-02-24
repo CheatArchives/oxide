@@ -11,13 +11,14 @@ use freetype_sys::*;
 use libc::CS;
 use sdl2_sys::*;
 
+module_export!(draw);
+
 #[derive(Debug, Clone, Copy)]
 pub struct Menu {
     pub old_ctx: *mut c_void,
     pub ctx: *mut c_void,
     pub renderer: *mut SDL_Renderer,
-    pub free_type: FT_Library,
-    pub face: FT_Face,
+    pub draw: Draw,
 }
 impl Menu {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Menu, std::boxed::Box<dyn Error>> {
@@ -35,98 +36,44 @@ impl Menu {
         SDL_SetWindowTitle(window, title.as_ptr());
 
         SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-        let mut free_type = MaybeUninit::zeroed().assume_init();
-        FT_Init_FreeType(&mut free_type);
-        let mut face = MaybeUninit::zeroed().assume_init();
-        let name = CString::new("/usr/share/fonts/TTF/HackNerdFontMono-Regular.ttf").unwrap();
-        FT_New_Face(free_type, name.as_ptr(), 0, &mut face);
-        FT_Set_Char_Size(face, 12 << 6, 12 << 6, 72, 72);
+
+        let draw = Draw::init(window, renderer);
 
         let menu = Menu {
             old_ctx,
             ctx,
             renderer,
-            free_type,
-            face,
+            draw,
         };
 
         Ok(menu)
     }
     pub unsafe fn unload(self) {
         SDL_GL_DeleteContext(self.ctx);
-        FT_Done_Face(self.face);
-        FT_Done_FreeType(self.free_type);
+        self.draw.unload()
     }
 
     pub unsafe fn run(&mut self, window: *mut SDL_Window) {
         let r = self.renderer;
-        self.draw_rect();
-        FT_Load_Char(self.face, 'O' as u32, FT_LOAD_RENDER);
 
-        let x = 10;
-        let y = 10;
-
-        let glyph = (*self.face).glyph.read_volatile();
-        self.draw_bitmap(window, glyph.bitmap, x as isize, y as isize);
+        self.draw_watermark();
 
         SDL_RenderPresent(r);
     }
-    pub unsafe fn draw_bitmap(
-        &mut self,
-        window: *mut SDL_Window,
-        bitmap: FT_Bitmap,
-        x: isize,
-        y: isize,
-    ) {
-        let r = self.renderer;
-        let glyph = SDL_CreateRGBSurfaceFrom(
-            bitmap.buffer as *mut c_void,
-            bitmap.width,
-            bitmap.rows,
-            8,
-            bitmap.pitch,
-            0,
-            0,
-            0,
-            0xff,
+
+    pub unsafe fn draw_watermark(&mut self) {
+        let text_size = self.draw.get_text_size(NAME, FontSize::Small);
+        self.draw
+            .draw_rect(10, 10, text_size.0 + 8, text_size.1 + 8, LGREEN, 255);
+        self.draw
+            .draw_rect(11, 11, text_size.0 + 6, text_size.1 + 6, BLACK, 255);
+        self.draw.draw_text(
+            NAME.to_uppercase().as_str(),
+            14,
+            14,
+            FontSize::Small,
+            ORANGE,
         );
-        let mut colors: [SDL_Color; 256] = MaybeUninit::zeroed().assume_init();
-        for i in 0..256 {
-            colors[i].r = i as u8;
-            colors[i].g = i as u8;
-            colors[i].b = i as u8;
-        }
-        SDL_SetPaletteColors((*(*glyph).format).palette, colors.as_ref() as *const _ as *const SDL_Color, 0, 256);
-        SDL_SetSurfaceBlendMode(glyph, SDL_BlendMode::SDL_BLENDMODE_NONE);
-
-        let texture = SDL_CreateTextureFromSurface(r, glyph);
-        let mut dest = SDL_Rect {
-            x: x as i32,
-            y: y as i32,
-            w: 100,
-            h: 100,
-        };
-
-        let res = SDL_RenderCopy(r, texture, null(), &mut dest);
-        if res < 0 {
-            let err = SDL_GetError();
-            let err = CStr::from_ptr(err);
-            dbg!(err);
-        }
-
-        SDL_FreeSurface(glyph);
-    }
-
-    pub unsafe fn draw_rect(&self) {
-        let r = self.renderer;
-        let rect = SDL_Rect {
-            x: 100,
-            y: 100,
-            w: 100,
-            h: 100,
-        };
-        SDL_SetRenderDrawColor(r, 100, 100, 100, 100);
-        SDL_RenderFillRect(r, &rect);
     }
 
     pub unsafe fn handle_event(&self, event: *mut SDL_Event) {
