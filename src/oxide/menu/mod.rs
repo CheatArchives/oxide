@@ -19,6 +19,7 @@ pub struct Menu {
     pub ctx: *mut c_void,
     pub renderer: *mut SDL_Renderer,
     pub draw: Draw,
+    pub is_menu_visible: bool,
 }
 impl Menu {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Menu, std::boxed::Box<dyn Error>> {
@@ -45,6 +46,7 @@ impl Menu {
             ctx,
             renderer,
             draw,
+            is_menu_visible: false,
         };
 
         println!("loaded menu");
@@ -60,36 +62,44 @@ impl Menu {
 
         self.draw_watermark();
 
+        if self.is_menu_visible {
+            self.draw_menu();
+        }
+
         SDL_RenderPresent(r);
+    }
+
+    pub fn draw_menu(&mut self) {
+        self.draw.draw_rect(100, 100, 500, 500, DGREEN, 255);
     }
 
     pub unsafe fn draw_watermark(&mut self) {
         let text = format!("{} v{} by {}", NAME, VERSION, AUTHOR);
         let text_size = self.draw.get_text_size(&text, FontSize::Small);
 
+        self.draw
+            .draw_rect(10, 10, text_size.0 + 10, 2, LGREEN, 255);
         self.draw.draw_rect(
             10,
-            10,
-            text_size.0 + 8,
+            12,
+            text_size.0 + 10,
             text_size.1 + text_size.2 + 8,
-            LGREEN,
+            DGREEN,
             255,
         );
-        self.draw.draw_rect(
-            11,
-            11,
-            text_size.0 + 6,
-            text_size.1 + text_size.2 + 6,
-            BLACK,
-            255,
-        );
-        self.draw.draw_text(&text, 14, 14, FontSize::Small, ORANGE);
+        self.draw.draw_text(&text, 15, 16, FontSize::Small, ORANGE);
     }
 
-    pub unsafe fn handle_event(&self, event: *mut SDL_Event) {
+    pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {
         match transmute::<u32, SDL_EventType>((*event).type_) {
             SDL_EventType::SDL_KEYUP => {
                 let key = (*event).key.keysym.scancode;
+                match key {
+                    SDL_Scancode::SDL_SCANCODE_INSERT => {
+                        self.is_menu_visible = !self.is_menu_visible
+                    }
+                    _ => (),
+                }
             }
             SDL_EventType::SDL_MOUSEMOTION => {
                 let motion = (*event).motion;

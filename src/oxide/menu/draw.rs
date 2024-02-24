@@ -160,7 +160,7 @@ impl Draw {
         SDL_FreeSurface(glyph);
     }
 
-    pub unsafe fn draw_rect(
+    pub fn draw_rect(
         &self,
         x: isize,
         y: isize,
@@ -177,9 +177,11 @@ impl Draw {
         };
         let r = self.renderer;
         let (red, g, b) = hex_to_rgb!(color);
-        SDL_SetRenderDrawBlendMode(r, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-        SDL_SetRenderDrawColor(r, red, g, b, alpah);
-        SDL_RenderFillRect(r, &rect);
+        unsafe {
+            SDL_SetRenderDrawBlendMode(r, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+            SDL_SetRenderDrawColor(r, red, g, b, alpah);
+            SDL_RenderFillRect(r, &rect);
+        }
     }
     pub unsafe fn unload(self) {
         FT_Done_Face(self.face_small);
