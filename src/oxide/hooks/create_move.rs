@@ -2,8 +2,11 @@ use std::usize;
 
 use crate::*;
 
+
+pub type CrateMoveFn = cfn!(bool, &'static mut ClientMode, f32,&'static mut UserCmd);
+
 pub unsafe extern "C-unwind" fn create_move_hook(
-    client_mode: *mut ClientMode,
+    client_mode: &'static mut ClientMode,
     input_sample_time: f32,
     cmd: &'static mut UserCmd,
 ) -> bool {
@@ -11,13 +14,12 @@ pub unsafe extern "C-unwind" fn create_move_hook(
         return true;
     }
     if let Err(err) = {
-        oxide!().cheats.aimbot.create_move(cmd)
+        oxide!().cheats.aimbot.pre_create_move(cmd)
     } {
         eprintln!("{}", err);
     }
     if let Some(p_local) = Entity::local() {
         if call!(*p_local, is_alive) {
-            p_local.force_taunt_cam = menu!().third_person_checkbox.checked as isize;
             if cmd.buttons.get(ButtonFlags::InJump) && menu!().bhop_checkbox.checked{
                 cmd.buttons
                     .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);
@@ -25,5 +27,5 @@ pub unsafe extern "C-unwind" fn create_move_hook(
         }
     }
 
-    true
+    false
 }

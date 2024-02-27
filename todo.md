@@ -10,3 +10,4 @@
 - [ ] draggable menu
 - [ ] freetyep sometimes sigsegvs on unload
 - [ ] pad macro that with debug ignore
+- [ ] fix unload crash

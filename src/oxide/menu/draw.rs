@@ -116,13 +116,17 @@ impl Draw {
     }
     pub unsafe fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
         let face = self.get_face(size);
+
         let mut w = 0;
         let mut h_min = 0;
         let mut h_max = 0;
+
         for (i, letter) in text.chars().enumerate() {
             FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
+
             let glyph = (*face).glyph.read_volatile();
             w += (glyph.metrics.horiAdvance >> 6) as isize;
+
             h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
             h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
         }
@@ -165,6 +169,7 @@ impl Draw {
 
         SDL_RenderCopy(r, texture, null(), &mut dest);
 
+        SDL_DestroyTexture(texture);
         SDL_FreeSurface(glyph);
     }
 

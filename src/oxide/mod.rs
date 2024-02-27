@@ -30,7 +30,7 @@ impl Oxide {
             cheats,
         };
 
-        println!("{:#x}",*(get_handle("./tf/bin/client.so")? as *const _ as *const usize));
+
 
         Ok(oxide)
     }

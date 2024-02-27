@@ -123,7 +123,7 @@ pub struct Entity {
     pub tick_base: isize,
     #[derivative(Debug = "ignore")]
     _pad13: [u8; 0x3F8],
-    pub player_class: isize,
+    pub player_class: PlayerClass,
     #[derivative(Debug = "ignore")]
     _pad14: [u8; 0x36C],
     pub player_cond: Condition,

@@ -26,6 +26,7 @@ module_export!(client_mode);
 module_export!(networkable);
 module_export!(condition);
 module_export!(global_vars);
+module_export!(player_class);
 
 pub type CBaseHandle = usize;
 pub type ConCommand = *const c_void;
