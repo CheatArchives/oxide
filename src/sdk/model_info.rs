@@ -1,3 +1,5 @@
+use std::intrinsics::size_of;
+
 use crate::*;
 
 pub type ModelInfo = WithVmt<VMTModelInfo>;
@@ -11,20 +13,19 @@ pub struct HitboxSet {
 }
 
 impl HitboxSet {
-    pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<&Hitbox> {
-        let addr = self as *const _ as usize + self.hitboxindex + id as usize;
-        let ptr = transmute::<usize, *const Hitbox>(addr);
+    pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<Hitbox> {
+        let ptr = ((self as *const _ as usize + self.hitboxindex  + size_of::<Hitbox>()* id as usize) as *const Hitbox );
         if ptr.is_null() {
             return None;
         }
-        Some(&*ptr)
+        Some(ptr.read_unaligned())
     }
 }
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Hitbox {
-    bone: usize,
+    pub bone: usize,
     group: usize,
     bbmin: Vector3,
     bbmax: Vector3,
@@ -140,7 +141,7 @@ impl StudioHdr {
             return None;
         }
 
-        Some(&*(((self as *const _ as usize) + self.hitboxsetindex + i) as *const HitboxSet))
+        Some(&*((self as *const _ as usize + self.hitboxsetindex + i * size_of::<HitboxSet>()) as *const HitboxSet))
     }
 }
 

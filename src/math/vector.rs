@@ -1,6 +1,6 @@
 use std::{f32::consts::PI, ops::Sub};
 
-use crate::Angles;
+use crate::{Angles, VectorAligned};
 
 #[derive(Debug, Clone, Copy)]
 #[repr(C)]
@@ -20,6 +20,9 @@ impl Vector3 {
     pub fn dist2d(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
+    pub fn dist3d(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
+    }
     pub fn angle(&self) -> Angles {
         Angles {
             pitch: self.z.atan2(self.dist2d()) / PI * 180f32,
@@ -37,6 +40,18 @@ impl Sub for Vector3 {
 
     fn sub(self, rhs: Self) -> Self::Output {
         Vector3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
+    }
+}
+
+impl Default for Vector3 {
+    fn default() -> Self {
+        Vector3::new(0f32,0f32,0f32)
+    }
+}
+
+impl Into<VectorAligned> for Vector3 {
+    fn into(self) -> VectorAligned {
+        VectorAligned::new(self.x,self.y,self.z,0f32)
     }
 }
 

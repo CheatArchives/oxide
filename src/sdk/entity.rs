@@ -135,7 +135,7 @@ pub struct Entity {
     pub allow_move_during_taunt: bool,
     #[derivative(Debug = "ignore")]
     _pad17: [u8; 0x18],
-    pub force_taunt_cam: bool,
+    pub force_taunt_cam: isize,
 }
 
 impl_has_vmt!(Entity, VMTEntity);
@@ -196,7 +196,7 @@ impl Entity {
             let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
                 return None;
             };
-            Some((*hitbox,bones[hitbox_id as usize]))
+            Some((hitbox, bones[hitbox.bone]))
         }
     }
     pub fn local() -> Option<&'static mut Entity> {

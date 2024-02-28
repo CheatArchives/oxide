@@ -1,3 +1,5 @@
+use std::isize;
+
 use crate::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -7,12 +9,14 @@ impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {}
     }
-    pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<u8> {
+    pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
+        let me = p_local.vec_origin;
+        let target = ent.vec_origin;
         unsafe {
             if call!(*ent, get_team_number) == call!(*p_local, get_team_number) {
                 return None;
             }
-            return Some(1);
+            return Some(-(me - target).dist3d() as isize);
         }
     }
 
@@ -26,7 +30,8 @@ impl Aimbot {
     pub unsafe fn find_target(&self, p_local: &Entity) -> Result<Option<Angles>, OxideError> {
         let entity_count = call!(interface!(entity_list), get_max_entities);
 
-        let mut target: Option<(&mut Entity, u8)> = None;
+        let mut target: Option<(Vector3, isize)> = None;
+        let my_eyes = call!(*p_local, eye_position);
 
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
@@ -37,29 +42,40 @@ impl Aimbot {
                 continue;
             };
 
+            let Some((hitbox, bone)) = ent.get_hitbox(self.hitbox(p_local)) else {
+                return Err(OxideError::new("could not get hitbox").into());
+            };
+
+            let target_point = hitbox.center(bone);
+
+            let trace = trace(my_eyes, target_point, MASK_SHOT, ent);
+            if trace.entity != ent as *const _ {
+                continue;
+            }
+
             let Some((_, target_prio)) = &target else {
-                target = Some((ent, prio));
+                target = Some((target_point, prio));
                 continue;
             };
+
             if prio > *target_prio {
-                target = Some((ent, prio))
+                target = Some((target_point, prio))
             }
         }
 
-        let Some((ent, prio)) = target else {
+        let Some((target_point, prio)) = target else {
             return Ok(None);
         };
-
-        let Some((hitbox, bone)) = ent.get_hitbox(HitboxId::HitboxHead) else {
-            return Err(OxideError::new("could not get hitbox").into());
-        };
-
-        let my_eyes = call!(*p_local, eye_position);
-
-        let diff = my_eyes - hitbox.center(bone);
+        let diff = target_point - my_eyes;
 
         return Ok(Some(diff.angle()));
         Ok(None)
+    }
+    pub fn hitbox(&self, p_local: &Entity) -> HitboxId {
+        match p_local.player_class {
+            PlayerClass::Sniper => HitboxId::HitboxHead,
+            _ => HitboxId::HitboxPelvis,
+        }
     }
     pub fn should_run(&mut self) -> bool {
         if !menu!().aimbot_checkbox.checked {
@@ -73,7 +89,7 @@ impl Aimbot {
         if !unsafe { call!(*p_local, is_alive) } {
             return false;
         }
-        return true;
+        true
     }
 
     pub unsafe fn pre_create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
@@ -85,13 +101,7 @@ impl Aimbot {
 
         let start = std::time::SystemTime::now();
         if let Some(new_angle) = self.find_target(p_local)? {
-            let shooting = match p_local.player_class {
-                PlayerClass::Sniper => self.sniper_shoot(p_local, cmd),
-                PlayerClass::Hwguy => self.heavy_shoot(p_local, cmd),
-                _ => true,
-            };
-
-            if shooting {
+            if self.shoot(p_local, cmd) {
                 cmd.viewangles = new_angle;
             }
         }
@@ -99,23 +109,33 @@ impl Aimbot {
 
         Ok(())
     }
-    pub fn sniper_shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
-        let weapon = unsafe { *call!(*p_local, get_weapon) };
-        if !p_local.player_cond.get(ConditionFlags::Zoomed) {
-            cmd.buttons.set(ButtonFlags::InAttack2, true);
-            return false;
-        }
-        unsafe {
-            if !p_local.can_attack() || !call!(weapon, can_fire_critical_shot, true) {
-                return false;
+    pub fn shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
+        match p_local.player_class {
+            PlayerClass::Sniper => {
+                let weapon = unsafe { *call!(*p_local, get_weapon) };
+                if !p_local.player_cond.get(ConditionFlags::Zoomed) {
+                    cmd.buttons.set(ButtonFlags::InAttack2, true);
+                    return false;
+                }
+                unsafe {
+                    if !p_local.can_attack() || !call!(weapon, can_fire_critical_shot, true) {
+                        return false;
+                    }
+                    cmd.buttons.set(ButtonFlags::InAttack, true);
+                    true
+                }
             }
-            cmd.buttons.set(ButtonFlags::InAttack, true);
-            return true;
+            PlayerClass::Hwguy => {
+                cmd.buttons.set(ButtonFlags::InAttack, true);
+                true
+            }
+            _ => unsafe {
+                if p_local.can_attack() {
+                    cmd.buttons.set(ButtonFlags::InAttack, true);
+                    return true;
+                }
+                return false;
+            },
         }
-    }
-
-    pub fn heavy_shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
-        cmd.buttons.set(ButtonFlags::InAttack, true);
-        return true;
     }
 }

@@ -1,22 +1,255 @@
+use std::{mem::MaybeUninit, ops::Sub};
+
 use crate::*;
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
+#[repr(C, align(16))]
+#[derive(Debug, Clone, Copy)]
+pub struct VectorAligned {
+    x: f32,
+    y: f32,
+    z: f32,
+    w: f32,
+}
+impl VectorAligned {
+    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
+        VectorAligned { x, y, z, w }
+    }
+}
+impl Default for VectorAligned {
+    fn default() -> Self {
+        VectorAligned {
+            x: 0f32,
+            y: 0f32,
+            z: 0f32,
+            w: 0f32,
+        }
+    }
+}
+
+impl Sub for VectorAligned {
+    type Output = VectorAligned;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        VectorAligned::new(
+            self.x - rhs.x,
+            self.y - rhs.y,
+            self.z - rhs.z,
+            self.w - rhs.w,
+        )
+    }
+}
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Ray {
-    start: Vector3,
-    delta: Vector3,
-    start_offset: Vector3,
-    extents: Vector3,
-    is_ray: bool,
-    is_swept: bool,
+    pub start: VectorAligned,
+    pub delta: VectorAligned,
+    pub start_offset: VectorAligned,
+    pub extents: VectorAligned,
+    pub is_ray: bool,
+    pub is_swept: bool,
+}
+
+impl Ray {
+    fn new(start: VectorAligned, end: VectorAligned) -> Self {
+        let delta = end - start;
+        Ray {
+            start: start.clone(),
+            delta: delta.clone(),
+            start_offset: VectorAligned::default(),
+            is_ray: true,
+            extents: VectorAligned::default(),
+            is_swept: delta.x == 0f32 || delta.y == 0f32 || delta.z == 0f32,
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct VMTTraceFilter {
+    should_hit_entity: cfn!(bool, *const TraceFilter, *const Entity, i32),
+    get_trace_type: cfn!(i32, *const TraceFilter),
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct TraceFilter {
+    vmt: *const VMTTraceFilter,
+    skip: &'static Entity,
+}
+
+pub enum TraceType {
+    Everything = 0,
+    WorldOnly,
+    EntitiesOnly,
+    EverythingFilterProps,
+}
+unsafe extern "C-unwind" fn should_hit_entity(
+    trace_filter: *const TraceFilter,
+    ent: *const Entity,
+    mask: i32,
+) -> bool {
+    return ent != unsafe { trace_filter.read().skip };
+}
+unsafe extern "C-unwind" fn get_trace_type(trace_filter: *const TraceFilter) -> i32 {
+    TraceType::Everything as i32
+}
+
+impl TraceFilter {
+    pub fn new(skip: &'static Entity) -> TraceFilter {
+        unsafe {
+            let mut ptr = alloc(Layout::new::<VMTTraceFilter>()) as *mut VMTTraceFilter;
+            *ptr = VMTTraceFilter {
+                should_hit_entity,
+                get_trace_type,
+            };
+            TraceFilter { vmt: ptr, skip }
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Plane {
+    normal: Vector3,
+    dist: f32,
+    r#type: u8,
+    signbits: u8,
+    pad: [u8; 2],
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Surface {
+    name: *const c_char,
+    surface_props: i16,
+    flags: u16,
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct Trace {
+    pub startpos: Vector3,
+    pub endpos: Vector3,
+    pub plane: Plane,
+    pub fraction: f32,
+    pub contents: i32,
+    pub disp_flags: u16,
+    pub allsolid: bool,
+    pub startsolid: bool,
+    pub fraction_left_solid: f32,
+    pub surface: Surface,
+    pub hit_group: i32,
+    pub physics_bone: i16,
+    pub entity: *const Entity,
+    pub hitbox: i32,
 }
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct VMTEngineTrace {
-    _pad1: [u8;4 * 4],
-    pub trace_ray: cfn!(isize, &'static EngineTrace , &'static Ray, usize),
+    _pad1: [u8; 4 * 4],
+    pub trace_ray: cfn!(isize, *const EngineTrace, &Ray, u32, &TraceFilter, &Trace),
 }
+
+pub fn trace(start: Vector3, end: Vector3, mask: u32, ent: &'static Entity) -> Trace {
+    unsafe {
+        let trace_engine = interface!(engine_trace);
+        let ray = Ray::new(start.into(), end.into());
+        let filter = TraceFilter::new(ent);
+        let trace = MaybeUninit::zeroed().assume_init();
+        call!(trace_engine, trace_ray, &ray, mask, &filter, &trace);
+        trace
+    }
+}
+
+pub const CONTENTS_EMPTY: u32 = 0x0;
+pub const CONTENTS_SOLID: u32 = 0x1;
+pub const CONTENTS_WINDOW: u32 = 0x2;
+pub const CONTENTS_AUX: u32 = 0x4;
+pub const CONTENTS_GRATE: u32 = 0x8;
+pub const CONTENTS_SLIME: u32 = 0x10;
+pub const CONTENTS_WATER: u32 = 0x20;
+pub const CONTENTS_BLOCKLOS: u32 = 0x40;
+pub const CONTENTS_OPAQUE: u32 = 0x80;
+pub const LAST_VISIBLE_CONTENTS: u32 = 0x80;
+pub const ALL_VISIBLE_CONTENTS: u32 = (LAST_VISIBLE_CONTENTS | (LAST_VISIBLE_CONTENTS - 1));
+pub const CONTENTS_TESTFOGVOLUME: u32 = 0x100;
+pub const CONTENTS_UNUSED: u32 = 0x200;
+pub const CONTENTS_UNUSED6: u32 = 0x400;
+pub const CONTENTS_TEAM1: u32 = 0x800;
+pub const CONTENTS_TEAM2: u32 = 0x1000;
+pub const CONTENTS_IGNORE_NODRAW_OPAQUE: u32 = 0x2000;
+pub const CONTENTS_MOVEABLE: u32 = 0x4000;
+pub const CONTENTS_AREAPORTAL: u32 = 0x8000;
+pub const CONTENTS_PLAYERCLIP: u32 = 0x10000;
+pub const CONTENTS_MONSTERCLIP: u32 = 0x20000;
+pub const CONTENTS_CURRENT_0: u32 = 0x40000;
+pub const CONTENTS_CURRENT_90: u32 = 0x80000;
+pub const CONTENTS_CURRENT_180: u32 = 0x100000;
+pub const CONTENTS_CURRENT_270: u32 = 0x200000;
+pub const CONTENTS_CURRENT_UP: u32 = 0x400000;
+pub const CONTENTS_CURRENT_DOWN: u32 = 0x800000;
+pub const CONTENTS_ORIGIN: u32 = 0x1000000;
+pub const CONTENTS_MONSTER: u32 = 0x2000000;
+pub const CONTENTS_DEBRIS: u32 = 0x4000000;
+pub const CONTENTS_DETAIL: u32 = 0x8000000;
+pub const CONTENTS_TRANSLUCENT: u32 = 0x10000000;
+pub const CONTENTS_LADDER: u32 = 0x20000000;
+pub const CONTENTS_HITBOX: u32 = 0x40000000;
+
+pub const MASK_ALL: u32 = (0xFFFFFFFF);
+pub const MASK_SOLID: u32 =
+    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER | CONTENTS_GRATE);
+pub const MASK_PLAYERSOLID: u32 = (CONTENTS_SOLID
+    | CONTENTS_MOVEABLE
+    | CONTENTS_PLAYERCLIP
+    | CONTENTS_WINDOW
+    | CONTENTS_MONSTER
+    | CONTENTS_GRATE);
+pub const MASK_NPCSOLID: u32 = (CONTENTS_SOLID
+    | CONTENTS_MOVEABLE
+    | CONTENTS_MONSTERCLIP
+    | CONTENTS_WINDOW
+    | CONTENTS_MONSTER
+    | CONTENTS_GRATE);
+pub const MASK_WATER: u32 = (CONTENTS_WATER | CONTENTS_MOVEABLE | CONTENTS_SLIME);
+pub const MASK_OPAQUE: u32 = (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_OPAQUE);
+pub const MASK_OPAQUE_AND_NPCS: u32 = (MASK_OPAQUE | CONTENTS_MONSTER);
+pub const MASK_BLOCKLOS: u32 = (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_BLOCKLOS);
+pub const MASK_BLOCKLOS_AND_NPCS: u32 = (MASK_BLOCKLOS | CONTENTS_MONSTER);
+pub const MASK_VISIBLE: u32 = (MASK_OPAQUE | CONTENTS_IGNORE_NODRAW_OPAQUE);
+pub const MASK_VISIBLE_AND_NPCS: u32 = (MASK_OPAQUE_AND_NPCS | CONTENTS_IGNORE_NODRAW_OPAQUE);
+pub const MASK_SHOT: u32 = (CONTENTS_SOLID
+    | CONTENTS_MOVEABLE
+    | CONTENTS_MONSTER
+    | CONTENTS_WINDOW
+    | CONTENTS_DEBRIS
+    | CONTENTS_HITBOX);
+pub const MASK_SHOT_HULL: u32 = (CONTENTS_SOLID
+    | CONTENTS_MOVEABLE
+    | CONTENTS_MONSTER
+    | CONTENTS_WINDOW
+    | CONTENTS_DEBRIS
+    | CONTENTS_GRATE);
+pub const MASK_SHOT_PORTAL: u32 =
+    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER);
+pub const MASK_SOLID_BRUSHONLY: u32 =
+    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_GRATE);
+pub const MASK_PLAYERSOLID_BRUSHONLY: u32 =
+    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_PLAYERCLIP | CONTENTS_GRATE);
+pub const MASK_NPCSOLID_BRUSHONLY: u32 =
+    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP | CONTENTS_GRATE);
+pub const MASK_NPCWORLDSTATIC: u32 =
+    (CONTENTS_SOLID | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP | CONTENTS_GRATE);
+pub const MASK_SPLITAREAPORTAL: u32 = (CONTENTS_WATER | CONTENTS_SLIME);
+pub const MASK_CURRENT: u32 = (CONTENTS_CURRENT_0
+    | CONTENTS_CURRENT_90
+    | CONTENTS_CURRENT_180
+    | CONTENTS_CURRENT_270
+    | CONTENTS_CURRENT_UP
+    | CONTENTS_CURRENT_DOWN);
+pub const MASK_DEADSOLID: u32 =
+    (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW | CONTENTS_GRATE);

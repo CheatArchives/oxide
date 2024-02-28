@@ -1,6 +1,7 @@
 #![feature(associated_type_defaults)]
 #![feature(core_intrinsics)]
 #![feature(ptr_metadata)]
+#![feature(pointer_is_aligned)]
 #![allow(unused)]
 #![allow(improper_ctypes_definitions)]
 #![allow(internal_features)]

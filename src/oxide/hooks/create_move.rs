@@ -18,6 +18,9 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     // move to bhop
     if let Some(p_local) = Entity::local() {
         if call!(*p_local, is_alive) {
+            if (p_local.force_taunt_cam != menu!().third_person_checkbox.checked as isize) {
+                p_local.force_taunt_cam = menu!().third_person_checkbox.checked as isize;
+            }
             if cmd.buttons.get(ButtonFlags::InJump) && menu!().bhop_checkbox.checked {
                 cmd.buttons
                     .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);
