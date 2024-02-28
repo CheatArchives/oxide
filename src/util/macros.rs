@@ -13,16 +13,14 @@ macro_rules! module_export {
 #[macro_export]
 macro_rules! oxide {
     () => {
-        unsafe {
-        *(OXIDE as *mut _ as *mut Oxide) 
-        }
+        &mut unsafe { *(OXIDE as *mut _ as *mut Oxide) }
     };
 }
 
 #[macro_export]
 macro_rules! menu {
     () => {
-        *(MENU as *mut _ as *mut Menu)
+        unsafe { &mut *(MENU as *mut _ as *mut Menu) }
     };
 }
 

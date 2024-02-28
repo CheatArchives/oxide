@@ -43,6 +43,7 @@ impl Menu {
             NAME, VERSION, AUTHOR
         ))
         .unwrap();
+
         SDL_SetWindowTitle(window, title.as_ptr());
 
         SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
@@ -54,7 +55,7 @@ impl Menu {
             ctx,
             renderer,
             draw,
-            is_menu_visible: false,
+            is_menu_visible: true,
             aimbot_checkbox: Checkbox::new("aimbot", 10, 10),
             third_person_checkbox: Checkbox::new("third person", 10, 30),
             bhop_checkbox: Checkbox::new("bhop", 10, 50),
@@ -101,8 +102,7 @@ impl Menu {
     }
 
     pub unsafe fn draw_watermark(&mut self) {
-        let text = format!("{} v{} by {}", NAME, VERSION, AUTHOR);
-        let text_size = self.draw.get_text_size(&text, FontSize::Small);
+        let text_size = self.draw.get_text_size(NAME, FontSize::Small);
 
         let rect = SDL_Rect {
             x: 10,
@@ -118,7 +118,7 @@ impl Menu {
             h: (text_size.1 + text_size.2) as i32 + 8,
         };
         self.draw.filled_rect(rect, DGREEN, 255);
-        self.draw.draw_text(&text, 15, 16, FontSize::Small, ORANGE);
+        self.draw.draw_text(NAME, 15, 16, FontSize::Small, ORANGE);
     }
 
     pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {
@@ -130,7 +130,7 @@ impl Menu {
                 let key = (*event).key.keysym.scancode;
                 match key {
                     SDL_Scancode::SDL_SCANCODE_INSERT => {
-                        self.is_menu_visible = !self.is_menu_visible
+                        self.is_menu_visible = !self.is_menu_visible;
                     }
                     _ => (),
                 }

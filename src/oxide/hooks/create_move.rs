@@ -2,8 +2,7 @@ use std::usize;
 
 use crate::*;
 
-
-pub type CrateMoveFn = cfn!(bool, &'static mut ClientMode, f32,&'static mut UserCmd);
+pub type CrateMoveFn = cfn!(bool, &'static mut ClientMode, f32, &'static mut UserCmd);
 
 pub unsafe extern "C-unwind" fn create_move_hook(
     client_mode: &'static mut ClientMode,
@@ -13,14 +12,13 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     if cmd.command_number == 0 || MENU.is_null() {
         return true;
     }
-    if let Err(err) = {
-        oxide!().cheats.aimbot.pre_create_move(cmd)
-    } {
+    if let Err(err) = { oxide!().cheats.aimbot.pre_create_move(cmd) } {
         eprintln!("{}", err);
     }
+    // move to bhop
     if let Some(p_local) = Entity::local() {
         if call!(*p_local, is_alive) {
-            if cmd.buttons.get(ButtonFlags::InJump) && menu!().bhop_checkbox.checked{
+            if cmd.buttons.get(ButtonFlags::InJump) && menu!().bhop_checkbox.checked {
                 cmd.buttons
                     .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);
             }

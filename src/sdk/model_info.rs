@@ -33,8 +33,7 @@ pub struct Hitbox {
 }
 
 impl Hitbox {
-    pub unsafe fn center(&self, bones: [Matrix3x4; MAX_STUDIO_BONES]) -> Vector3 {
-        let bone = bones[self.bone];
+    pub unsafe fn center(&self, bone: Matrix3x4) -> Vector3 {
         let min = bone.transform(self.bbmin);
         let max = bone.transform(self.bbmax);
         Vector3 {

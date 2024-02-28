@@ -135,30 +135,32 @@ pub struct Entity {
     pub allow_move_during_taunt: bool,
     #[derivative(Debug = "ignore")]
     _pad17: [u8; 0x18],
-    pub force_taunt_cam: isize,
+    pub force_taunt_cam: bool,
 }
 
 impl_has_vmt!(Entity, VMTEntity);
 
 impl Entity {
-    pub unsafe fn as_renderable(&mut self) -> &mut Renderable {
-        transmute(transmute::<&mut Self, usize>(self) + 4)
+    pub fn as_renderable(&mut self) -> &mut Renderable {
+        unsafe { transmute(transmute::<&mut Self, usize>(self) + 4) }
     }
-    pub unsafe fn as_networkable(&mut self) -> &mut Networkable {
-        transmute(transmute::<&mut Self, usize>(self) + 8)
+    pub fn as_networkable(&mut self) -> &mut Networkable {
+        unsafe { transmute(transmute::<&mut Self, usize>(self) + 8) }
     }
-    pub unsafe fn get_player(id: isize) -> Option<&'static mut Entity> {
-        let ent = call!(interface!(entity_list), get_client_entity, id);
-        if ent.is_null() {
-            return None;
-        }
-        let ent = &mut *ent;
-        let net = ent.as_networkable();
-        if call!(*net, is_dormant) || !call!(*ent, is_alive) || !call!(*ent, is_player) {
-            return None;
-        }
+    pub fn get_player(id: isize) -> Option<&'static mut Entity> {
+        unsafe {
+            let ent = call!(interface!(entity_list), get_client_entity, id);
+            if ent.is_null() {
+                return None;
+            }
+            let ent = &mut *ent;
+            let net = ent.as_networkable();
+            if call!(*net, is_dormant) || !call!(*ent, is_alive) || !call!(*ent, is_player) {
+                return None;
+            }
 
-        Some(ent)
+            Some(ent)
+        }
     }
 
     pub unsafe fn can_attack(&self) -> bool {
@@ -170,33 +172,35 @@ impl Entity {
         self.next_attack <= now && weapon.can_attack_primary()
     }
 
-    pub unsafe fn get_hitbox(&mut self, hitbox_id: HitboxId) -> Option<Vector3> {
-        let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::zeroed().assume_init();
-        let rend = self.as_renderable();
+    pub fn get_hitbox(&mut self, hitbox_id: HitboxId) -> Option<(Hitbox, Matrix3x4)> {
+        unsafe {
+            let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::zeroed().assume_init();
+            let rend = self.as_renderable();
 
-        if !call!(
-            *rend,
-            setup_bones,
-            &bones,
-            MAX_STUDIO_BONES,
-            BoneMask::BoneUsedByHitbox,
-            0f32
-        ) {
-            return None;
+            if !call!(
+                *rend,
+                setup_bones,
+                &bones,
+                MAX_STUDIO_BONES,
+                BoneMask::BoneUsedByHitbox,
+                0f32
+            ) {
+                return None;
+            }
+            let model = call!(*rend, get_model);
+            let studio_model = &*call!(interface!(model_info), get_studio_model, model);
+
+            let Some(hitbox_set) = studio_model.get_hitbox_set(HITBOX_SET) else {
+                return None;
+            };
+            let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
+                return None;
+            };
+            Some((*hitbox,bones[hitbox_id as usize]))
         }
-        let model = call!(*rend, get_model);
-        let studio_model = &*call!(interface!(model_info), get_studio_model, model);
-
-        let Some(hitbox_set) = studio_model.get_hitbox_set(HITBOX_SET) else {
-            return None;
-        };
-        let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
-            return None;
-        };
-        Some(hitbox.center(bones))
     }
-    pub unsafe fn local() -> Option<&'static mut Entity> {
-        let id = call!(interface!(base_engine), get_local_player);
+    pub fn local() -> Option<&'static mut Entity> {
+        let id = unsafe { call!(interface!(base_engine), get_local_player) };
         Self::get_player(id)
     }
 }

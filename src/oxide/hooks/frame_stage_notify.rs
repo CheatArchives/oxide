@@ -8,7 +8,9 @@ pub unsafe extern "C-unwind" fn frame_stage_notify_hook(client: &BaseClient, sta
     match stage {
         FrameStage::FrameRenderStart => {
             if let Some(p_local) = Entity::local() {
-                p_local.force_taunt_cam = menu!().third_person_checkbox.checked as isize;
+                if p_local.force_taunt_cam != menu!().third_person_checkbox.checked {
+                    p_local.force_taunt_cam = menu!().third_person_checkbox.checked ;
+                }
                 let net = p_local.as_networkable();
             }
         }
