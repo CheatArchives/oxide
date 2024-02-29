@@ -27,7 +27,10 @@ impl Aimbot {
         my_angles.roll += p_local.vec_punch_angle.roll;
     }
 
-    pub unsafe fn find_target(&self, p_local: &Entity) -> Result<Option<Angles>, OxideError> {
+    pub unsafe fn find_target(
+        &self,
+        p_local: &'static Entity,
+    ) -> Result<Option<Angles>, OxideError> {
         let entity_count = call!(interface!(entity_list), get_max_entities);
 
         let mut target: Option<(Vector3, isize)> = None;
@@ -48,8 +51,8 @@ impl Aimbot {
 
             let target_point = hitbox.center(bone);
 
-            let trace = trace(my_eyes, target_point, MASK_SHOT, ent);
-            if trace.entity != ent as *const _ {
+            let trace = trace(my_eyes, target_point, MASK_SHOT | CONTENTS_GRATE, p_local);
+            if trace.fraction != 1f32 {
                 continue;
             }
 
@@ -66,7 +69,7 @@ impl Aimbot {
         let Some((target_point, prio)) = target else {
             return Ok(None);
         };
-        let diff = target_point - my_eyes;
+        let diff = my_eyes - target_point;
 
         return Ok(Some(diff.angle()));
         Ok(None)

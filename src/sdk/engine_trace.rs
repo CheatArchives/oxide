@@ -53,14 +53,14 @@ pub struct Ray {
 }
 
 impl Ray {
-    fn new(start: VectorAligned, end: VectorAligned) -> Self {
+    fn new(start: Vector3, end: Vector3) -> Self {
         let delta = end - start;
         Ray {
-            start: start.clone(),
-            delta: delta.clone(),
+            start: start.clone().into(),
+            delta: delta.clone().into(),
             start_offset: VectorAligned::default(),
-            is_ray: true,
             extents: VectorAligned::default(),
+            is_ray: true,
             is_swept: delta.x == 0f32 || delta.y == 0f32 || delta.z == 0f32,
         }
     }
@@ -91,7 +91,8 @@ unsafe extern "C-unwind" fn should_hit_entity(
     ent: *const Entity,
     mask: i32,
 ) -> bool {
-    return ent != unsafe { trace_filter.read().skip };
+    dbg!(ent);
+    ent != unsafe { trace_filter.read().skip }
 }
 unsafe extern "C-unwind" fn get_trace_type(trace_filter: *const TraceFilter) -> i32 {
     TraceType::Everything as i32
@@ -151,16 +152,23 @@ pub struct Trace {
 #[derive(Debug, Clone, Copy)]
 pub struct VMTEngineTrace {
     _pad1: [u8; 4 * 4],
-    pub trace_ray: cfn!(isize, *const EngineTrace, &Ray, u32, &TraceFilter, &Trace),
+    pub trace_ray: cfn!(
+        isize,
+        *const EngineTrace,
+        &Ray,
+        u32,
+        &TraceFilter,
+        &mut Trace
+    ),
 }
 
 pub fn trace(start: Vector3, end: Vector3, mask: u32, ent: &'static Entity) -> Trace {
     unsafe {
         let trace_engine = interface!(engine_trace);
-        let ray = Ray::new(start.into(), end.into());
+        let ray = Ray::new(start, end);
         let filter = TraceFilter::new(ent);
-        let trace = MaybeUninit::zeroed().assume_init();
-        call!(trace_engine, trace_ray, &ray, mask, &filter, &trace);
+        let mut trace = MaybeUninit::zeroed().assume_init();
+        let res = call!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
         trace
     }
 }
