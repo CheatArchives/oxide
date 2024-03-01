@@ -1,5 +1,5 @@
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Condition {
     _1: u32,
     _2: u32,
@@ -14,7 +14,7 @@ impl Condition {
         self._1 & shifted == shifted
     }
 }
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum ConditionFlags {
     Aiming,
     Zoomed,

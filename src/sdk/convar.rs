@@ -2,7 +2,7 @@ use crate::*;
 
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTConVar {
     _pad: [u8; 4*14],
     pub internal_set_value: cfn!(c_void, &'static ConVar , &CStr),
@@ -11,7 +11,7 @@ pub struct VMTConVar {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct ConVar {
     vmt: &'static VMTConVar,
     _pad: [u8; 0x18],

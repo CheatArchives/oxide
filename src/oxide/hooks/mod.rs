@@ -14,27 +14,26 @@ module_export!(frame_stage_notify);
 static SWAPWINDOW_OFFSET: usize = 0xFD648;
 static POLLEVENT_OFFSET: usize = 0xFCF64;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Hook<T: Copy> {
+#[derive(Debug, Clone)]
+pub struct Hook<T> {
     pub org: T,
     pub target: *mut T,
 }
 
-impl<T: Copy> Hook<T> {
-    unsafe fn init(target: *const T, hook: T) -> Self {
-        let target = target as *mut T;
-        let org = *target;
+impl<T: Clone> Hook<T> {
+    unsafe fn init(target: *mut T, hook: T) -> Self {
+        let org = target;
         *target = hook;
-        Hook { org, target }
+        Hook { org:org.read(), target }
     }
-    unsafe fn restore(&self) {
-        *self.target = transmute_unchecked(self.org)
+    unsafe fn restore(&mut self) {
+        self.target = transmute_unchecked(self.org.clone())
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Hooks {
-    pub create_move: Hook<CrateMoveFn>,
+    pub create_move: Hook<CreateMoveFn>,
     pub swap_window: Hook<SwapWindowFn>,
     pub poll_event: Hook<PollEventFn>,
     pub paint_traverse: Hook<PaintRraverseFn>,
@@ -45,23 +44,23 @@ pub struct Hooks {
 impl Hooks {
     pub unsafe fn init(interfaces: &Interfaces) -> Result<Hooks, std::boxed::Box<dyn Error>> {
         //todo: move all those to thier files
-        let create_move = Hook::init(
-            &(*interfaces.client_mode.get_vmt()).create_move,
+        let create_move = Hook::<CreateMoveFn>::init(
+            transmute(&(*interfaces.client_mode.get_vmt()).create_move),
             create_move_hook,
         );
         
-        let override_view = Hook::init(
-            &(*interfaces.client_mode.get_vmt()).override_view,
+        let override_view = Hook::<OverrideViewFn>::init(
+            transmute(&(*interfaces.client_mode.get_vmt()).override_view),
             override_view_hook,
         );
 
-        let paint_traverse = Hook::init(
-            &(*interfaces.panel.get_vmt()).paint_traverse,
+        let paint_traverse = Hook::<PaintRraverseFn>::init(
+            transmute(&(*interfaces.panel.get_vmt()).paint_traverse),
             paint_traverse_hook,
         );
 
-        let frame_stage_notify = Hook::init(
-            &(*interfaces.base_client.get_vmt()).frame_stage_notify,
+        let frame_stage_notify = Hook::<FrameStageNotifyFn>::init(
+            transmute(&(*interfaces.base_client.get_vmt()).frame_stage_notify),
             frame_stage_notify_hook,
         );
 
@@ -82,7 +81,7 @@ impl Hooks {
             frame_stage_notify
         })
     }
-    pub unsafe fn restore(&self) {
+    pub unsafe fn restore(&mut self) {
         self.swap_window.restore();
         self.create_move.restore();
         self.poll_event.restore();

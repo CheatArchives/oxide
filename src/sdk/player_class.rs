@@ -1,5 +1,5 @@
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum PlayerClass {
     Undefined = 0,
     Scout,

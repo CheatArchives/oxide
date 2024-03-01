@@ -7,7 +7,7 @@ const SIGNED_GUID_LEN: usize = 32;
 const MAX_CUSTOM_FILES: usize = 4;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct PlayerInfo {
     name: [c_char; MAX_PLAYER_NAME_LENGTH],
     user_id: isize,
@@ -21,7 +21,7 @@ pub struct PlayerInfo {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTBaseEngine {
     _pad1: [u32; 5],
     pub get_screen_size: cfn!(c_void, &'static BaseEngine, &'static isize, &'static isize),
@@ -31,7 +31,7 @@ pub struct VMTBaseEngine {
     pub get_local_player: cfn!(isize, *const BaseEngine),
     _pad4: [u32; 6],
     pub get_view_angles: cfn!(c_void, &'static BaseEngine, Angles),
-    pub set_view_angles: cfn!(c_void, &'static BaseEngine, Angles),
+    pub set_view_angles: cfn!(c_void, *const BaseEngine, Angles),
     pub get_max_clients: cfn!(isize, &'static BaseEngine),
     _pad5: [u32; 4],
     pub is_in_game: cfn!(bool, &'static BaseEngine),

@@ -2,7 +2,7 @@ use std::{f32::consts::PI, ops::Sub};
 
 use crate::{Angles, VectorAligned};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Vector3 {
     pub x: f32,
@@ -17,15 +17,15 @@ impl Vector3 {
     pub fn dot(&self, vec: Vector3) -> f32 {
         self.x * vec.x + self.y * vec.y + self.z * vec.z
     }
-    pub fn dist2d(&self) -> f32 {
+    pub fn len2d(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2)).sqrt()
     }
-    pub fn dist3d(&self) -> f32 {
+    pub fn len3d(&self) -> f32 {
         (self.x.powi(2) + self.y.powi(2) + self.z.powi(2)).sqrt()
     }
     pub fn angle(&self) -> Angles {
         Angles {
-            pitch: self.z.atan2(self.dist2d()) / PI * 180f32,
+            pitch: self.z.atan2(self.len2d()) / PI * 180f32,
             yaw: self.y.atan2(self.x) / PI * 180f32 + 180f32,
             roll: 0.0,
         }
@@ -45,17 +45,17 @@ impl Sub for Vector3 {
 
 impl Default for Vector3 {
     fn default() -> Self {
-        Vector3::new(0f32,0f32,0f32)
+        Vector3::new(0f32, 0f32, 0f32)
     }
 }
 
 impl Into<VectorAligned> for Vector3 {
     fn into(self) -> VectorAligned {
-        VectorAligned::new(self.x,self.y,self.z,0f32)
+        VectorAligned::new(self.x, self.y, self.z)
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Vector4 {
     pub x: f32,

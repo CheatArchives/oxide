@@ -5,11 +5,11 @@ use crate::*;
 pub type ModelRender = WithVmt<VMTModelRender>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Matrix3x4([[f32; 4]; 3]);
 
 impl Matrix3x4 {
-    pub unsafe fn transform(&self, vec: Vector3) -> Vector3 {
+    pub unsafe fn transform(&self, vec: &Vector3) -> Vector3 {
         let matrix = self.0;
         let vec1 = Vector3::new(matrix[0][0], matrix[0][1], matrix[0][2]);
         let vec2 = Vector3::new(matrix[1][0], matrix[1][1], matrix[1][2]);
@@ -24,7 +24,7 @@ impl Matrix3x4 {
 
 
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct VMTRenderable {
     #[derivative(Debug = "ignore")]
@@ -48,7 +48,7 @@ pub struct VMTRenderable {
 pub type Renderable = WithVmt<VMTRenderable>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct ModelRenderInfo {
     origin: Vector3,
     angles: Angles,
@@ -66,7 +66,7 @@ pub struct ModelRenderInfo {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct DrawModelState {
     studio_hdr: *mut StudioHdr,
     studio_hw_data: *mut c_void,
@@ -78,7 +78,7 @@ pub struct DrawModelState {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTModelRender {
     _pad1: [u8; 4 * 1],
     pub forced_material_override: cfn!(c_void, &'static mut ModelRender, &'static IMaterial, isize),

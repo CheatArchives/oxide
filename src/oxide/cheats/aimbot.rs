@@ -1,27 +1,33 @@
 use std::isize;
 
+use sdl2_sys::SDL_Event;
+
 use crate::*;
 
-#[derive(Debug, Clone, Copy)]
-pub struct Aimbot {}
+#[derive(Debug, Clone)]
+pub struct Aimbot {
+    pub shoot_key_pressed: bool,
+}
 
 impl Aimbot {
     pub fn init() -> Aimbot {
-        Aimbot {}
+        Aimbot {
+            shoot_key_pressed: false,
+        }
     }
     pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
-        let me = p_local.vec_origin;
-        let target = ent.vec_origin;
+        let me = p_local.vec_origin.clone();
+        let target = ent.vec_origin.clone();
         unsafe {
-            if call!(*ent, get_team_number) == call!(*p_local, get_team_number) {
+            if call!(ent, get_team_number) == call!(p_local, get_team_number) {
                 return None;
             }
-            return Some(-(me - target).dist3d() as isize);
+            return Some(-(me - target).len3d() as isize);
         }
     }
 
     pub fn remove_punch(p_local: &Entity) {
-        let mut my_angles = unsafe { *call!(*p_local, get_abs_angles) };
+        let mut my_angles = unsafe { call!(p_local, get_abs_angles).clone() };
         my_angles.pitch += p_local.vec_punch_angle.pitch;
         my_angles.yaw += p_local.vec_punch_angle.yaw;
         my_angles.roll += p_local.vec_punch_angle.roll;
@@ -34,7 +40,7 @@ impl Aimbot {
         let entity_count = call!(interface!(entity_list), get_max_entities);
 
         let mut target: Option<(Vector3, isize)> = None;
-        let my_eyes = call!(*p_local, eye_position);
+        let my_eyes = call!(p_local, eye_position);
 
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
@@ -49,9 +55,10 @@ impl Aimbot {
                 return Err(OxideError::new("could not get hitbox").into());
             };
 
-            let target_point = hitbox.center(bone);
+            let target_point = hitbox.center(&bone);
 
-            let trace = trace(my_eyes, target_point, MASK_SHOT | CONTENTS_GRATE, p_local);
+            let trace = trace(my_eyes.clone(), target_point.clone(), MASK_SHOT, p_local);
+            dbg!(&trace);
             if trace.fraction != 1f32 {
                 continue;
             }
@@ -81,7 +88,7 @@ impl Aimbot {
         }
     }
     pub fn should_run(&mut self) -> bool {
-        if !menu!().aimbot_checkbox.checked {
+        if !menu!().aimbot_checkbox.checked || !self.shoot_key_pressed {
             return false;
         }
 
@@ -89,9 +96,10 @@ impl Aimbot {
             return false;
         };
 
-        if !unsafe { call!(*p_local, is_alive) } {
+        if !unsafe { call!(p_local, is_alive) } {
             return false;
         }
+
         true
     }
 
@@ -115,7 +123,7 @@ impl Aimbot {
     pub fn shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
         match p_local.player_class {
             PlayerClass::Sniper => {
-                let weapon = unsafe { *call!(*p_local, get_weapon) };
+                let weapon = unsafe { call!(p_local, get_weapon) };
                 if !p_local.player_cond.get(ConditionFlags::Zoomed) {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;

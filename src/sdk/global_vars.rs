@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct GlobalVars {
     pub realtime: f32,
     pub framecount: i32,

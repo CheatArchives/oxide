@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum FontDrawType {
     Default,
     NonAdditive,
@@ -18,7 +18,7 @@ impl Default for FontDrawType {
 pub type MatSurface = WithVmt<VMTMatSurface>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTMatSurface {
     _pad1: [u32; 10],
     pub set_color: cfn!(c_void, &'static MatSurface, isize, isize, isize, isize),

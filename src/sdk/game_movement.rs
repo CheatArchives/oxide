@@ -5,7 +5,7 @@ pub type GameMovement = WithVmt<VMTGameMovement>;
 type EntityHandle = CBaseHandle;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct CMoveData{
     first_run_of_functions: bool,
     game_code_moved_player: bool,
@@ -36,7 +36,7 @@ pub struct CMoveData{
 
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTGameMovement {
     _pad1: [u32; 2],
     pub process_movement: cfn!(c_void, &'static mut GameMovement, &'static mut Entity, &'static mut CMoveData),

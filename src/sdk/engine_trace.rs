@@ -5,26 +5,21 @@ use crate::*;
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
 #[repr(C, align(16))]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VectorAligned {
     x: f32,
     y: f32,
     z: f32,
-    w: f32,
+    _pad: i32,
 }
 impl VectorAligned {
-    pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
-        VectorAligned { x, y, z, w }
+    pub fn new(x: f32, y: f32, z: f32) -> Self {
+        VectorAligned { x, y, z, _pad: 0 }
     }
 }
 impl Default for VectorAligned {
     fn default() -> Self {
-        VectorAligned {
-            x: 0f32,
-            y: 0f32,
-            z: 0f32,
-            w: 0f32,
-        }
+        VectorAligned::new(0f32, 0f32, 0f32)
     }
 }
 
@@ -32,17 +27,12 @@ impl Sub for VectorAligned {
     type Output = VectorAligned;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        VectorAligned::new(
-            self.x - rhs.x,
-            self.y - rhs.y,
-            self.z - rhs.z,
-            self.w - rhs.w,
-        )
+        VectorAligned::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Ray {
     pub start: VectorAligned,
     pub delta: VectorAligned,
@@ -54,30 +44,30 @@ pub struct Ray {
 
 impl Ray {
     fn new(start: Vector3, end: Vector3) -> Self {
-        let delta = end - start;
+        let delta = end - start.clone();
         Ray {
             start: start.clone().into(),
             delta: delta.clone().into(),
             start_offset: VectorAligned::default(),
             extents: VectorAligned::default(),
             is_ray: true,
-            is_swept: delta.x == 0f32 || delta.y == 0f32 || delta.z == 0f32,
+            is_swept: delta.len3d() == 0f32,
         }
     }
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTTraceFilter {
     should_hit_entity: cfn!(bool, *const TraceFilter, *const Entity, i32),
-    get_trace_type: cfn!(i32, *const TraceFilter),
+    get_trace_type: cfn!(TraceType, *const TraceFilter),
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct TraceFilter {
     vmt: *const VMTTraceFilter,
-    skip: &'static Entity,
+    p_local: &'static Entity,
 }
 
 pub enum TraceType {
@@ -86,16 +76,19 @@ pub enum TraceType {
     EntitiesOnly,
     EverythingFilterProps,
 }
+
 unsafe extern "C-unwind" fn should_hit_entity(
     trace_filter: *const TraceFilter,
     ent: *const Entity,
     mask: i32,
 ) -> bool {
     dbg!(ent);
-    ent != unsafe { trace_filter.read().skip }
+    dbg!(mask);
+    ent != unsafe { trace_filter.read().p_local }
 }
-unsafe extern "C-unwind" fn get_trace_type(trace_filter: *const TraceFilter) -> i32 {
-    TraceType::Everything as i32
+
+unsafe extern "C-unwind" fn get_trace_type(trace_filter: *const TraceFilter) -> TraceType {
+    TraceType::Everything
 }
 
 impl TraceFilter {
@@ -106,13 +99,16 @@ impl TraceFilter {
                 should_hit_entity,
                 get_trace_type,
             };
-            TraceFilter { vmt: ptr, skip }
+            TraceFilter {
+                vmt: ptr,
+                p_local: skip,
+            }
         }
     }
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Plane {
     normal: Vector3,
     dist: f32,
@@ -122,7 +118,7 @@ pub struct Plane {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Surface {
     name: *const c_char,
     surface_props: i16,
@@ -130,7 +126,7 @@ pub struct Surface {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Trace {
     pub startpos: Vector3,
     pub endpos: Vector3,
@@ -149,9 +145,9 @@ pub struct Trace {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTEngineTrace {
-    _pad1: [u8; 4 * 4],
+    _pad1: [i32; 4],
     pub trace_ray: cfn!(
         isize,
         *const EngineTrace,
@@ -162,12 +158,14 @@ pub struct VMTEngineTrace {
     ),
 }
 
-pub fn trace(start: Vector3, end: Vector3, mask: u32, ent: &'static Entity) -> Trace {
+pub fn trace(start: Vector3, end: Vector3, mask: u32, p_local: &'static Entity) -> Trace {
     unsafe {
         let trace_engine = interface!(engine_trace);
+
         let ray = Ray::new(start, end);
-        let filter = TraceFilter::new(ent);
+        let filter = TraceFilter::new(p_local);
         let mut trace = MaybeUninit::zeroed().assume_init();
+
         let res = call!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
         trace
     }

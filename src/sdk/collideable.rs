@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTCollideable {
     _pad: [u8; 4],
     pub obb_mins_pre_scaled: cfn!(Vector3, &'static Collideable),

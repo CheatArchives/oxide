@@ -7,7 +7,7 @@ pub struct MoveHelper {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTPrediction {
     _pad1: [u32; 13],
     pub get_local_view_angles: cfn!(c_void, &'static mut Prediction, &'static mut Angles),
@@ -32,9 +32,9 @@ pub struct VMTPrediction {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Prediction {
-    vmt: &'static VMTPrediction,
+    vmt: *const VMTPrediction,
     last_ground: isize,
     in_prediction: bool,
     first_time_predicted: bool,

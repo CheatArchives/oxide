@@ -1,7 +1,10 @@
 #[macro_export]
 macro_rules! cfn {
-    ($r:ty,$($t:ty),*) => {unsafe extern "C-unwind" fn($($t), *) -> $r}
+    ($r:ty,$($t:ty),*) => {
+        unsafe extern "C-unwind" fn($($t), *) -> $r
+    }
 }
+
 #[macro_export]
 macro_rules! module_export {
     ($m:ident) => {
@@ -13,7 +16,7 @@ macro_rules! module_export {
 #[macro_export]
 macro_rules! oxide {
     () => {
-        &mut unsafe { *(OXIDE as *mut _ as *mut Oxide) }
+        unsafe { &mut *(OXIDE as *mut _ as *mut Oxide) }
     };
 }
 
@@ -34,13 +37,13 @@ macro_rules! interface_vmt {
 #[macro_export]
 macro_rules! interface {
     ($n:ident) => {
-        *oxide!().interfaces.$n.interface_ref()
+        oxide!().interfaces.$n.interface_ref()
     };
 }
 #[macro_export]
 macro_rules! call {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        ($i.vmt.$f)(addr_of!($i),$($args),*)
+        ((*$i.vmt).$f)($i,$($args),*)
     };
 }
 #[macro_export]
@@ -55,15 +58,11 @@ macro_rules! impl_has_vmt {
     ($t:tt,$tv:tt) => {
         impl HasVmt<$tv> for $t {
             fn get_vmt(&self) -> &'static $tv {
-                self.vmt
+                unsafe{&*self.vmt}
             }
 
             fn set_vmt(&mut self, vmt: &'static $tv) {
                 self.vmt = vmt
-            }
-
-            unsafe fn c(&mut self) -> $tv {
-                *self.vmt
             }
         }
     };

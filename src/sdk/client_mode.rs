@@ -3,7 +3,7 @@ use crate::*;
 pub type ClientMode = WithVmt<VMTClientMode>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTClientMode {
     _pad1: [cfn!(c_void, c_void); 17],
     pub override_view: cfn!((), &mut ClientMode, &mut ViewSetup),

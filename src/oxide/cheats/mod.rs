@@ -2,7 +2,7 @@ use crate::*;
 
 module_export!(aimbot);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Cheats {
     pub aimbot: Aimbot,
 }

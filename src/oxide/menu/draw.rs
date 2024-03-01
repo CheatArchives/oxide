@@ -5,7 +5,7 @@ use freetype_sys::*;
 use sdl2_sys::*;
 use std::{intrinsics::offset, isize, mem::MaybeUninit, ptr::null, usize};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Draw {
     renderer: *mut SDL_Renderer,
     pub free_type: FT_Library,
@@ -14,7 +14,7 @@ pub struct Draw {
     pub face_small: FT_Face,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum FontSize {
     Small = 16,
     Medium = 24,
@@ -79,7 +79,7 @@ impl Draw {
         color: usize,
     ) -> SDL_Rect {
         unsafe {
-            let face = self.get_face(size);
+            let face = self.get_face(&size);
 
             FT_Load_Char(face, text.chars().next().unwrap() as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
@@ -107,7 +107,7 @@ impl Draw {
             }
         }
     }
-    pub fn get_face(&mut self, size: FontSize) -> *mut FT_FaceRec {
+    pub fn get_face(&mut self, size: &FontSize) -> *mut FT_FaceRec {
         match size {
             FontSize::Small => self.face_small,
             FontSize::Medium => self.face_medium,
@@ -115,7 +115,7 @@ impl Draw {
         }
     }
     pub unsafe fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
-        let face = self.get_face(size);
+        let face = self.get_face(&size);
 
         let mut w = 0;
         let mut h_min = 0;
@@ -193,7 +193,7 @@ impl Draw {
         }
         return rect;
     }
-    pub unsafe fn unload(self) {
+    pub unsafe fn unload(&self) {
         FT_Done_Face(self.face_small);
         FT_Done_Face(self.face_medium);
         FT_Done_Face(self.face_large);

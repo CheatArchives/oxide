@@ -3,7 +3,7 @@ use crate::*;
 pub type MaterialSystem = WithVmt<VMTMaterialSystem>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTMaterialSystem {
     _pad1: [u8;4 * 73],
     pub find_material: cfn!(&'static IMaterial, &'static MaterialSystem , &CStr, &CStr, bool, &CStr),
@@ -14,7 +14,7 @@ pub struct VMTMaterialSystem {
 pub type IMaterial = WithVmt<VMTIMaterial>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTIMaterial {
     _pad1: [u8;4 * 27],
     pub alpha_modulate: cfn!(c_void, &'static IMaterial, f32),
@@ -26,7 +26,7 @@ pub struct VMTIMaterial {
 pub type IMatRenderContext = WithVmt<VMTIMatRenderContext>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTIMatRenderContext {
     _pad1: [u8;4 * 11],
     pub depth_range: cfn!(c_void, &'static IMatRenderContext, f32,f32),

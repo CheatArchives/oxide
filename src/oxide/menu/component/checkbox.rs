@@ -3,7 +3,7 @@ use std::{isize, mem::MaybeUninit, ptr::null};
 use crate::*;
 use sdl2_sys::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Checkbox {
     pub checked: bool,
     x: isize,

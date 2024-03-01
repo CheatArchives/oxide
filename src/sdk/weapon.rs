@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct VMTWeapon {
     #[derivative(Debug="ignore")]
@@ -29,7 +29,7 @@ pub struct VMTWeapon {
 }
 
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Weapon {
     pub vmt: &'static VMTWeapon,

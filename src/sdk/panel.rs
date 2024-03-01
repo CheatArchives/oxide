@@ -7,7 +7,7 @@ pub type VPanel = usize;
 
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTPanel {
     _pad1: [u32; 37],
     pub get_name: cfn!(*const c_char, *const Panel, VPanel),

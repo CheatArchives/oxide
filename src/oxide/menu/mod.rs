@@ -16,7 +16,7 @@ use sdl2_sys::*;
 module_export!(draw);
 module_export!(component);
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Menu {
     pub old_ctx: *mut c_void,
     pub ctx: *mut c_void,
@@ -66,9 +66,9 @@ impl Menu {
         println!("loaded menu");
         Ok(menu)
     }
-    pub unsafe fn unload(self) {
+    pub unsafe fn unload(&self) {
         SDL_GL_DeleteContext(self.ctx);
-        self.draw.unload()
+        self.draw.unload();
     }
 
     pub unsafe fn run(&mut self, window: *mut SDL_Window) {

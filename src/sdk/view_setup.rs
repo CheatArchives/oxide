@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct ViewSetup {
     pub x: isize,
     pub unscaled_x: isize,

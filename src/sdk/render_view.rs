@@ -3,11 +3,11 @@ use crate::*;
 pub type RenderView = WithVmt<VMTRenderView>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct FloatRGBA(f32, f32, f32, f32);
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTRenderView {
     _pad1: [u32; 4],
     pub set_blend: cfn!(c_void, &'static RenderView, f32),

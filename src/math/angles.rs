@@ -1,7 +1,7 @@
 use std::ops::Sub;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Angles {
     pub pitch: f32,
     pub yaw: f32,

@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum FrameStage {
     FrameUndefined = -1,
     FrameStart,
@@ -17,7 +17,7 @@ pub type BaseClient = WithVmt<VMTBaseClient>;
 
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTBaseClient {
     _pad1: [u32; 6],
     pub level_init_post_entity: cfn!((), &BaseClient),

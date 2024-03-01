@@ -1,7 +1,7 @@
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct ClientClass{
     _pad1: [usize;2],
     pub get_client_class: cfn!(&ClientClass, &Networkable),
@@ -10,7 +10,7 @@ pub struct ClientClass{
     class_id: usize
 }
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct VMTNetworkable{
     _pad1: [usize;2],

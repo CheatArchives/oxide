@@ -10,7 +10,7 @@ pub const MAX_STUDIO_BONES: usize = 128;
 pub const HITBOX_SET: usize = 0;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum BoneMask {
     BoneUsedByAnything = 0x0007FF00,
     BoneUsedByHitbox = 0x00000100,
@@ -28,7 +28,7 @@ pub enum BoneMask {
 }
 
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct VMTEntity {
     #[derivative(Debug = "ignore")]
@@ -37,7 +37,7 @@ pub struct VMTEntity {
     #[derivative(Debug = "ignore")]
     _pad2: [u32; 6],
     pub get_abs_origin: cfn!(*const Vector3, *const Entity),
-    pub get_abs_angles: cfn!(*const Angles, *const Entity),
+    pub get_abs_angles: cfn!(&'static Angles, *const Entity),
     #[derivative(Debug = "ignore")]
     _pad3: [u32; 66],
     pub get_index: cfn!(&isize, &Entity),
@@ -81,7 +81,7 @@ pub struct VMTEntity {
 }
 
 #[repr(C)]
-#[derive(Derivative, Clone, Copy)]
+#[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Entity {
     pub vmt: &'static VMTEntity,
@@ -155,7 +155,7 @@ impl Entity {
             }
             let ent = &mut *ent;
             let net = ent.as_networkable();
-            if call!(*net, is_dormant) || !call!(*ent, is_alive) || !call!(*ent, is_player) {
+            if call!(net, is_dormant) || !call!(ent, is_alive) || !call!(ent, is_player) {
                 return None;
             }
 
@@ -165,10 +165,10 @@ impl Entity {
 
     pub unsafe fn can_attack(&self) -> bool {
         let now = oxide!().global_vars.now();
-        if !call!(*self, is_alive) {
+        if !call!(self, is_alive) {
             return false;
         }
-        let weapon = call!(*self, get_weapon);
+        let weapon = call!(self, get_weapon);
         self.next_attack <= now && weapon.can_attack_primary()
     }
 
@@ -178,7 +178,7 @@ impl Entity {
             let rend = self.as_renderable();
 
             if !call!(
-                *rend,
+                rend,
                 setup_bones,
                 &bones,
                 MAX_STUDIO_BONES,
@@ -187,7 +187,7 @@ impl Entity {
             ) {
                 return None;
             }
-            let model = call!(*rend, get_model);
+            let model = call!(rend, get_model);
             let studio_model = &*call!(interface!(model_info), get_studio_model, model);
 
             let Some(hitbox_set) = studio_model.get_hitbox_set(HITBOX_SET) else {
@@ -196,7 +196,7 @@ impl Entity {
             let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
                 return None;
             };
-            Some((hitbox, bones[hitbox.bone]))
+            Some((hitbox.clone(), bones[hitbox.bone].clone()))
         }
     }
     pub fn local() -> Option<&'static mut Entity> {

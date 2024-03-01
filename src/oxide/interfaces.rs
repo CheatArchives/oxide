@@ -1,26 +1,25 @@
 use std::{
     alloc::{alloc, Layout},
     mem::{align_of, MaybeUninit},
-    ptr::copy_nonoverlapping, usize,
+    ptr::copy_nonoverlapping,
+    usize,
 };
 
 use libc::dlsym;
 
 use crate::*;
 
-
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Interface<T: HasVmt<V> + 'static, V: 'static> {
     interface_ref: *mut T,
     pub old_vmt: &'static V,
 }
-
-impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
+impl<T: HasVmt<V>, V> Interface<T, V> {
     pub unsafe fn new(interface_ref: &'static mut T) -> Interface<T, V> {
         let old = (*interface_ref).get_vmt();
         let size = vmt_size(transmute(old));
 
-        let layout = Layout::from_size_align(size,8).unwrap();
+        let layout = Layout::from_size_align(size, 8).unwrap();
         let new: &'static mut V = transmute(alloc(layout));
 
         libc::memcpy(transmute(&mut *new), transmute(old), size);
@@ -39,11 +38,14 @@ impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
             std::mem::transmute(dlsym(handle, CString::new("CreateInterface")?.as_ptr()));
 
         let name = CString::new(name).unwrap();
-        let interface_ref: &'static mut T = transmute(create_interface_fn(name.as_ptr(), std::ptr::null()));
+        let interface_ref: &'static mut T =
+            transmute(create_interface_fn(name.as_ptr(), std::ptr::null()));
 
         Ok(Interface::new(interface_ref))
     }
+}
 
+impl<T: HasVmt<V>, V> Interface<T, V> {
     pub fn get_vmt(&self) -> &'static V {
         unsafe { (*self.interface_ref).get_vmt() }
     }
@@ -55,7 +57,7 @@ impl<T: HasVmt<V>, V: Copy> Interface<T, V> {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Interfaces {
     pub base_client: Interface<BaseClient, VMTBaseClient>,
     pub base_engine: Interface<BaseEngine, VMTBaseEngine>,
@@ -84,7 +86,7 @@ impl Interfaces {
         let base_client: Interface<BaseClient, VMTBaseClient> =
             Interface::create(client_handle, "VClient017")?;
 
-        let client_mode = Interfaces::get_client_mode(*base_client.interface_ref());
+        let client_mode = Interfaces::get_client_mode(base_client.interface_ref());
 
         Ok(Interfaces {
             base_client,
@@ -122,8 +124,9 @@ impl Interfaces {
         self.prediction.restore();
         self.client_mode.restore();
     }
-    unsafe fn get_client_mode(base_client: BaseClient) -> &'static mut ClientMode {
-        **transmute::<usize,&'static mut &'static mut &'static mut ClientMode>((*base_client.vmt).hud_process_input as usize + 1)
-
+    unsafe fn get_client_mode(base_client: &BaseClient) -> &'static mut ClientMode {
+        **transmute::<usize, &'static mut &'static mut &'static mut ClientMode>(
+            (*base_client.vmt).hud_process_input as usize + 1,
+        )
     }
 }

@@ -3,7 +3,7 @@ use std::usize;
 use crate::*;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct UserCmd {
     pub vmt: &'static c_void,
     pub command_number: isize,
@@ -22,7 +22,7 @@ pub struct UserCmd {
     pub hasbeenpredicted: bool,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 #[repr(C)]
 pub struct Buttons(u32);
 
@@ -35,7 +35,7 @@ impl Buttons {
     }
     pub fn set(&mut self, flag: ButtonFlags, val: bool) {
         let flag = flag as u8;
-        let mut b: usize = unsafe { transmute(*self) };
+        let mut b: usize = *unsafe { transmute::<&mut Self,&usize>(self) };
         if val {
             b |= 1 << flag;
         } else {
@@ -45,7 +45,7 @@ impl Buttons {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum ButtonFlags {
     InAttack,
     InJump,

@@ -33,14 +33,14 @@ pub type ConCommand = *const c_void;
 pub type HFont = usize;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMatrix([[f32; 4]; 4]);
 
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
-pub struct WithVmt<T: Copy + 'static> {
-    pub vmt: &'static T,
+#[derive(Debug, Clone)]
+pub struct WithVmt<T:'static> {
+    pub vmt: *const T,
 }
 
 
@@ -48,16 +48,12 @@ pub trait HasVmt<T: 'static> {
     type VMTType = T;
     fn get_vmt(&self) -> &'static T;
     fn set_vmt(&mut self, vmt: &'static T);
-    unsafe fn c(&mut self) -> T;
 }
-impl<T: Copy + 'static> HasVmt<T> for WithVmt<T> {
+impl<T:'static> HasVmt<T> for WithVmt<T> {
     fn get_vmt(&self) -> &'static T {
-        self.vmt
+        unsafe{&*self.vmt}
     }
     fn set_vmt(&mut self, vmt: &'static T) {
         self.vmt = vmt
-    }
-    unsafe fn c(&mut self) -> T {
-        *self.vmt
     }
 }

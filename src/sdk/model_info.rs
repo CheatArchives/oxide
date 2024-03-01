@@ -5,7 +5,7 @@ use crate::*;
 pub type ModelInfo = WithVmt<VMTModelInfo>;
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct HitboxSet {
     sznameindex: usize,
     numhitboxes: usize,
@@ -23,7 +23,7 @@ impl HitboxSet {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Hitbox {
     pub bone: usize,
     group: usize,
@@ -34,9 +34,9 @@ pub struct Hitbox {
 }
 
 impl Hitbox {
-    pub unsafe fn center(&self, bone: Matrix3x4) -> Vector3 {
-        let min = bone.transform(self.bbmin);
-        let max = bone.transform(self.bbmax);
+    pub unsafe fn center(&self, bone: &Matrix3x4) -> Vector3 {
+        let min = bone.transform(&self.bbmin);
+        let max = bone.transform(&self.bbmax);
         Vector3 {
             x: (min.x + max.x) / 2.0,
             y: (min.y + max.y) / 2.0,
@@ -46,7 +46,7 @@ impl Hitbox {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub enum HitboxId {
     HitboxHead,
     HitboxPelvis,
@@ -70,7 +70,7 @@ pub enum HitboxId {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Model {
     pub handle: &'static c_void,
     pub name: &'static CStr,
@@ -84,7 +84,7 @@ pub struct Model {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct StudioHdr {
     pub id: usize,
     pub version: usize,
@@ -107,7 +107,7 @@ pub struct StudioHdr {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Bone {
     sznameindex: usize,
     parent: usize,
@@ -146,7 +146,7 @@ impl StudioHdr {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct VMTModelInfo {
     _pad1: [u8; 4 * 3],
     pub get_model_index: cfn!(isize, &'static ModelInfo, &CStr),
