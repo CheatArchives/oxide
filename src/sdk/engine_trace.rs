@@ -82,8 +82,6 @@ unsafe extern "C-unwind" fn should_hit_entity(
     ent: *const Entity,
     mask: i32,
 ) -> bool {
-    dbg!(ent);
-    dbg!(mask);
     ent != unsafe { trace_filter.read().p_local }
 }
 

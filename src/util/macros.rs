@@ -61,7 +61,7 @@ macro_rules! impl_has_vmt {
                 unsafe{&*self.vmt}
             }
 
-            fn set_vmt(&mut self, vmt: &'static $tv) {
+            fn set_vmt(&mut self, vmt: *mut $tv) {
                 self.vmt = vmt
             }
         }

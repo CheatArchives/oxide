@@ -86,5 +86,7 @@ impl Hooks {
         self.create_move.restore();
         self.poll_event.restore();
         self.paint_traverse.restore();
+        self.frame_stage_notify.restore();
+        self.override_view.restore();
     }
 }

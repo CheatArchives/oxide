@@ -36,24 +36,24 @@ pub type HFont = usize;
 #[derive(Debug, Clone)]
 pub struct VMatrix([[f32; 4]; 4]);
 
-
 #[repr(C)]
 #[derive(Debug, Clone)]
-pub struct WithVmt<T:'static> {
-    pub vmt: *const T,
+pub struct WithVmt<T: 'static> {
+    pub vmt: *mut T,
 }
-
 
 pub trait HasVmt<T: 'static> {
     type VMTType = T;
     fn get_vmt(&self) -> &'static T;
-    fn set_vmt(&mut self, vmt: &'static T);
+    fn set_vmt(&mut self, vmt: *mut T);
 }
-impl<T:'static> HasVmt<T> for WithVmt<T> {
+impl<T: 'static + Clone + Debug> HasVmt<T> for WithVmt<T> {
     fn get_vmt(&self) -> &'static T {
-        unsafe{&*self.vmt}
+        unsafe { &*self.vmt }
     }
-    fn set_vmt(&mut self, vmt: &'static T) {
-        self.vmt = vmt
+    fn set_vmt(&mut self, vmt: *mut T) {
+        unsafe{
+            self.vmt = vmt
+        }
     }
 }

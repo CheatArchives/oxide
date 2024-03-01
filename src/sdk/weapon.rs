@@ -32,7 +32,7 @@ pub struct VMTWeapon {
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Weapon {
-    pub vmt: &'static VMTWeapon,
+    pub vmt: *mut VMTWeapon,
     #[derivative(Debug="ignore")]
     _pad1: [u8; 0x924],
     pub item_definition_index: isize,

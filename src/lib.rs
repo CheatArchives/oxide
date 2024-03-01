@@ -10,20 +10,21 @@
 use std::{
     alloc::{alloc, Layout},
     error::Error,
-    thread, time::Duration,
+    thread,
+    time::Duration,
 };
 
 pub use libc::wchar_t;
 pub use std::{
     ffi::*,
+    intrinsics::breakpoint,
     mem::transmute,
     ptr::{addr_of, addr_of_mut},
-    intrinsics::breakpoint
 };
 
 mod util;
-pub use util::*;
 pub use derivative::*;
+pub use util::*;
 
 module_export!(oxide);
 module_export!(sdk);
@@ -69,7 +70,11 @@ extern "C" fn unload() {
         println!("unloading");
 
         oxide!().unload();
-        menu!().unload();
+        if !MENU.is_null() {
+            menu!().unload();
+            std::ptr::drop_in_place(menu!());
+        }
+        std::ptr::drop_in_place(oxide!());
 
         println!("unloaded");
     }

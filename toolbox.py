@@ -54,10 +54,10 @@ def unload(pid, lib):
 
     result = run(command).returncode
 
+    os.remove(loaded_lib)
     if not result == 0:
         print("failed to unload")
         exit(result)
-    os.remove(loaded_lib)
 
 
 def get_pid():
@@ -95,7 +95,6 @@ def build(dev=False):
 def start_tf2():
     run(["bash", "./hl2.sh", "-game", "tf"], cwd=TF2_DIR,
         env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
-
 
 
 parser = argparse.ArgumentParser(

@@ -11,8 +11,8 @@ use crate::*;
 
 #[derive(Debug, Clone)]
 pub struct Interface<T: HasVmt<V> + 'static, V: 'static> {
-    interface_ref: *mut T,
-    pub old_vmt: &'static V,
+    pub interface_ref: *mut T,
+    pub old_vmt: *mut V,
 }
 impl<T: HasVmt<V>, V> Interface<T, V> {
     pub unsafe fn new(interface_ref: &'static mut T) -> Interface<T, V> {
@@ -27,7 +27,7 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
 
         Interface {
             interface_ref,
-            old_vmt: old,
+            old_vmt: (old as *const _ as *mut V),
         }
     }
     unsafe fn create(

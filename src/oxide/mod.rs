@@ -1,5 +1,6 @@
-use std::{collections::HashMap, ops::Deref, usize};
+use std::{backtrace::Backtrace, collections::HashMap, mem::MaybeUninit, ops::Deref, usize};
 
+use libc::{dlclose, dlopen, wait};
 use sdl2_sys::{SDL_Event, SDL_EventType, SDL_Scancode};
 
 use crate::*;
@@ -15,23 +16,22 @@ pub struct Oxide {
     pub hooks: Hooks,
     pub global_vars: &'static GlobalVars,
     pub cheats: Cheats,
-    pub keys: HashMap<SDL_Scancode, bool>
 }
 
 impl Oxide {
     pub unsafe fn init() -> Result<Oxide, std::boxed::Box<dyn Error>> {
         let interfaces = Interfaces::init()?;
-        let hooks = Hooks::init(&interfaces)?;
         let cheats = Cheats::init();
+        let hooks = Hooks::init(&interfaces)?;
 
-        let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
+        //let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
 
+        #[allow(invalid_value)]
         let oxide = Oxide {
             interfaces,
-            hooks,
-            global_vars,
             cheats,
-            keys: HashMap::new()
+            hooks,
+            global_vars: MaybeUninit::zeroed().assume_init(),
         };
 
         Ok(oxide)
@@ -68,5 +68,17 @@ impl Oxide {
             }
             _ => (),
         };
+    }
+    pub fn self_unload() {
+        let lib_path = CString::new("/tmp/liboxide.so").unwrap();
+        unsafe {
+            let handle = dlopen(lib_path.as_ptr(), 6);
+            dlclose(handle);
+            dlclose(handle);
+        }
+    }
+}
+impl Drop for Oxide {
+    fn drop(&mut self) {
     }
 }

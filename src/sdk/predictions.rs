@@ -3,7 +3,7 @@ use crate::*;
 pub struct VMTMoveHelper(&'static mut c_void);
 
 pub struct MoveHelper {
-    vmt: &'static mut VMTMoveHelper,
+    vmt: *mut VMTMoveHelper,
 }
 
 #[repr(C)]

@@ -84,7 +84,7 @@ pub struct VMTEntity {
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]
 pub struct Entity {
-    pub vmt: &'static VMTEntity,
+    pub vmt: *mut VMTEntity,
     #[derivative(Debug = "ignore")]
     _pad1: [u8; 0x7C],
     pub model_idx: isize,
