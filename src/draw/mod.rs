@@ -28,7 +28,6 @@ pub enum FontSize {
 
 impl Draw {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Draw, std::boxed::Box<dyn Error>> {
-        breakpoint();
         println!("loading menu");
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
@@ -50,7 +49,8 @@ impl Draw {
         SDL_GL_MakeCurrent(window, old_ctx);
 
         let mut components = Vec::new();
-        components.push(Box::new(AimbotFov {}) as Box<dyn ComponentDebug>);
+        //components.push(Box::new(AimbotFov {}) as Box<dyn ComponentDebug>);
+        components.push(Box::new(Overlay {}) as Box<dyn ComponentDebug>);
 
         println!("loaded menu");
         Ok(Draw {
@@ -70,7 +70,6 @@ impl Draw {
     pub unsafe fn run(&mut self, window: *mut SDL_Window) {
         SDL_GL_MakeCurrent(window, self.ctx);
 
-        breakpoint();
         let mut frame = Frame::new(window, self.renderer);
         for component in &mut self.components {
             component.draw(&mut frame, 0, 0)

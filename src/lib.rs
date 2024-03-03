@@ -9,10 +9,7 @@
 #![deny(warnings)]
 
 use std::{
-    alloc::{alloc, Layout},
-    error::Error,
-    thread,
-    time::Duration,
+    alloc::{alloc, Layout}, error::Error, mem::ManuallyDrop, thread, time::Duration
 };
 
 pub use libc::wchar_t;
@@ -43,8 +40,8 @@ static mut DRAW: Option<*mut c_void> = None;
 unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     println!("loading");
 
-    let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut Oxide;
-    *oxide_ptr = Oxide::init()?;
+    let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut ManuallyDrop<Oxide>;
+    *oxide_ptr = ManuallyDrop::new(Oxide::init()?);
     OXIDE = Some(oxide_ptr as *mut _ as *mut c_void);
 
     println!("loaded");
@@ -73,9 +70,11 @@ extern "C" fn unload() {
 
         if DRAW.is_some() {
             draw!().restore();
+            std::ptr::drop_in_place(draw!());
         }
         if OXIDE.is_some() {
             oxide!().restore();
+            std::ptr::drop_in_place(oxide!());
         }
 
         println!("unloaded");
