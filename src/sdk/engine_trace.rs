@@ -51,7 +51,7 @@ impl Ray {
             start_offset: VectorAligned::default(),
             extents: VectorAligned::default(),
             is_ray: true,
-            is_swept: delta.len3d() == 0f32,
+            is_swept: delta.len3d() != 0f32,
         }
     }
 }
@@ -90,7 +90,7 @@ unsafe extern "C-unwind" fn get_trace_type(trace_filter: *const TraceFilter) -> 
 }
 
 impl TraceFilter {
-    pub fn new(skip: &'static Entity) -> TraceFilter {
+    pub fn new(p_local: &'static Entity) -> TraceFilter {
         unsafe {
             let mut ptr = alloc(Layout::new::<VMTTraceFilter>()) as *mut VMTTraceFilter;
             *ptr = VMTTraceFilter {
@@ -99,7 +99,7 @@ impl TraceFilter {
             };
             TraceFilter {
                 vmt: ptr,
-                p_local: skip,
+                p_local,
             }
         }
     }

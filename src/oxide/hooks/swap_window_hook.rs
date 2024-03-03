@@ -5,17 +5,13 @@ use crate::*;
 pub type SwapWindowFn = cfn!(c_void, *mut sdl2_sys::SDL_Window);
 
 pub unsafe extern "C-unwind" fn swap_window_hook(window: *mut sdl2_sys::SDL_Window) -> c_void {
-    if MENU.is_null() {
+    if MENU.is_none() {
         let menu_ptr = alloc(Layout::new::<Menu>()) as *mut _ as *mut Menu;
         *menu_ptr = Menu::init(window).unwrap();
-        MENU = menu_ptr as *mut _ as *mut c_void;
+        MENU = Some(menu_ptr as *mut _ as *mut c_void);
     }
-
-    SDL_GL_MakeCurrent(window, menu!().ctx);
-    SDL_ShowCursor(SDL_ENABLE as i32);
 
     menu!().run(window);
 
-    SDL_GL_MakeCurrent(window, menu!().old_ctx);
     (oxide!().hooks.swap_window.org)(window)
 }

@@ -21,17 +21,17 @@ pub struct Oxide {
 impl Oxide {
     pub unsafe fn init() -> Result<Oxide, std::boxed::Box<dyn Error>> {
         let interfaces = Interfaces::init()?;
+        let hooks = Hooks::init(&interfaces);
         let cheats = Cheats::init();
-        let hooks = Hooks::init(&interfaces)?;
 
-        //let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
+        let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
 
         #[allow(invalid_value)]
         let oxide = Oxide {
             interfaces,
             cheats,
             hooks,
-            global_vars: MaybeUninit::zeroed().assume_init(),
+            global_vars,
         };
 
         Ok(oxide)
@@ -41,10 +41,6 @@ impl Oxide {
         let global_vars: &'static mut &'static mut &'static mut GlobalVars =
             transmute(hud_update_addr + 9);
         **global_vars
-    }
-    pub unsafe fn unload(&mut self) {
-        self.interfaces.restore();
-        self.hooks.restore();
     }
     pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {
         match transmute::<u32, SDL_EventType>((*event).type_) {
@@ -77,8 +73,8 @@ impl Oxide {
             dlclose(handle);
         }
     }
-}
-impl Drop for Oxide {
-    fn drop(&mut self) {
+    pub fn restore(&mut self) {
+        self.interfaces.restore();
+        self.hooks.restore();
     }
 }

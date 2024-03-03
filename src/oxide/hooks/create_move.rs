@@ -9,16 +9,16 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     input_sample_time: f32,
     cmd: &'static mut UserCmd,
 ) -> bool {
-    if cmd.command_number == 0 || MENU.is_null() {
+    if cmd.command_number == 0 || MENU.is_none() {
         return true;
     }
-    // move to bhop
     let Some(p_local) = Entity::local() else {
         return true;
     };
     if !call!(p_local, is_alive) {
         return true;
     }
+    remove_punch(p_local);
 
     let org_cmd = cmd.clone();
 
@@ -58,3 +58,10 @@ pub fn correct_movement(
 
     (forward, side)
 }
+
+    pub fn remove_punch(p_local: &Entity) {
+        let mut my_angles = unsafe { call!(p_local, get_abs_angles).clone() };
+        my_angles.pitch += p_local.vec_punch_angle.pitch;
+        my_angles.yaw += p_local.vec_punch_angle.yaw;
+        my_angles.roll += p_local.vec_punch_angle.roll;
+    }

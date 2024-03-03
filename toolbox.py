@@ -93,7 +93,7 @@ def build(dev=False):
 
 
 def start_tf2():
-    run(["bash", "./hl2.sh", "-game", "tf"], cwd=TF2_DIR,
+    run(["bash", "./hl2.sh", "-game", "tf", "-steam"], cwd=TF2_DIR,
         env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
 
 
@@ -128,7 +128,7 @@ match args.action:
         lib = get_lib(args.debug)
 
         unload(pid, lib)
-        sleep(2)
+        sleep(1)
         inject(pid, lib)
     case 'build':
         build(args.debug)

@@ -1,5 +1,3 @@
-use std::isize;
-
 use sdl2_sys::SDL_Event;
 
 use crate::*;
@@ -7,30 +5,46 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Aimbot {
     pub shoot_key_pressed: bool,
+    pub trigger_fov: u8,
 }
 
 impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
+            trigger_fov: 30,
         }
     }
-    pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
-        let me = p_local.vec_origin.clone();
-        let target = ent.vec_origin.clone();
+    pub fn ent_priority(
+        &self,
+        p_local: &Entity,
+        ent: &Entity,
+        target_point: Vector3,
+    ) -> Option<isize> {
+        let my_eyes = unsafe { call!(p_local, eye_position) };
+
+        let diff = my_eyes - target_point;
+        let angle = diff.angle();
+        let my_angle = p_local.angle.clone();
+
+        let distance_to_center = (((angle.yaw - my_angle.yaw)
+            .min(360f32 - angle.yaw + my_angle.yaw)
+            .abs()
+            % 360f32)
+            .powi(2)
+            + (angle.pitch - my_angle.pitch).abs().powi(2))
+        .sqrt();
+
+        if distance_to_center > self.trigger_fov as f32 {
+            return None;
+        }
+
         unsafe {
             if call!(ent, get_team_number) == call!(p_local, get_team_number) {
                 return None;
             }
-            return Some(-(me - target).len3d() as isize);
         }
-    }
-
-    pub fn remove_punch(p_local: &Entity) {
-        let mut my_angles = unsafe { call!(p_local, get_abs_angles).clone() };
-        my_angles.pitch += p_local.vec_punch_angle.pitch;
-        my_angles.yaw += p_local.vec_punch_angle.yaw;
-        my_angles.roll += p_local.vec_punch_angle.roll;
+        return Some(distance_to_center as isize);
     }
 
     pub unsafe fn find_target(
@@ -47,19 +61,18 @@ impl Aimbot {
                 continue;
             };
 
-            let Some(prio) = self.ent_priority(p_local, ent) else {
-                continue;
-            };
-
             let Some((hitbox, bone)) = ent.get_hitbox(self.hitbox(p_local)) else {
                 return Err(OxideError::new("could not get hitbox").into());
             };
 
             let target_point = hitbox.center(&bone);
 
+            let Some(prio) = self.ent_priority(p_local, ent, target_point.clone()) else {
+                continue;
+            };
+
             let trace = trace(my_eyes.clone(), target_point.clone(), MASK_SHOT, p_local);
-            dbg!(&trace);
-            if trace.fraction != 1f32 {
+            if trace.entity == ent {
                 continue;
             }
 

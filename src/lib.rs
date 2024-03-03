@@ -2,6 +2,7 @@
 #![feature(core_intrinsics)]
 #![feature(ptr_metadata)]
 #![feature(pointer_is_aligned)]
+#![feature(c_variadic)]
 #![allow(unused)]
 #![allow(improper_ctypes_definitions)]
 #![allow(internal_features)]
@@ -35,15 +36,15 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const NAME: &str = env!("CARGO_PKG_NAME");
 pub const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
 
-static mut OXIDE: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
-static mut MENU: *mut c_void = std::ptr::null_mut() as *mut _ as *mut c_void;
+static mut OXIDE: Option<*mut c_void> = None;
+static mut MENU: Option<*mut c_void> = None;
 
 unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     println!("loading");
 
     let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut Oxide;
     *oxide_ptr = Oxide::init()?;
-    OXIDE = oxide_ptr as *mut _ as *mut c_void;
+    OXIDE = Some(oxide_ptr as *mut _ as *mut c_void);
 
     println!("loaded");
     Ok(())
@@ -69,12 +70,12 @@ extern "C" fn unload() {
     unsafe {
         println!("unloading");
 
-        oxide!().unload();
-        if !MENU.is_null() {
-            menu!().unload();
-            std::ptr::drop_in_place(menu!());
+        if MENU.is_some() {
+            menu!().restore();
         }
-        std::ptr::drop_in_place(oxide!());
+        if OXIDE.is_some() {
+            oxide!().restore();
+        }
 
         println!("unloaded");
     }

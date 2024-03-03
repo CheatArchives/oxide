@@ -35,9 +35,12 @@ impl Menu {
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
         let mut renderer = SDL_CreateRenderer(window, -1, 0);
+
+        //STUPID WORKOAROUND
         if renderer.is_null() {
-            renderer = SDL_GetRenderer(window)
+            renderer = SDL_GetRenderer(window);
         }
+
         let title = CString::new(format!(
             "Team Fortress 2 - [{}] v{} by {}",
             NAME, VERSION, AUTHOR
@@ -45,8 +48,6 @@ impl Menu {
         .unwrap();
 
         SDL_SetWindowTitle(window, title.as_ptr());
-
-        SDL_SetRenderDrawBlendMode(renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
 
         let draw = Draw::init(window, renderer);
 
@@ -63,15 +64,17 @@ impl Menu {
             y: 100,
         };
 
+        SDL_GL_MakeCurrent(window, old_ctx);
         println!("loaded menu");
         Ok(menu)
     }
-    pub unsafe fn unload(&self) {
+    pub unsafe fn restore(&self) {
         SDL_GL_DeleteContext(self.ctx);
-        self.draw.unload();
+        self.draw.restore();
     }
 
     pub unsafe fn run(&mut self, window: *mut SDL_Window) {
+        SDL_GL_MakeCurrent(window, self.ctx);
         let r = self.renderer;
 
         self.draw_watermark();
@@ -81,6 +84,7 @@ impl Menu {
         }
 
         SDL_RenderPresent(r);
+        SDL_GL_MakeCurrent(window, menu!().old_ctx);
     }
 
     pub fn draw_menu(&mut self) {

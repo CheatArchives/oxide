@@ -1,4 +1,4 @@
-use std::intrinsics::transmute_unchecked;
+use std::{intrinsics::transmute_unchecked, mem::MaybeUninit};
 
 use libc::CLONE_VFORK;
 
@@ -15,19 +15,22 @@ static SWAPWINDOW_OFFSET: usize = 0xFD648;
 static POLLEVENT_OFFSET: usize = 0xFCF64;
 
 #[derive(Debug, Clone)]
-pub struct Hook<T> {
+pub struct Hook<T>
+where
+    T: Clone + Copy,
+{
     pub org: T,
     pub target: *mut T,
 }
 
-impl<T: Clone> Hook<T> {
+impl<T: Clone + Copy + std::fmt::Debug> Hook<T> {
     unsafe fn init(target: *mut T, hook: T) -> Self {
-        let org = target;
+        let org = target.read();
         *target = hook;
-        Hook { org:org.read(), target }
+        Hook { org, target }
     }
-    unsafe fn restore(&mut self) {
-        self.target = transmute_unchecked(self.org.clone())
+    fn restore(&mut self) {
+        unsafe { *self.target = self.org }
     }
 }
 
@@ -42,13 +45,12 @@ pub struct Hooks {
 }
 
 impl Hooks {
-    pub unsafe fn init(interfaces: &Interfaces) -> Result<Hooks, std::boxed::Box<dyn Error>> {
-        //todo: move all those to thier files
+    pub unsafe fn init(interfaces: &Interfaces) -> Hooks {
         let create_move = Hook::<CreateMoveFn>::init(
             transmute(&(*interfaces.client_mode.get_vmt()).create_move),
             create_move_hook,
         );
-        
+
         let override_view = Hook::<OverrideViewFn>::init(
             transmute(&(*interfaces.client_mode.get_vmt()).override_view),
             override_view_hook,
@@ -65,28 +67,30 @@ impl Hooks {
         );
 
         let sdl_handle =
-            get_handle("./bin/libSDL2-2.0.so.0")? as *const _ as *const *const *const c_void;
+            get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _ as *const *const *const c_void;
 
         let swap_window_ptr = ((*sdl_handle) as usize + SWAPWINDOW_OFFSET) as *mut SwapWindowFn;
         let swap_window = Hook::init(swap_window_ptr, swap_window_hook);
 
         let poll_event_ptr = ((*sdl_handle) as usize + POLLEVENT_OFFSET) as *mut PollEventFn;
         let poll_event = Hook::init(poll_event_ptr, poll_event_hook);
-        Ok(Hooks {
+
+        #[allow(invalid_value)]
+        Hooks {
             create_move,
+            override_view,
+            paint_traverse,
             swap_window,
             poll_event,
-            paint_traverse,
-            override_view,
             frame_stage_notify
-        })
+        }
     }
-    pub unsafe fn restore(&mut self) {
-        self.swap_window.restore();
+    pub fn restore(&mut self) {
         self.create_move.restore();
-        self.poll_event.restore();
-        self.paint_traverse.restore();
-        self.frame_stage_notify.restore();
         self.override_view.restore();
+        self.paint_traverse.restore();
+        self.swap_window.restore();
+        self.poll_event.restore();
+        self.frame_stage_notify.restore();
     }
 }

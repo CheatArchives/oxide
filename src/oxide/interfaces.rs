@@ -49,13 +49,16 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
     pub fn get_vmt(&self) -> &'static V {
         unsafe { (*self.interface_ref).get_vmt() }
     }
-    unsafe fn restore(&mut self) {
-        (*self.interface_ref).set_vmt(self.old_vmt);
+    fn restore(&mut self) {
+        unsafe {
+            (*self.interface_ref).set_vmt(self.old_vmt);
+        }
     }
-    pub unsafe fn interface_ref(&self) -> &'static mut T {
-        &mut *self.interface_ref
+    pub fn interface_ref(&self) -> &'static mut T {
+        unsafe { &mut *self.interface_ref }
     }
 }
+
 
 #[derive(Debug, Clone)]
 pub struct Interfaces {
@@ -107,7 +110,12 @@ impl Interfaces {
         })
     }
 
-    pub unsafe fn restore(&mut self) {
+    unsafe fn get_client_mode(base_client: &BaseClient) -> &'static mut ClientMode {
+        **transmute::<usize, &'static mut &'static mut &'static mut ClientMode>(
+            (*base_client.vmt).hud_process_input as usize + 1,
+        )
+    }
+    pub fn restore(&mut self) {
         self.base_client.restore();
         self.base_engine.restore();
         self.entity_list.restore();
@@ -123,10 +131,5 @@ impl Interfaces {
         self.game_movement.restore();
         self.prediction.restore();
         self.client_mode.restore();
-    }
-    unsafe fn get_client_mode(base_client: &BaseClient) -> &'static mut ClientMode {
-        **transmute::<usize, &'static mut &'static mut &'static mut ClientMode>(
-            (*base_client.vmt).hud_process_input as usize + 1,
-        )
     }
 }

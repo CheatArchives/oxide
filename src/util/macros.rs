@@ -16,14 +16,14 @@ macro_rules! module_export {
 #[macro_export]
 macro_rules! oxide {
     () => {
-        unsafe { &mut *(OXIDE as *mut _ as *mut Oxide) }
+        unsafe { &mut *(OXIDE.unwrap() as *mut _ as *mut Oxide) }
     };
 }
 
 #[macro_export]
 macro_rules! menu {
     () => {
-        unsafe { &mut *(MENU as *mut _ as *mut Menu) }
+        unsafe { &mut *(MENU.unwrap() as *mut _ as *mut Menu) }
     };
 }
 

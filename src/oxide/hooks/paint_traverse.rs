@@ -15,6 +15,7 @@ pub unsafe extern "C-unwind" fn paint_traverse_hook(
         Ok("HudScope") => return,
         _ => {}
     }
-
-    (oxide!().hooks.paint_traverse.org)(panel, vpanel, force_paint, allow_force);
+    if OXIDE.is_some() {
+        (oxide!().hooks.paint_traverse.org)(panel, vpanel, force_paint, allow_force);
+    }
 }

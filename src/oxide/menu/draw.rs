@@ -29,7 +29,7 @@ impl Draw {
         let font_file = include_bytes!("./../../../HackNerdFont-Regular.ttf");
 
         let mut face_large = MaybeUninit::zeroed().assume_init();
-        let err = FT_New_Memory_Face(
+        FT_New_Memory_Face(
             free_type,
             font_file as *const u8,
             2215536,
@@ -77,14 +77,17 @@ impl Draw {
         y: isize,
         size: FontSize,
         color: usize,
-    ) -> SDL_Rect {
+    ) {
         unsafe {
+
             let face = self.get_face(&size);
 
             FT_Load_Char(face, text.chars().next().unwrap() as u32, FT_LOAD_RENDER);
             let glyph = (*face).glyph.read_volatile();
+
             let mut x_offset = -(glyph.metrics.vertBearingX >> 6) as isize;
             let mut y_offset = self.get_text_size(text, size).1 as isize;
+
             for (i, letter) in text.chars().enumerate() {
                 if letter == ' ' {
                     x_offset += (face.read().size.read().metrics.max_advance >> 6) as isize;
@@ -98,12 +101,6 @@ impl Draw {
 
                 x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
                 self.draw_bitmap(glyph.bitmap, x, y, color);
-            }
-            SDL_Rect {
-                x: x as i32,
-                y: y as i32,
-                w: x_offset as i32,
-                h: y_offset as i32,
             }
         }
     }
@@ -193,7 +190,7 @@ impl Draw {
         }
         return rect;
     }
-    pub unsafe fn unload(&self) {
+    pub unsafe fn restore(&self) {
         FT_Done_Face(self.face_small);
         FT_Done_Face(self.face_medium);
         FT_Done_Face(self.face_large);
