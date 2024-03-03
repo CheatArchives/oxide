@@ -2,5 +2,4 @@
 - [ ] auto versioning
 - [ ] pad macro that with debug ignore
 - [ ] my result type
-- [ ] disable crash report
 - [ ] fix draw alpha 
