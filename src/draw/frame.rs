@@ -5,14 +5,16 @@ use crate::*;
 pub struct Frame {
     window: *mut SDL_Window,
     pub renderer: *mut SDL_Renderer,
-    pub window_size: (isize, isize)
+    pub window_size: (isize, isize),
+    pub fonts: &'static mut Fonts 
 }
 impl Frame {
-    pub fn new(window: *mut SDL_Window, renderer: *mut SDL_Renderer) -> Frame {
+    pub fn new(window: *mut SDL_Window, renderer: *mut SDL_Renderer,fonts: &'static mut Fonts) -> Frame {
         Frame{
             window,
             renderer,
-            window_size: Frame::window_size(window)
+            window_size: Frame::window_size(window),
+            fonts
         }
     }
     pub fn window_size(window: *mut SDL_Window) -> (isize, isize) {

@@ -1,4 +1,4 @@
-use std::f32::consts::PI;
+use std::{f32::consts::PI, ptr::null};
 
 use sdl2_sys::*;
 
@@ -57,6 +57,52 @@ impl Frame {
         unsafe {
             SDL_SetRenderDrawBlendMode(self.renderer, SDL_BlendMode::SDL_BLENDMODE_BLEND);
             SDL_SetRenderDrawColor(self.renderer, r, g, b, a);
+        }
+    }
+    pub fn draw_text(&mut self, text: &str, x: isize, y: isize, size: FontSize, color: usize) {
+        let glyph = self
+            .fonts
+            .get_glyph(size.clone(), text.chars().next().unwrap());
+
+        let mut x_offset = -(glyph.metrics.vertBearingX >> 6) as isize;
+        let mut y_offset = self.fonts.get_text_size(text, size.clone()).1 as isize;
+
+        for (i, letter) in text.chars().enumerate() {
+            if letter == ' ' {
+                x_offset += unsafe {
+                    (self
+                        .fonts
+                        .get_face(&size)
+                        .read()
+                        .size
+                        .read()
+                        .metrics
+                        .max_advance
+                        >> 6) as isize
+                };
+                continue;
+            }
+            let glyph = self.fonts.get_glyph(size.clone(), letter);
+
+            let x = x + x_offset + (glyph.metrics.vertBearingX >> 6) as isize;
+            let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
+
+            x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
+            let surface = Fonts::glyph_to_surface(glyph, color);
+            let texture = unsafe { SDL_CreateTextureFromSurface(self.renderer, surface) };
+
+            let mut dest = SDL_Rect {
+                x: x as i32,
+                y: y as i32,
+                w: 0,
+                h: 0,
+            };
+
+            unsafe {
+                SDL_RenderCopy(self.renderer, texture, null(), &mut dest);
+                SDL_DestroyTexture(texture);
+            }
+            unsafe { SDL_FreeSurface(surface) };
         }
     }
 }

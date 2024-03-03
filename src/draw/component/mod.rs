@@ -12,4 +12,7 @@ pub trait Component {
     fn draw(&mut self,frame: &mut Frame, root_x: isize, root_y: isize);
     fn handle_event(&mut self, event: *mut SDL_Event);
 }
-pub trait ComponentDebug: component::Component + std::fmt::Debug {}
+
+
+
+pub trait ComponentDebug: component::Component + std::fmt::Debug {} 

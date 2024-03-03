@@ -2,6 +2,10 @@ use std::mem::MaybeUninit;
 
 use crate::{Draw, *};
 use freetype_sys::*;
+use sdl2_sys::{
+    SDL_BlendMode, SDL_CreateRGBSurfaceFrom, SDL_CreateTextureFromSurface, SDL_Rect,
+    SDL_SetSurfaceBlendMode, SDL_Surface,
+};
 
 static NERD_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
 
@@ -21,10 +25,16 @@ pub enum FontSize {
 }
 
 impl Fonts {
-    pub fn init_face(free_type: *mut c_void, size: isize) -> FT_Face{
+    pub fn init_face(free_type: *mut c_void, size: isize) -> FT_Face {
         unsafe {
             let mut face = MaybeUninit::zeroed().assume_init();
-            FT_New_Memory_Face(free_type, NERD_FONT.as_ptr(), NERD_FONT.len() as i32, 0, &mut face);
+            FT_New_Memory_Face(
+                free_type,
+                NERD_FONT.as_ptr(),
+                NERD_FONT.len() as i32,
+                0,
+                &mut face,
+            );
             let size = ((size) << 6) as i32;
             FT_Set_Char_Size(face, size, size, 72, 72);
             face
@@ -47,7 +57,7 @@ impl Fonts {
             }
         }
     }
-    pub fn get_face(&mut self, size: &FontSize) -> *mut FT_FaceRec {
+    pub fn get_face(&self, size: &FontSize) -> *mut FT_FaceRec {
         match size {
             FontSize::Small => self.face_small,
             FontSize::Medium => self.face_medium,
@@ -62,7 +72,7 @@ impl Fonts {
             FT_Done_FreeType(self.free_type);
         }
     }
-    pub unsafe fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
+    pub fn get_text_size(&mut self, text: &str, size: FontSize) -> (isize, isize, isize) {
         let face = self.get_face(&size);
 
         let mut w = 0;
@@ -70,14 +80,54 @@ impl Fonts {
         let mut h_max = 0;
 
         for (i, letter) in text.chars().enumerate() {
-            FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
+            unsafe {
+                FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
 
-            let glyph = (*face).glyph.read_volatile();
-            w += (glyph.metrics.horiAdvance >> 6) as isize;
+                let glyph = (*face).glyph.read_volatile();
+                w += (glyph.metrics.horiAdvance >> 6) as isize;
 
-            h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
-            h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
+                h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
+                h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
+            }
         }
         (w, h_min, h_max)
+    }
+    pub fn get_glyph(&self, size: FontSize, char: char) -> FT_GlyphSlotRec {
+        let face = self.get_face(&size);
+
+        unsafe {
+            FT_Load_Char(face, char as u32, FT_LOAD_RENDER);
+            (*face).glyph.read_volatile()
+        }
+    }
+    pub fn glyph_to_surface(glyph: FT_GlyphSlotRec, color: usize) -> *mut SDL_Surface{
+        let bitmap = glyph.bitmap;
+
+        let len = (bitmap.width * bitmap.rows * 4) as usize;
+        let mut rgba = vec![0u8; len];
+
+        let buffer = unsafe { std::slice::from_raw_parts(bitmap.buffer, len) };
+        for i in (0..len).step_by(4) {
+            let val = buffer[i / 4];
+            (rgba[i], rgba[i + 1], rgba[i + 2]) = hex_to_rgb!(color);
+            rgba[i + 3] = val;
+        }
+
+        unsafe {
+            let surface = SDL_CreateRGBSurfaceFrom(
+                rgba.as_ptr() as *mut c_void,
+                bitmap.width,
+                bitmap.rows,
+                32,
+                bitmap.width * 4,
+                0x000000ff,
+                0x0000ff00,
+                0x00ff0000,
+                0xff000000,
+            );
+            SDL_SetSurfaceBlendMode(surface, SDL_BlendMode::SDL_BLENDMODE_BLEND);
+
+            surface
+        }
     }
 }
