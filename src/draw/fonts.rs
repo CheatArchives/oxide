@@ -100,7 +100,7 @@ impl Fonts {
             (*face).glyph.read_volatile()
         }
     }
-    pub fn glyph_to_surface(glyph: FT_GlyphSlotRec, color: usize) -> *mut SDL_Surface{
+    pub fn glyph_to_surface(glyph: FT_GlyphSlotRec, color: usize, alpha: u8) -> *mut SDL_Surface {
         let bitmap = glyph.bitmap;
 
         let len = (bitmap.width * bitmap.rows * 4) as usize;
@@ -108,9 +108,8 @@ impl Fonts {
 
         let buffer = unsafe { std::slice::from_raw_parts(bitmap.buffer, len) };
         for i in (0..len).step_by(4) {
-            let val = buffer[i / 4];
             (rgba[i], rgba[i + 1], rgba[i + 2]) = hex_to_rgb!(color);
-            rgba[i + 3] = val;
+            rgba[i + 3] = alpha;
         }
 
         unsafe {
@@ -125,8 +124,8 @@ impl Fonts {
                 0x00ff0000,
                 0xff000000,
             );
-            SDL_SetSurfaceBlendMode(surface, SDL_BlendMode::SDL_BLENDMODE_BLEND);
 
+            SDL_SetSurfaceBlendMode(surface, SDL_BlendMode::SDL_BLENDMODE_BLEND);
             surface
         }
     }

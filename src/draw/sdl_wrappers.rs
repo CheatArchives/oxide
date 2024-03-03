@@ -59,7 +59,7 @@ impl Frame {
             SDL_SetRenderDrawColor(self.renderer, r, g, b, a);
         }
     }
-    pub fn draw_text(&mut self, text: &str, x: isize, y: isize, size: FontSize, color: usize) {
+    pub fn text(&mut self, text: &str, x: isize, y: isize, size: FontSize, color: usize,alpha: u8) {
         let glyph = self
             .fonts
             .get_glyph(size.clone(), text.chars().next().unwrap());
@@ -67,19 +67,21 @@ impl Frame {
         let mut x_offset = -(glyph.metrics.vertBearingX >> 6) as isize;
         let mut y_offset = self.fonts.get_text_size(text, size.clone()).1 as isize;
 
-        for (i, letter) in text.chars().enumerate() {
+        let max_advance = unsafe {
+            (self
+                .fonts
+                .get_face(&size)
+                .read()
+                .size
+                .read()
+                .metrics
+                .max_advance
+                >> 6) as isize
+        };
+
+        for letter in text.chars() {
             if letter == ' ' {
-                x_offset += unsafe {
-                    (self
-                        .fonts
-                        .get_face(&size)
-                        .read()
-                        .size
-                        .read()
-                        .metrics
-                        .max_advance
-                        >> 6) as isize
-                };
+                x_offset += max_advance;
                 continue;
             }
             let glyph = self.fonts.get_glyph(size.clone(), letter);
@@ -88,8 +90,10 @@ impl Frame {
             let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
 
             x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
-            let surface = Fonts::glyph_to_surface(glyph, color);
+
+            let surface = Fonts::glyph_to_surface(glyph, color,alpha);
             let texture = unsafe { SDL_CreateTextureFromSurface(self.renderer, surface) };
+            unsafe { SDL_FreeSurface(surface) }
 
             let mut dest = SDL_Rect {
                 x: x as i32,
@@ -102,7 +106,6 @@ impl Frame {
                 SDL_RenderCopy(self.renderer, texture, null(), &mut dest);
                 SDL_DestroyTexture(texture);
             }
-            unsafe { SDL_FreeSurface(surface) };
         }
     }
 }

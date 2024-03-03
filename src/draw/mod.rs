@@ -42,8 +42,8 @@ impl Draw {
         SDL_GL_MakeCurrent(window, old_ctx);
 
         let mut components = Vec::new();
-        //components.push(Box::new(AimbotFov {}) as Box<dyn ComponentDebug>);
-        components.push(Box::new(Overlay {}) as Box<dyn ComponentDebug>);
+        components.push(Box::new(AimbotFov {}) as Box<dyn ComponentDebug>);
+        components.push(Box::new(Overlay::new()) as Box<dyn ComponentDebug>);
 
         println!("loaded menu");
         Ok(Draw {
@@ -73,17 +73,8 @@ impl Draw {
     }
 
     pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {
-        match transmute::<u32, SDL_EventType>((*event).type_) {
-            SDL_EventType::SDL_KEYUP => {
-                let key = (*event).key.keysym.scancode;
-                match key {
-                    _ => (),
-                }
-            }
-            SDL_EventType::SDL_MOUSEMOTION => {
-                let motion = (*event).motion;
-            }
-            _ => (),
-        };
+        for component in &mut self.components {
+            component.handle_event(event)
+        }
     }
 }

@@ -107,7 +107,7 @@ impl Aimbot {
     }
     pub fn should_run(&mut self) -> bool {
         //!draw!().aimbot_checkbox.checked
-        if true || !self.shoot_key_pressed {
+        if false || !self.shoot_key_pressed {
             return false;
         }
 
