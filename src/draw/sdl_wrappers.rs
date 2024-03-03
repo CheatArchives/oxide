@@ -37,6 +37,7 @@ impl Frame {
         let mut points = Vec::new();
 
         let step = (1f32 - 1f32 / (r as f32)).acos();
+
         let mut angle = 0f32;
         while angle < 360f32 {
             let x = (r as f32 * (angle as f32 * PI / 180f32).cos()) as i32 + root_x as i32;
