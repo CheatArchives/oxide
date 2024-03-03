@@ -21,9 +21,9 @@ macro_rules! oxide {
 }
 
 #[macro_export]
-macro_rules! menu {
+macro_rules! draw {
     () => {
-        unsafe { &mut *(MENU.unwrap() as *mut _ as *mut Menu) }
+        unsafe { &mut *(DRAW.unwrap() as *mut _ as *mut Draw) }
     };
 }
 

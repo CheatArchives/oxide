@@ -9,7 +9,7 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     input_sample_time: f32,
     cmd: &'static mut UserCmd,
 ) -> bool {
-    if cmd.command_number == 0 || MENU.is_none() {
+    if cmd.command_number == 0 || DRAW.is_none() {
         return true;
     }
     let Some(p_local) = Entity::local() else {
@@ -26,7 +26,7 @@ pub unsafe extern "C-unwind" fn create_move_hook(
         eprintln!("{}", err);
     }
 
-    if cmd.buttons.get(ButtonFlags::InJump) && menu!().bhop_checkbox.checked {
+    if cmd.buttons.get(ButtonFlags::InJump) && true /*draw!().bhop_checkbox.checked*/ {
         cmd.buttons
             .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);
     }

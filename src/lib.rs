@@ -31,13 +31,14 @@ module_export!(oxide);
 module_export!(sdk);
 module_export!(error);
 module_export!(math);
+module_export!(draw);
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const NAME: &str = env!("CARGO_PKG_NAME");
 pub const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
 
 static mut OXIDE: Option<*mut c_void> = None;
-static mut MENU: Option<*mut c_void> = None;
+static mut DRAW: Option<*mut c_void> = None;
 
 unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     println!("loading");
@@ -70,8 +71,8 @@ extern "C" fn unload() {
     unsafe {
         println!("unloading");
 
-        if MENU.is_some() {
-            menu!().restore();
+        if DRAW.is_some() {
+            draw!().restore();
         }
         if OXIDE.is_some() {
             oxide!().restore();

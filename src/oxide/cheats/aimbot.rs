@@ -12,7 +12,7 @@ impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
-            trigger_fov: 30,
+            trigger_fov: 10,
         }
     }
     pub fn ent_priority(
@@ -106,7 +106,8 @@ impl Aimbot {
         }
     }
     pub fn should_run(&mut self) -> bool {
-        if !menu!().aimbot_checkbox.checked || !self.shoot_key_pressed {
+        //!draw!().aimbot_checkbox.checked
+        if true || !self.shoot_key_pressed {
             return false;
         }
 
@@ -159,11 +160,8 @@ impl Aimbot {
                 true
             }
             _ => unsafe {
-                if p_local.can_attack() {
-                    cmd.buttons.set(ButtonFlags::InAttack, true);
-                    return true;
-                }
-                return false;
+                cmd.buttons.set(ButtonFlags::InAttack, true);
+                return true;
             },
         }
     }

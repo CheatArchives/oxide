@@ -6,7 +6,6 @@ use sdl2_sys::{SDL_Event, SDL_EventType, SDL_Scancode};
 use crate::*;
 
 module_export!(interfaces);
-module_export!(menu);
 module_export!(hooks);
 module_export!(cheats);
 

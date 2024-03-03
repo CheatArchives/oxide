@@ -27,32 +27,20 @@ impl Checkbox {
     }
 }
 impl Component for Checkbox {
-    fn draw(&mut self, draw: &mut Draw, root_x: isize, root_y: isize) {
+    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.rooted_x = (root_x + self.x);
         self.rooted_y = (root_y + self.y);
-        let rect = SDL_Rect {
-            x: self.rooted_x as i32,
-            y: self.rooted_y as i32,
-            w: 12,
-            h: 12,
-        };
-        draw.filled_rect(rect, DBLUE, 255);
+        frame.filled_rect(self.rooted_x, self.rooted_y, 12, 12, SELECTION, 255);
         if self.checked {
-            let rect = SDL_Rect {
-                x: self.rooted_x as i32 + 1,
-                y: self.rooted_y as i32 + 1,
-                w: 10,
-                h: 10,
-            };
-            draw.filled_rect(rect, LBLUE, 255);
+            frame.filled_rect(self.rooted_x+1, self.rooted_y+1, 10, 10, SELECTION_TEXT, 255);
         }
-        draw.draw_text(
-            self.text,
-            self.rooted_x + 20,
-            self.rooted_y,
-            FontSize::Small,
-            ORANGE,
-        );
+        //frame.draw_text(
+        //    self.text,
+        //    self.rooted_x + 20,
+        //    self.rooted_y,
+        //    FontSize::Small,
+        //    FOREGROUND,
+        //);
     }
 
     fn handle_event(&mut self, event: *mut SDL_Event) {
