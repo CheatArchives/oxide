@@ -165,11 +165,8 @@ impl Entity {
 
     pub unsafe fn can_attack(&self) -> bool {
         let now = oxide!().global_vars.now();
-        if !call!(self, is_alive) {
-            return false;
-        }
         let weapon = call!(self, get_weapon);
-        self.next_attack <= now && weapon.can_attack_primary()
+        self.next_attack <= now
     }
 
     pub fn get_hitbox(&mut self, hitbox_id: HitboxId) -> Option<(Hitbox, Matrix3x4)> {

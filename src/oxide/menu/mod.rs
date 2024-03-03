@@ -6,7 +6,7 @@ pub static BLACK: usize = 0x0C0F0A;
 pub static LBLUE: usize = 0x295183;
 pub static DBLUE: usize = 0x2e4254;
 
-use std::{isize, mem::MaybeUninit, ptr::null};
+use std::{f32::consts::PI, isize, mem::MaybeUninit, ptr::null};
 
 use crate::*;
 use freetype_sys::*;
@@ -82,6 +82,9 @@ impl Menu {
         if self.is_menu_visible {
             self.draw_menu();
         }
+        if oxide!().cheats.aimbot.should_run() {
+            self.draw_aimbot_fov(window);
+        }
 
         SDL_RenderPresent(r);
         SDL_GL_MakeCurrent(window, menu!().old_ctx);
@@ -123,6 +126,18 @@ impl Menu {
         };
         self.draw.filled_rect(rect, DGREEN, 255);
         self.draw.draw_text(NAME, 15, 16, FontSize::Small, ORANGE);
+    }
+
+    pub unsafe fn draw_aimbot_fov(&mut self, window: *mut SDL_Window) {
+        let size = Draw::get_window_size(window);
+        let aimbot_fov = oxide!().cheats.aimbot.trigger_fov as f32;
+        let fov = oxide!().fov;
+
+        let screen_fov = size.0 as f32 / size.1 as f32 / (4f32 / 3f32);
+        let real_fov = (screen_fov * (fov / 360f32 * PI).tan()).atan();
+        let radius = (aimbot_fov * PI / 360f32).tan() / (real_fov).tan() * size.0 as f32;
+
+        self.draw.circle(size.0 / 2, size.1 / 2, radius, ORANGE);
     }
 
     pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {

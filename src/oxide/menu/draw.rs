@@ -3,7 +3,7 @@ use sdl2_sys::SDL_RendererInfo;
 use crate::*;
 use freetype_sys::*;
 use sdl2_sys::*;
-use std::{intrinsics::offset, isize, mem::MaybeUninit, ptr::null, usize};
+use std::{f32::consts::PI, intrinsics::offset, isize, mem::MaybeUninit, ptr::null, usize};
 
 #[derive(Debug, Clone)]
 pub struct Draw {
@@ -70,16 +70,8 @@ impl Draw {
         }
     }
 
-    pub fn draw_text(
-        &mut self,
-        text: &str,
-        x: isize,
-        y: isize,
-        size: FontSize,
-        color: usize,
-    ) {
+    pub fn draw_text(&mut self, text: &str, x: isize, y: isize, size: FontSize, color: usize) {
         unsafe {
-
             let face = self.get_face(&size);
 
             FT_Load_Char(face, text.chars().next().unwrap() as u32, FT_LOAD_RENDER);
@@ -190,10 +182,41 @@ impl Draw {
         }
         return rect;
     }
-    pub unsafe fn restore(&self) {
-        FT_Done_Face(self.face_small);
-        FT_Done_Face(self.face_medium);
-        FT_Done_Face(self.face_large);
-        FT_Done_FreeType(self.free_type);
+
+    pub fn circle(&self, root_x: i32, root_y: i32, r: f32, color: usize) {
+        let mut points = Vec::new();
+
+        let step = (1f32 - 1f32 / (r as f32)).acos();
+        let mut angle = 0f32;
+        while angle < 360f32 {
+            let x = (r as f32 * (angle as f32 * PI / 180f32).cos()) as i32 + root_x;
+            let y = (r as f32 * (angle as f32 * PI / 180f32).sin()) as i32 + root_y;
+            points.push(SDL_Point { x, y });
+            angle += step;
+        }
+
+        let (red, g, b) = hex_to_rgb!(color);
+        unsafe {
+            let r = self.renderer;
+            SDL_SetRenderDrawColor(r, red, g, b, 255);
+            SDL_RenderDrawPoints(r, points.as_ptr(), points.len() as i32);
+        }
+    }
+    pub fn restore(&self) {
+        unsafe {
+            FT_Done_Face(self.face_small);
+            FT_Done_Face(self.face_medium);
+            FT_Done_Face(self.face_large);
+            FT_Done_FreeType(self.free_type);
+        }
+    }
+    pub fn get_window_size(window: *mut SDL_Window) -> (i32, i32) {
+        let mut w = 0i32;
+        let mut h = 0i32;
+
+        unsafe {
+            SDL_GetWindowSize(window, &mut w, &mut h);
+        }
+        return (w, h);
     }
 }

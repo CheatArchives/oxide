@@ -16,6 +16,7 @@ pub struct Oxide {
     pub hooks: Hooks,
     pub global_vars: &'static GlobalVars,
     pub cheats: Cheats,
+    pub fov: f32
 }
 
 impl Oxide {
@@ -32,6 +33,7 @@ impl Oxide {
             cheats,
             hooks,
             global_vars,
+            fov: 0f32,
         };
 
         Ok(oxide)

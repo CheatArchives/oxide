@@ -93,7 +93,9 @@ def build(dev=False):
 
 
 def start_tf2():
-    run(["bash", "./hl2.sh", "-game", "tf", "-steam"], cwd=TF2_DIR,
+    run(["bash", "./hl2.sh", "-game", "tf", "-steam", "-novid", "-nojoy",
+         "-nosteamcontroller", "-nohltv", "-particles", "1",
+         "-precachefontchars", "-noquicktime"], cwd=TF2_DIR,
         env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
 
 

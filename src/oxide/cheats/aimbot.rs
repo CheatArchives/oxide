@@ -44,7 +44,7 @@ impl Aimbot {
                 return None;
             }
         }
-        return Some(distance_to_center as isize);
+        return Some(-distance_to_center as isize);
     }
 
     pub unsafe fn find_target(
@@ -71,8 +71,13 @@ impl Aimbot {
                 continue;
             };
 
-            let trace = trace(my_eyes.clone(), target_point.clone(), MASK_SHOT, p_local);
-            if trace.entity == ent {
+            let trace = trace(
+                my_eyes.clone(),
+                target_point.clone(),
+                MASK_SHOT | CONTENTS_GRATE,
+                p_local,
+            );
+            if trace.entity != ent {
                 continue;
             }
 
