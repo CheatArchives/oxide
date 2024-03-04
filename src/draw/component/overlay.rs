@@ -25,6 +25,7 @@ impl Overlay {
     pub fn new() -> Overlay {
         let mut components = Components::new();
         let show_aimbot = Arc::new(Mutex::new(false));
+        // ORDER OF ADDING IS IMPORTANT
         components.add(Button::new(
             PADDING,
             TOP_OVERLAY_WIDTH + PADDING,
@@ -32,11 +33,7 @@ impl Overlay {
             BUTTON_HEIGHT,
             show_aimbot.clone(),
         ));
-        components.add(window::Window::new(
-            700,
-            700,
-            show_aimbot.clone(),
-        ));
+        components.add(AimbotWindow::new(show_aimbot.clone()));
         Overlay {
             visible: true,
             components,
@@ -86,8 +83,7 @@ impl RawComponent for Overlay {
             255,
         );
 
-        self.components.draw(frame);
-
+        self.components.draw(frame, 0, 0);
     }
 
     fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {

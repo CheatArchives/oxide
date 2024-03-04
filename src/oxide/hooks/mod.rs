@@ -1,4 +1,4 @@
-use std::{intrinsics::transmute_unchecked, mem::MaybeUninit};
+use std::{collections::HashMap, intrinsics::transmute_unchecked, mem::MaybeUninit};
 
 use libc::CLONE_VFORK;
 
@@ -95,25 +95,3 @@ impl Hooks {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Hook2<T>
-where
-    T: Clone + Copy,
-{
-    pub org: T,
-    pub target: *mut T,
-    pub hook: T,
-}
-impl<T: Clone + Copy> Hook2<T> {
-    fn init(target: *mut T) {
-        unsafe {
-            unsafe extern "C" fn hook(first: *mut c_void, mut args: ...) {
-                args.arg()
-            }
-
-            let org = *target;
-            *target = transmute_unchecked(hook);
-             
-        }
-    }
-}

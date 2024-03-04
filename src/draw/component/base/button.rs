@@ -55,7 +55,8 @@ impl RawComponent for Button {
                         && self.cursor.1 <= self.y + self.h
                     {
                         let mut val = self.val.lock().unwrap();
-                        *val= !*val;
+                        *val = !*val;
+                        (*event).type_ = 0;
                     }
                 }
                 SDL_EventType::SDL_MOUSEMOTION => {

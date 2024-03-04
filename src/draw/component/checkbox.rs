@@ -1,11 +1,18 @@
-use std::{isize, mem::MaybeUninit, ptr::null};
+use std::{
+    isize,
+    mem::MaybeUninit,
+    ptr::null,
+    sync::{Arc, Mutex},
+};
+
+const SIZE: isize = 12;
 
 use crate::*;
 use sdl2_sys::*;
 
 #[derive(Debug, Clone)]
 pub struct Checkbox {
-    pub checked: bool,
+    pub checked: Arc<Mutex<bool>>,
     x: isize,
     y: isize,
     rooted_x: isize,
@@ -14,9 +21,9 @@ pub struct Checkbox {
     text: &'static str,
 }
 impl Checkbox {
-    pub fn new(text: &'static str, x: isize, y: isize) -> Checkbox {
+    pub fn new(text: &'static str, checked: Arc<Mutex<bool>>, x: isize, y: isize) -> Checkbox {
         Checkbox {
-            checked: false,
+            checked,
             x,
             y,
             rooted_x: 0,
@@ -30,17 +37,26 @@ impl RawComponent for Checkbox {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.rooted_x = (root_x + self.x);
         self.rooted_y = (root_y + self.y);
-        frame.filled_rect(self.rooted_x, self.rooted_y, 12, 12, SELECTION, 255);
-        if self.checked {
-            frame.filled_rect(self.rooted_x+1, self.rooted_y+1, 10, 10, SELECTION_TEXT, 255);
+        frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, SELECTION, 255);
+        if *self.checked.lock().unwrap() {
+            frame.filled_rect(
+                self.rooted_x + 1,
+                self.rooted_y + 1,
+                SIZE - 2,
+                SIZE - 2,
+                SELECTION_TEXT,
+                255,
+            );
         }
-        //frame.draw_text(
-        //    self.text,
-        //    self.rooted_x + 20,
-        //    self.rooted_y,
-        //    FontSize::Small,
-        //    FOREGROUND,
-        //);
+        frame.text(
+            self.text,
+            self.rooted_x + SIZE + 10,
+            self.rooted_y + SIZE / 2,
+            FontSize::Small,
+            false,
+            FOREGROUND,
+            255,
+        );
     }
 
     fn handle_event(&mut self, event: *mut SDL_Event) {
@@ -53,7 +69,9 @@ impl RawComponent for Checkbox {
                         && y as isize <= self.rooted_y + 10
                         && self.rooted_y <= y as isize
                     {
-                        self.checked = !self.checked;
+                        let mut checked = self.checked.lock().unwrap();
+                        *checked = !*checked;
+                        (*event).type_ = 0;
                     }
                 }
                 SDL_EventType::SDL_MOUSEMOTION => {
@@ -65,3 +83,4 @@ impl RawComponent for Checkbox {
         }
     }
 }
+impl Component for Checkbox {}

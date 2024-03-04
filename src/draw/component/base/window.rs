@@ -15,21 +15,31 @@ pub struct Window {
     y: isize,
     w: isize,
     h: isize,
+    title: String,
     last_cursor: (isize, isize),
     pub visible: Arc<Mutex<bool>>,
     dragging: bool,
+    components: Components,
 }
 
 impl Window {
-    pub fn new(x: isize, y: isize, visible: Arc<Mutex<bool>>) -> Window {
+    pub fn new(
+        x: isize,
+        y: isize,
+        title: String,
+        visible: Arc<Mutex<bool>>,
+        components: Components,
+    ) -> Window {
         Window {
             x,
             y,
             w: 500,
             h: 500,
+            title,
             last_cursor: (0, 0),
             visible,
             dragging: false,
+            components,
         }
     }
 }
@@ -47,12 +57,25 @@ impl RawComponent for Window {
                 220,
             );
 
+            frame.text(
+                &self.title,
+                self.x + self.w / 2,
+                self.y + HEADER_HEIGHT / 2,
+                FontSize::Medium,
+                true,
+                FOREGROUND,
+                255,
+            );
+
             frame.filled_rect(self.x, self.y + HEADER_HEIGHT, self.w, 1, CURSOR, 100);
             frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
+
+            self.components.draw(frame, self.x, self.y + HEADER_HEIGHT);
         }
     }
 
     fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
+        self.components.handle_event(event);
         unsafe {
             match transmute::<u32, SDL_EventType>((*event).type_) {
                 SDL_EventType::SDL_MOUSEBUTTONDOWN => {
@@ -60,8 +83,10 @@ impl RawComponent for Window {
                         && self.last_cursor.0 <= self.x + self.w
                         && self.y <= self.last_cursor.1
                         && self.last_cursor.1 <= self.y + self.h
+                        && *self.visible.lock().unwrap()
                     {
                         self.dragging = true;
+                        (*event).type_ = 0;
                     }
                 }
                 SDL_EventType::SDL_MOUSEBUTTONUP => {

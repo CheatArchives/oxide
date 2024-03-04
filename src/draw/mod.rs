@@ -66,7 +66,7 @@ impl Draw {
         }
 
         let mut frame = Frame::new(window, self.renderer, &mut self.fonts);
-        self.components.draw(&mut frame);
+        self.components.draw(&mut frame,0,0);
 
         unsafe {
             SDL_RenderPresent(self.renderer);

@@ -6,8 +6,8 @@ use sdl2_sys::*;
 module_export!(checkbox);
 module_export!(aimbot_fov);
 module_export!(overlay);
-module_export!(button);
-module_export!(window);
+module_export!(base);
+module_export!(aimbot_window);
 
 pub trait RawComponent {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize);
@@ -23,17 +23,20 @@ impl Components {
     pub fn new() -> Components {
         Components(Vec::new())
     }
-    pub fn add(&mut self,component: impl Component + 'static) {
+    pub fn add(&mut self, component: impl Component + 'static) {
         self.0.push(Box::new(component));
     }
-    pub fn draw(&mut self, frame: &mut Frame) {
+    pub fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         for component in &mut self.0 {
-            component.draw(frame, 0, 0)
+            component.draw(frame, root_x, root_y)
         }
     }
     pub fn handle_event(&mut self, event: *mut SDL_Event) {
+        self.0.reverse();
+
         for component in &mut self.0 {
             component.handle_event(event)
         }
+        self.0.reverse();
     }
 }
