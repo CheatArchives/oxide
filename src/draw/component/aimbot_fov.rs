@@ -5,7 +5,7 @@ use crate::*;
 #[derive(Debug)]
 pub struct AimbotFov {}
 
-impl Component for AimbotFov {
+impl RawComponent for AimbotFov {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         if !oxide!().cheats.aimbot.should_run(){
             return
@@ -24,4 +24,4 @@ impl Component for AimbotFov {
     fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {}
 }
 
-impl ComponentDebug for AimbotFov {}
+impl Component for AimbotFov {}

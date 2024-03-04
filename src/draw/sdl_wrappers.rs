@@ -65,15 +65,20 @@ impl Frame {
         x: isize,
         y: isize,
         size: FontSize,
+        center_horizontaly: bool,
         color: usize,
         alpha: u8,
     ) {
         let glyph = self
             .fonts
             .get_glyph(size.clone(), text.chars().next().unwrap());
+        let calculated_size = self.fonts.get_text_size(text, size.clone());
 
         let mut x_offset = -(glyph.metrics.vertBearingX >> 6) as isize;
-        let mut y_offset = self.fonts.get_text_size(text, size.clone()).1 as isize;
+        if center_horizontaly {
+            x_offset -= calculated_size.0/2;
+        }
+        let mut y_offset = calculated_size.1/2 - calculated_size.2/2;
 
         let max_advance = unsafe {
             (self

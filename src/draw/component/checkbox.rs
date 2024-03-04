@@ -26,7 +26,7 @@ impl Checkbox {
         }
     }
 }
-impl Component for Checkbox {
+impl RawComponent for Checkbox {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.rooted_x = (root_x + self.x);
         self.rooted_y = (root_y + self.y);

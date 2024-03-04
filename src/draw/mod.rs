@@ -4,7 +4,6 @@ use sdl2_sys::*;
 use sdl2_sys::*;
 use std::{f32::consts::PI, intrinsics::offset, isize, mem::MaybeUninit, ptr::null, usize};
 
-module_export!(menu);
 module_export!(component);
 module_export!(colors);
 module_export!(fonts);
@@ -16,7 +15,7 @@ pub struct Draw {
     pub renderer: *mut SDL_Renderer,
     pub old_ctx: *mut c_void,
     pub ctx: *mut c_void,
-    pub components: Vec<Box<dyn ComponentDebug>>,
+    pub components: Components,
 }
 
 impl Draw {
@@ -41,9 +40,10 @@ impl Draw {
 
         SDL_GL_MakeCurrent(window, old_ctx);
 
-        let mut components = Vec::new();
-        components.push(Box::new(AimbotFov {}) as Box<dyn ComponentDebug>);
-        components.push(Box::new(Overlay::new()) as Box<dyn ComponentDebug>);
+        let mut components = Components::new();
+
+        components.add(AimbotFov {});
+        components.add(Overlay::new());
 
         println!("loaded menu");
         Ok(Draw {
@@ -60,21 +60,21 @@ impl Draw {
         self.fonts.restore();
     }
 
-    pub unsafe fn run(&'static mut self, window: *mut SDL_Window) {
-        SDL_GL_MakeCurrent(window, self.ctx);
+    pub fn run(&'static mut self, window: *mut SDL_Window) {
+        unsafe {
+            SDL_GL_MakeCurrent(window, self.ctx);
+        }
 
         let mut frame = Frame::new(window, self.renderer, &mut self.fonts);
-        for component in &mut self.components {
-            component.draw(&mut frame, 0, 0)
-        }
+        self.components.draw(&mut frame);
 
-        SDL_RenderPresent(self.renderer);
-        SDL_GL_MakeCurrent(window, self.old_ctx);
+        unsafe {
+            SDL_RenderPresent(self.renderer);
+            SDL_GL_MakeCurrent(window, self.old_ctx);
+        }
     }
 
-    pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {
-        for component in &mut self.components {
-            component.handle_event(event)
-        }
+    pub fn handle_event(&mut self, event: *mut SDL_Event) {
+        self.components.handle_event(event);
     }
 }
