@@ -62,7 +62,7 @@ impl RawComponent for Overlay {
 
         frame.text(
             &NAME.to_uppercase(),
-            (size.0 - LEFT_OVERLAY_WIDTH) / 2 + LEFT_OVERLAY_WIDTH,
+            LEFT_OVERLAY_WIDTH / 2,
             TOP_OVERLAY_WIDTH / 2,
             FontSize::Large,
             true,

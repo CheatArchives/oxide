@@ -9,7 +9,7 @@
 #![deny(warnings)]
 
 use std::{
-    alloc::{alloc, Layout}, error::Error, mem::ManuallyDrop, thread, time::Duration
+    alloc::{alloc, Layout}, error::Error, mem::ManuallyDrop, sync::{Arc, Mutex}, thread, time::Duration
 };
 
 pub use libc::wchar_t;
@@ -29,6 +29,7 @@ module_export!(sdk);
 module_export!(error);
 module_export!(math);
 module_export!(draw);
+module_export!(settings);
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const NAME: &str = env!("CARGO_PKG_NAME");
@@ -36,9 +37,14 @@ pub const AUTHOR: &str = env!("CARGO_PKG_AUTHORS");
 
 static mut OXIDE: Option<*mut c_void> = None;
 static mut DRAW: Option<*mut c_void> = None;
+static mut SETTINGS: Option<*mut c_void> = None;
 
 unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     println!("loading");
+
+    let settings_ptr = alloc(Layout::new::<Settings>()) as *mut _ as *mut ManuallyDrop<Settings>;
+    *settings_ptr = ManuallyDrop::new(Settings::new());
+    SETTINGS = Some(settings_ptr as *mut _ as *mut c_void);
 
     let oxide_ptr = alloc(Layout::new::<Oxide>()) as *mut _ as *mut ManuallyDrop<Oxide>;
     *oxide_ptr = ManuallyDrop::new(Oxide::init()?);

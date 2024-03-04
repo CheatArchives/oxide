@@ -82,10 +82,17 @@ impl RawComponent for Window {
                     if self.x <= self.last_cursor.0
                         && self.last_cursor.0 <= self.x + self.w
                         && self.y <= self.last_cursor.1
-                        && self.last_cursor.1 <= self.y + self.h
+                        && self.last_cursor.1 <= self.y + HEADER_HEIGHT
                         && *self.visible.lock().unwrap()
                     {
                         self.dragging = true;
+                    }
+                    if self.x <= self.last_cursor.0
+                        && self.last_cursor.0 <= self.x + self.w
+                        && self.y <= self.last_cursor.1
+                        && self.last_cursor.1 <= self.y + self.h
+                        && *self.visible.lock().unwrap()
+                    {
                         (*event).type_ = 0;
                     }
                 }

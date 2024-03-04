@@ -28,6 +28,13 @@ macro_rules! draw {
 }
 
 #[macro_export]
+macro_rules! settings {
+    () => {
+        unsafe { &mut *(SETTINGS.unwrap() as *mut _ as *mut Settings) }
+    };
+}
+
+#[macro_export]
 macro_rules! interface_vmt {
     ($n:ident) => {
         (*oxide!().interfaces.$n.get_vmt())
@@ -58,7 +65,7 @@ macro_rules! impl_has_vmt {
     ($t:tt,$tv:tt) => {
         impl HasVmt<$tv> for $t {
             fn get_vmt(&self) -> &'static $tv {
-                unsafe{&*self.vmt}
+                unsafe { &*self.vmt }
             }
 
             fn set_vmt(&mut self, vmt: *mut $tv) {
@@ -74,4 +81,3 @@ macro_rules! hex_to_rgb {
         (($h >> 16) as u8, ($h >> 8) as u8, $h as u8)
     };
 }
-
