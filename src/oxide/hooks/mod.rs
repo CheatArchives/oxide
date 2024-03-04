@@ -66,8 +66,8 @@ impl Hooks {
             frame_stage_notify_hook,
         );
 
-        let sdl_handle =
-            get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _ as *const *const *const c_void;
+        let sdl_handle = get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _
+            as *const *const *const c_void;
 
         let swap_window_ptr = ((*sdl_handle) as usize + SWAPWINDOW_OFFSET) as *mut SwapWindowFn;
         let swap_window = Hook::init(swap_window_ptr, swap_window_hook);
@@ -82,7 +82,7 @@ impl Hooks {
             paint_traverse,
             swap_window,
             poll_event,
-            frame_stage_notify
+            frame_stage_notify,
         }
     }
     pub fn restore(&mut self) {
@@ -92,5 +92,28 @@ impl Hooks {
         self.swap_window.restore();
         self.poll_event.restore();
         self.frame_stage_notify.restore();
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Hook2<T>
+where
+    T: Clone + Copy,
+{
+    pub org: T,
+    pub target: *mut T,
+    pub hook: T,
+}
+impl<T: Clone + Copy> Hook2<T> {
+    fn init(target: *mut T) {
+        unsafe {
+            unsafe extern "C" fn hook(first: *mut c_void, mut args: ...) {
+                args.arg()
+            }
+
+            let org = *target;
+            *target = transmute_unchecked(hook);
+             
+        }
     }
 }
