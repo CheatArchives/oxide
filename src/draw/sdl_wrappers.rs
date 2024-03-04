@@ -59,7 +59,15 @@ impl Frame {
             SDL_SetRenderDrawColor(self.renderer, r, g, b, a);
         }
     }
-    pub fn text(&mut self, text: &str, x: isize, y: isize, size: FontSize, color: usize,alpha: u8) {
+    pub fn text(
+        &mut self,
+        text: &str,
+        x: isize,
+        y: isize,
+        size: FontSize,
+        color: usize,
+        alpha: u8,
+    ) {
         let glyph = self
             .fonts
             .get_glyph(size.clone(), text.chars().next().unwrap());
@@ -90,21 +98,8 @@ impl Frame {
             let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
 
             x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
-
-            let surface = Fonts::glyph_to_surface(glyph, color,alpha);
-            let texture = unsafe { SDL_CreateTextureFromSurface(self.renderer, surface) };
-            unsafe { SDL_FreeSurface(surface) }
-
-            let mut dest = SDL_Rect {
-                x: x as i32,
-                y: y as i32,
-                w: 0,
-                h: 0,
-            };
-
             unsafe {
-                SDL_RenderCopy(self.renderer, texture, null(), &mut dest);
-                SDL_DestroyTexture(texture);
+                Fonts::draw_glyph(glyph, x, y, color, alpha);
             }
         }
     }

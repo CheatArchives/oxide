@@ -1,10 +1,9 @@
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit, ptr::null, usize};
 
 use crate::{Draw, *};
 use freetype_sys::*;
 use sdl2_sys::{
-    SDL_BlendMode, SDL_CreateRGBSurfaceFrom, SDL_CreateTextureFromSurface, SDL_Rect,
-    SDL_SetSurfaceBlendMode, SDL_Surface,
+    SDL_BlendMode, SDL_CreateRGBSurfaceFrom, SDL_CreateTextureFromSurface, SDL_DestroyTexture, SDL_FreeSurface, SDL_Rect, SDL_RenderCopy, SDL_SetSurfaceBlendMode, SDL_Surface
 };
 
 static NERD_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
@@ -100,7 +99,13 @@ impl Fonts {
             (*face).glyph.read_volatile()
         }
     }
-    pub fn glyph_to_surface(glyph: FT_GlyphSlotRec, color: usize, alpha: u8) -> *mut SDL_Surface {
+    pub fn draw_glyph(
+        glyph: FT_GlyphSlotRec,
+        x: isize,
+        y: isize,
+        color: usize,
+        alpha: u8,
+    )  {
         let bitmap = glyph.bitmap;
 
         let len = (bitmap.width * bitmap.rows * 4) as usize;
@@ -108,8 +113,9 @@ impl Fonts {
 
         let buffer = unsafe { std::slice::from_raw_parts(bitmap.buffer, len) };
         for i in (0..len).step_by(4) {
+            let val = buffer[i / 4];
             (rgba[i], rgba[i + 1], rgba[i + 2]) = hex_to_rgb!(color);
-            rgba[i + 3] = alpha;
+            rgba[i + 3] = val * (alpha as f32 / 255 as f32) as u8;
         }
 
         unsafe {
@@ -126,7 +132,17 @@ impl Fonts {
             );
 
             SDL_SetSurfaceBlendMode(surface, SDL_BlendMode::SDL_BLENDMODE_BLEND);
-            surface
+            let mut rect = SDL_Rect {
+                x: x as i32,
+                y: y as i32,
+                w: bitmap.width,
+                h: bitmap.rows,
+            };
+
+            let texture = unsafe { SDL_CreateTextureFromSurface(draw!().renderer, surface) };
+            SDL_RenderCopy(draw!().renderer, texture, null(), &mut rect);
+            SDL_DestroyTexture(texture);
+            SDL_FreeSurface(surface);
         }
     }
 }

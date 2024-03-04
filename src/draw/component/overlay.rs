@@ -21,7 +21,7 @@ impl Component for Overlay {
         let size = frame.window_size;
         frame.filled_rect(0, 0, size.0, 50, BACKGROUND, 220);
         frame.filled_rect(0, 50, 300, size.1, BACKGROUND, 220);
-        frame.text(NAME, size.0 / 2, 25, FontSize::Small, FOREGROUND, 255)
+        frame.text(NAME,  size.0/2, 25, FontSize::Medium, FOREGROUND, 255)
     }
 
     fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
