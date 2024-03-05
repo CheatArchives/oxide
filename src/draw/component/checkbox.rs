@@ -37,14 +37,14 @@ impl RawComponent for Checkbox {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.rooted_x = (root_x + self.x);
         self.rooted_y = (root_y + self.y);
-        frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, SELECTION, 255);
-        if *self.checked.lock().unwrap() {
+        frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, FOREGROUND, 255);
+        if !*self.checked.lock().unwrap() {
             frame.filled_rect(
                 self.rooted_x + 1,
                 self.rooted_y + 1,
                 SIZE - 2,
                 SIZE - 2,
-                SELECTION_TEXT,
+                BACKGROUND,
                 255,
             );
         }

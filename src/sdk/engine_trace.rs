@@ -139,7 +139,7 @@ pub struct Trace {
     pub hit_group: i32,
     pub physics_bone: i16,
     pub entity: *const Entity,
-    pub hitbox: i32,
+    pub hitbox: HitboxId,
 }
 
 #[repr(C)]

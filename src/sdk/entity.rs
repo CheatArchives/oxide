@@ -61,8 +61,9 @@ pub struct VMTEntity {
     #[derivative(Debug = "ignore")]
     _pad9: [u32; 2],
     pub is_weapon: cfn!(bool, &Entity),
+    pub get_weapon2: cfn!(*mut c_void, &Entity),
     #[derivative(Debug = "ignore")]
-    _pad10: [u32; 3],
+    _pad10: [u32; 2],
     pub eye_position: cfn!(Vector3, *const Entity),
     pub eye_angles: cfn!(Angles, *const Entity),
     #[derivative(Debug = "ignore")]
@@ -86,7 +87,7 @@ pub struct VMTEntity {
 pub struct Entity {
     pub vmt: *mut VMTEntity,
     #[derivative(Debug = "ignore")]
-    _pad1: [u8; 0x7C],
+    _pad1: [u8; 0x7c],
     pub model_idx: isize,
     #[derivative(Debug = "ignore")]
     _pad2: [u8; 0x8C],
@@ -141,8 +142,8 @@ pub struct Entity {
 impl_has_vmt!(Entity, VMTEntity);
 
 impl Entity {
-    pub fn as_renderable(&mut self) -> &mut Renderable {
-        unsafe { transmute(transmute::<&mut Self, usize>(self) + 4) }
+    pub fn as_renderable(&self) -> &mut Renderable {
+        unsafe { transmute(transmute::<&Self, usize>(self) + 4) }
     }
     pub fn as_networkable(&mut self) -> &mut Networkable {
         unsafe { transmute(transmute::<&mut Self, usize>(self) + 8) }
@@ -169,7 +170,7 @@ impl Entity {
         self.next_attack <= now
     }
 
-    pub fn get_hitbox(&mut self, hitbox_id: HitboxId) -> Option<(Hitbox, Matrix3x4)> {
+    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<(Hitbox, Matrix3x4)> {
         unsafe {
             let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::zeroed().assume_init();
             let rend = self.as_renderable();

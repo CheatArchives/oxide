@@ -9,7 +9,7 @@ pub type ModelRender = WithVmt<VMTModelRender>;
 pub struct Matrix3x4([[f32; 4]; 3]);
 
 impl Matrix3x4 {
-    pub unsafe fn transform(&self, vec: &Vector3) -> Vector3 {
+    pub fn transform(&self, vec: &Vector3) -> Vector3 {
         let matrix = self.0;
         let vec1 = Vector3::new(matrix[0][0], matrix[0][1], matrix[0][2]);
         let vec2 = Vector3::new(matrix[1][0], matrix[1][1], matrix[1][2]);

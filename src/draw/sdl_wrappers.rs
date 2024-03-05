@@ -69,6 +69,9 @@ impl Frame {
         color: usize,
         alpha: u8,
     ) {
+        if text.len() == 0{
+            return;
+        }
         let glyph = self
             .fonts
             .get_glyph(size.clone(), text.chars().next().unwrap());

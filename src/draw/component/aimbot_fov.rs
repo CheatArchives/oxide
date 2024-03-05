@@ -5,13 +5,30 @@ use crate::*;
 #[derive(Debug)]
 pub struct AimbotFov {}
 
+impl AimbotFov {
+    fn should_draw(&self) -> bool {
+        if !settings!().aimbot || !settings!().aimbot_draw_fov{
+            return false;
+        }
+
+        let Some(p_local) = Entity::local() else {
+            return false;
+        };
+
+        if !unsafe { call!(p_local, is_alive) } {
+            return false;
+        }
+        true
+    }
+}
+
 impl RawComponent for AimbotFov {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
-        if !oxide!().cheats.aimbot.should_run(){
-            return
+        if !self.should_draw() {
+            return;
         }
-        let size = frame.window_size;
-        let aimbot_fov = oxide!().cheats.aimbot.trigger_fov as f32;
+        let size = frame.window_size();
+        let aimbot_fov = settings!().aimbot_fov as f32;
         let fov = oxide!().fov;
 
         let screen_fov = size.0 as f32 / size.1 as f32 / (4f32 / 3f32);

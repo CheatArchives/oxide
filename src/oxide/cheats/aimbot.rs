@@ -1,3 +1,5 @@
+use std::isize;
+
 use sdl2_sys::SDL_Event;
 
 use crate::*;
@@ -5,22 +7,15 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Aimbot {
     pub shoot_key_pressed: bool,
-    pub trigger_fov: u8,
 }
 
 impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
-            trigger_fov: 10,
         }
     }
-    pub fn ent_priority(
-        &self,
-        p_local: &Entity,
-        ent: &Entity,
-        target_point: Vector3,
-    ) -> Option<isize> {
+    pub fn point_priority(&self, p_local: &Entity, target_point: Vector3) -> Option<isize> {
         let my_eyes = unsafe { call!(p_local, eye_position) };
 
         let diff = my_eyes - target_point;
@@ -35,56 +30,61 @@ impl Aimbot {
             + (angle.pitch - my_angle.pitch).abs().powi(2))
         .sqrt();
 
-        if distance_to_center > self.trigger_fov as f32 {
+        if distance_to_center > settings!().aimbot_fov as f32 {
             return None;
         }
 
+        return Some(-distance_to_center as isize);
+    }
+    pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
         unsafe {
             if call!(ent, get_team_number) == call!(p_local, get_team_number) {
                 return None;
             }
         }
-        return Some(-distance_to_center as isize);
+        return Some(1 as isize);
+    }
+    pub fn find_point(&self, p_local: &'static Entity, ent: &'static Entity) -> Option<Vector3> {
+        let my_eyes = unsafe { call!(p_local, eye_position) };
+        for hitboxid in self.hitbox_order(p_local) {
+            let (hitbox, bone) = ent.get_hitbox(hitboxid).unwrap();
+            let target_point_candidate = hitbox.center(&bone);
+
+            let Some(prio) = self.point_priority(p_local, target_point_candidate.clone()) else { continue };
+
+            let trace = trace(
+                my_eyes.clone(),
+                target_point_candidate.clone(),
+                MASK_SHOT | CONTENTS_GRATE,
+                p_local,
+            );
+            if trace.entity != ent && trace.hitbox == hitboxid {
+                continue;
+            }
+            return Some(target_point_candidate);
+        }
+        None
     }
 
-    pub unsafe fn find_target(
-        &self,
-        p_local: &'static Entity,
-    ) -> Result<Option<Angles>, OxideError> {
-        let entity_count = call!(interface!(entity_list), get_max_entities);
+    pub fn find_target(&self, p_local: &'static Entity) -> Result<Option<Angles>, OxideError> {
+        let entity_count = unsafe { call!(interface!(entity_list), get_max_entities) };
 
         let mut target: Option<(Vector3, isize)> = None;
-        let my_eyes = call!(p_local, eye_position);
+        let my_eyes = unsafe { call!(p_local, eye_position) };
 
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
                 continue;
             };
 
-            let Some((hitbox, bone)) = ent.get_hitbox(self.hitbox(p_local)) else {
-                return Err(OxideError::new("could not get hitbox").into());
-            };
+            let Some(prio) = self.ent_priority(p_local, ent) else { continue };
 
-            let target_point = hitbox.center(&bone);
-
-            let Some(prio) = self.ent_priority(p_local, ent, target_point.clone()) else {
-                continue;
-            };
-
-            let trace = trace(
-                my_eyes.clone(),
-                target_point.clone(),
-                MASK_SHOT | CONTENTS_GRATE,
-                p_local,
-            );
-            if trace.entity != ent {
-                continue;
-            }
+            let Some(target_point) = self.find_point(p_local, ent) else { continue };
 
             let Some((_, target_prio)) = &target else {
-                target = Some((target_point, prio));
-                continue;
-            };
+                    target = Some((target_point, prio));
+                    continue;
+                };
 
             if prio > *target_prio {
                 target = Some((target_point, prio))
@@ -99,14 +99,20 @@ impl Aimbot {
         return Ok(Some(diff.angle()));
         Ok(None)
     }
-    pub fn hitbox(&self, p_local: &Entity) -> HitboxId {
-        match p_local.player_class {
-            PlayerClass::Sniper => HitboxId::HitboxHead,
-            _ => HitboxId::HitboxPelvis,
+    pub fn hitbox_order(&self, p_local: &Entity) -> Vec<HitboxId> {
+        let weapon = unsafe { call!(p_local, get_weapon) };
+        match unsafe { call!(weapon, get_weapon_id) } {
+            WeaponType::Sniperrifle => {
+                vec![HitboxId::Head]
+            }
+            _ => [
+                HitboxId::body(),
+                vec![HitboxId::Head],
+            ]
+            .concat(),
         }
     }
     pub fn should_run(&mut self) -> bool {
-        dbg!(settings!());
         if !settings!().aimbot || !self.shoot_key_pressed {
             return false;
         }
@@ -129,13 +135,11 @@ impl Aimbot {
 
         let p_local = Entity::local().unwrap();
 
-        let start = std::time::SystemTime::now();
         if let Some(new_angle) = self.find_target(p_local)? {
             if self.shoot(p_local, cmd) {
                 cmd.viewangles = new_angle;
             }
         }
-        let end = std::time::SystemTime::now();
 
         Ok(())
     }

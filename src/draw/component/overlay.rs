@@ -47,7 +47,7 @@ impl RawComponent for Overlay {
         if !self.visible {
             return;
         }
-        let size = frame.window_size;
+        let size = frame.window_size();
         frame.filled_rect(
             LEFT_OVERLAY_WIDTH,
             0,
@@ -87,7 +87,6 @@ impl RawComponent for Overlay {
     }
 
     fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
-        self.components.handle_event(event);
         unsafe {
             match transmute::<u32, SDL_EventType>((*event).type_) {
                 SDL_EventType::SDL_KEYUP => {
@@ -102,6 +101,10 @@ impl RawComponent for Overlay {
                 _ => (),
             };
         }
+        if !self.visible{
+            return;
+        }
+        self.components.handle_event(event);
     }
 }
 

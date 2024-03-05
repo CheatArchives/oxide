@@ -75,6 +75,9 @@ impl RawComponent for Window {
     }
 
     fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
+        if !*self.visible.lock().unwrap() {
+          return
+        }
         self.components.handle_event(event);
         unsafe {
             match transmute::<u32, SDL_EventType>((*event).type_) {
@@ -83,7 +86,6 @@ impl RawComponent for Window {
                         && self.last_cursor.0 <= self.x + self.w
                         && self.y <= self.last_cursor.1
                         && self.last_cursor.1 <= self.y + HEADER_HEIGHT
-                        && *self.visible.lock().unwrap()
                     {
                         self.dragging = true;
                     }
@@ -91,7 +93,6 @@ impl RawComponent for Window {
                         && self.last_cursor.0 <= self.x + self.w
                         && self.y <= self.last_cursor.1
                         && self.last_cursor.1 <= self.y + self.h
-                        && *self.visible.lock().unwrap()
                     {
                         (*event).type_ = 0;
                     }

@@ -14,7 +14,9 @@ pub struct HitboxSet {
 
 impl HitboxSet {
     pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<Hitbox> {
-        let ptr = ((self as *const _ as usize + self.hitboxindex  + size_of::<Hitbox>()* id as usize) as *const Hitbox );
+        let ptr = ((self as *const _ as usize
+            + self.hitboxindex
+            + size_of::<Hitbox>() * id as usize) as *const Hitbox);
         if ptr.is_null() {
             return None;
         }
@@ -34,7 +36,7 @@ pub struct Hitbox {
 }
 
 impl Hitbox {
-    pub unsafe fn center(&self, bone: &Matrix3x4) -> Vector3 {
+    pub fn center(&self, bone: &Matrix3x4) -> Vector3 {
         let min = bone.transform(&self.bbmin);
         let max = bone.transform(&self.bbmax);
         Vector3 {
@@ -46,27 +48,34 @@ impl Hitbox {
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HitboxId {
-    HitboxHead,
-    HitboxPelvis,
-    HitboxSpine0,
-    HitboxSpine1,
-    HitboxSpine2,
-    HitboxSpine3,
-    HitboxLeftUpperArm,
-    HitboxLeftLowerArm,
-    HitboxLeftHand,
-    HitboxRightUpperArm,
-    HitboxRightLowerArm,
-    HitboxRightHand,
-    HitboxLeftHip,
-    HitboxLeftKnee,
-    HitboxLeftFoot,
-    HitboxRightHip,
-    HitboxRightKnee,
-    HitboxRightFoot,
-    HitboxMax,
+    Head,
+    Pelvis,
+    Spine0,
+    Spine1,
+    Spine2,
+    Spine3,
+    LeftUpperArm,
+    LeftLowerArm,
+    LeftHand,
+    RightUpperArm,
+    RightLowerArm,
+    RightHand,
+    LeftHip,
+    LeftKnee,
+    LeftFoot,
+    RightHip,
+    RightKnee,
+    RightFoot,
+}
+
+impl HitboxId {
+    pub fn body() -> Vec<HitboxId> {
+        (1..=17)
+            .map(|x| unsafe { transmute(x) })
+            .collect::<Vec<HitboxId>>()
+    }
 }
 
 #[repr(C)]
@@ -141,7 +150,10 @@ impl StudioHdr {
             return None;
         }
 
-        Some(&*((self as *const _ as usize + self.hitboxsetindex + i * size_of::<HitboxSet>()) as *const HitboxSet))
+        Some(
+            &*((self as *const _ as usize + self.hitboxsetindex + i * size_of::<HitboxSet>())
+                as *const HitboxSet),
+        )
     }
 }
 

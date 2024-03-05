@@ -1,15 +1,18 @@
-#![feature(associated_type_defaults)]
-#![feature(core_intrinsics)]
-#![feature(ptr_metadata)]
-#![feature(pointer_is_aligned)]
-#![feature(c_variadic)]
-#![allow(unused)]
-#![allow(improper_ctypes_definitions)]
-#![allow(internal_features)]
+#![feature(
+    c_variadic,
+    pointer_is_aligned,
+    core_intrinsics,
+    associated_type_defaults
+)]
+#![allow(improper_ctypes_definitions, internal_features, unused)]
 #![deny(warnings)]
 
 use std::{
-    alloc::{alloc, Layout}, error::Error, mem::ManuallyDrop, sync::{Arc, Mutex}, thread, time::Duration
+    alloc::{alloc, Layout},
+    error::Error,
+    mem::ManuallyDrop,
+    thread,
+    time::Duration,
 };
 
 pub use libc::wchar_t;
