@@ -84,13 +84,13 @@ impl Fonts {
                 FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
 
                 let glyph = (*face).glyph.read_volatile();
-                w += (glyph.metrics.horiAdvance >> 6) as isize;
+                w += (glyph.metrics.horiAdvance >> 6) as isize - 1;
 
                 h_min = std::cmp::max((glyph.metrics.horiBearingY >> 6) as isize, h_min);
                 h_max = std::cmp::max((glyph.metrics.horiBearingX >> 6) as isize, h_max);
             }
         }
-        (w, h_min, h_max)
+        (w, h_min - 1, h_max - 1)
     }
     pub fn get_glyph(&self, size: FontSize, char: char) -> FT_GlyphSlotRec {
         let face = self.get_face(&size);
