@@ -59,27 +59,20 @@ impl RawComponent for Checkbox {
         );
     }
 
-    fn handle_event(&mut self, event: *mut SDL_Event) {
-        unsafe {
-            match transmute::<u32, SDL_EventType>((*event).type_) {
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => {
-                    let (x, y) = self.motion;
-                    if x as isize <= self.rooted_x + 10
-                        && self.rooted_x <= x as isize
-                        && y as isize <= self.rooted_y + 10
-                        && self.rooted_y <= y as isize
-                    {
-                        let mut checked = self.checked.lock().unwrap();
-                        *checked = !*checked;
-                        (*event).type_ = 0;
-                    }
+    fn handle_event(&mut self, mut event: &mut Event) {
+        match event.r#type {
+            EventType::MouseButtonDown => {
+                if draw!().cursor.0 as isize <= self.rooted_x + SIZE
+                    && self.rooted_x <= draw!().cursor.0 as isize
+                    && draw!().cursor.1 as isize <= self.rooted_y + SIZE
+                    && self.rooted_y <= draw!().cursor.1 as isize
+                {
+                    let mut checked = self.checked.lock().unwrap();
+                    *checked = !*checked;
+                    event.handled = true;
                 }
-                SDL_EventType::SDL_MOUSEMOTION => {
-                    let motion = (*event).motion;
-                    self.motion = (motion.x as isize, motion.y as isize);
-                }
-                _ => (),
-            };
+            }
+            _ => (),
         }
     }
 }

@@ -9,6 +9,7 @@ module_export!(colors);
 module_export!(fonts);
 module_export!(sdl_wrappers);
 module_export!(frame);
+module_export!(event);
 
 pub struct Draw {
     pub fonts: Fonts,
@@ -16,6 +17,7 @@ pub struct Draw {
     pub old_ctx: *mut c_void,
     pub ctx: *mut c_void,
     pub components: Components,
+    pub cursor: (isize,isize)
 }
 
 impl Draw {
@@ -52,6 +54,7 @@ impl Draw {
             old_ctx,
             ctx,
             renderer,
+            cursor: (0,0)
         })
     }
 
@@ -66,7 +69,7 @@ impl Draw {
         }
 
         let mut frame = Frame::new(window, self.renderer, &mut self.fonts);
-        self.components.draw(&mut frame,0,0);
+        self.components.draw(&mut frame, 0, 0);
 
         unsafe {
             SDL_RenderPresent(self.renderer);
@@ -75,6 +78,10 @@ impl Draw {
     }
 
     pub fn handle_event(&mut self, event: *mut SDL_Event) {
-        self.components.handle_event(event);
+        let mut event = Event::from(unsafe { *event });
+        if let EventType::CursorMove(pos) = event.r#type {
+            self.cursor = pos
+        }
+        self.components.handle_event(&mut event);
     }
 }

@@ -59,88 +59,48 @@ impl RawComponent for TextInput {
         );
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
-        unsafe {
-            match transmute::<u32, SDL_EventType>((*event).type_) {
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => {
-                    if self.rooted_x <= self.cursor.0
-                        && self.cursor.0 <= self.rooted_x + self.w
-                        && self.rooted_y <= self.cursor.1
-                        && self.cursor.1 <= self.rooted_y + SIZE
-                    {
+    fn handle_event(&mut self, event: &mut Event) {
+        match event.r#type {
+            EventType::MouseButtonDown => {
+                if !self.focussed {
+                    if point_in_bounds(
+                        draw!().cursor.0,
+                        draw!().cursor.1,
+                        self.rooted_x,
+                        self.rooted_y,
+                        self.w,
+                        SIZE,
+                    ) {
                         self.focussed = true;
-                        (*event).type_ = 0;
-                    } else {
+                        event.handled = true;
+                    }
+                } else {
                         self.focussed = false;
+                        event.handled = true;
+                }
+            }
+            EventType::KeyDown(key) => {
+                if !self.focussed {
+                    return;
+                }
+                if let Some(letter) = sdl_scancode_to_char(key) {
+                    let mut val = self.val.lock().unwrap();
+                    val.push(letter);
+                }
+                match key {
+                    SDL_Scancode::SDL_SCANCODE_DELETE => {}
+                    SDL_Scancode::SDL_SCANCODE_BACKSPACE => {
+                        let mut val = self.val.lock().unwrap();
+                        val.pop();
                     }
-                }
-                SDL_EventType::SDL_MOUSEMOTION => {
-                    let motion = (*event).motion;
-                    self.cursor = (motion.x as isize, motion.y as isize);
-                }
-                SDL_EventType::SDL_KEYDOWN => {
-                    let key = (*event).key.keysym.scancode;
-                    if self.focussed {
-                        let letter = match key {
-                            SDL_Scancode::SDL_SCANCODE_A => Some('A'),
-                            SDL_Scancode::SDL_SCANCODE_B => Some('B'),
-                            SDL_Scancode::SDL_SCANCODE_C => Some('C'),
-                            SDL_Scancode::SDL_SCANCODE_D => Some('D'),
-                            SDL_Scancode::SDL_SCANCODE_E => Some('E'),
-                            SDL_Scancode::SDL_SCANCODE_F => Some('F'),
-                            SDL_Scancode::SDL_SCANCODE_G => Some('G'),
-                            SDL_Scancode::SDL_SCANCODE_H => Some('H'),
-                            SDL_Scancode::SDL_SCANCODE_I => Some('I'),
-                            SDL_Scancode::SDL_SCANCODE_J => Some('J'),
-                            SDL_Scancode::SDL_SCANCODE_K => Some('K'),
-                            SDL_Scancode::SDL_SCANCODE_L => Some('L'),
-                            SDL_Scancode::SDL_SCANCODE_M => Some('M'),
-                            SDL_Scancode::SDL_SCANCODE_N => Some('N'),
-                            SDL_Scancode::SDL_SCANCODE_O => Some('O'),
-                            SDL_Scancode::SDL_SCANCODE_P => Some('P'),
-                            SDL_Scancode::SDL_SCANCODE_Q => Some('Q'),
-                            SDL_Scancode::SDL_SCANCODE_R => Some('R'),
-                            SDL_Scancode::SDL_SCANCODE_S => Some('S'),
-                            SDL_Scancode::SDL_SCANCODE_T => Some('T'),
-                            SDL_Scancode::SDL_SCANCODE_U => Some('U'),
-                            SDL_Scancode::SDL_SCANCODE_V => Some('V'),
-                            SDL_Scancode::SDL_SCANCODE_W => Some('W'),
-                            SDL_Scancode::SDL_SCANCODE_X => Some('X'),
-                            SDL_Scancode::SDL_SCANCODE_Y => Some('Y'),
-                            SDL_Scancode::SDL_SCANCODE_Z => Some('Z'),
-                            SDL_Scancode::SDL_SCANCODE_1 => Some('1'),
-                            SDL_Scancode::SDL_SCANCODE_2 => Some('2'),
-                            SDL_Scancode::SDL_SCANCODE_3 => Some('3'),
-                            SDL_Scancode::SDL_SCANCODE_4 => Some('4'),
-                            SDL_Scancode::SDL_SCANCODE_5 => Some('5'),
-                            SDL_Scancode::SDL_SCANCODE_6 => Some('6'),
-                            SDL_Scancode::SDL_SCANCODE_7 => Some('7'),
-                            SDL_Scancode::SDL_SCANCODE_8 => Some('8'),
-                            SDL_Scancode::SDL_SCANCODE_9 => Some('9'),
-                            SDL_Scancode::SDL_SCANCODE_0 => Some('0'),
-                            SDL_Scancode::SDL_SCANCODE_PERIOD => Some('.'),
-                            SDL_Scancode::SDL_SCANCODE_MINUS => Some('-'),
-                            SDL_Scancode::SDL_SCANCODE_SPACE => Some(' '),
-                            _ => Option::None,
-                        };
-                        if let Some(letter) = letter {
-                            let mut val = self.val.lock().unwrap();
-                            val.push(letter);
-                        }
-                        match key {
-                            SDL_Scancode::SDL_SCANCODE_DELETE => {}
-                            SDL_Scancode::SDL_SCANCODE_BACKSPACE => {
-                                let mut val = self.val.lock().unwrap();
-                                val.pop();
-                            }
-                            SDL_Scancode::SDL_SCANCODE_RETURN
-                            | SDL_Scancode::SDL_SCANCODE_ESCAPE => self.focussed = false,
-                            _ => {}
-                        }
+                    SDL_Scancode::SDL_SCANCODE_RETURN | SDL_Scancode::SDL_SCANCODE_ESCAPE => {
+                        self.focussed = false
                     }
+                    _ => {}
                 }
-                _ => (),
-            };
+                event.handled = true
+            }
+            _ => (),
         }
     }
 }

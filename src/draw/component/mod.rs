@@ -1,9 +1,9 @@
+
 use crate::*;
 use freetype_sys::*;
 use libc::CS;
 use sdl2_sys::*;
 
-module_export!(checkbox);
 module_export!(aimbot_fov);
 module_export!(overlay);
 module_export!(base);
@@ -11,7 +11,7 @@ module_export!(aimbot_window);
 
 pub trait RawComponent {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize);
-    fn handle_event(&mut self, event: *mut SDL_Event);
+    fn handle_event(&mut self, event: &mut Event);
 }
 
 pub trait Component: component::RawComponent + std::fmt::Debug {}
@@ -31,10 +31,13 @@ impl Components {
             component.draw(frame, root_x, root_y)
         }
     }
-    pub fn handle_event(&mut self, event: *mut SDL_Event) {
+    pub fn handle_event(&mut self, event: &mut Event) {
         self.0.reverse();
 
         for component in &mut self.0 {
+            if event.handled {
+                break;
+            }
             component.handle_event(event)
         }
         self.0.reverse();

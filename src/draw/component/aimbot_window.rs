@@ -57,7 +57,7 @@ impl RawComponent for AimbotWindow {
         self.window.draw(frame, root_x, root_y);
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
+    fn handle_event(&mut self, event: &mut Event) {
         self.window.handle_event(event);
     }
 }

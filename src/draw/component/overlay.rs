@@ -27,6 +27,7 @@ impl Overlay {
         let show_aimbot = Arc::new(Mutex::new(false));
         // ORDER OF ADDING IS IMPORTANT
         components.add(Button::new(
+            "AIMBOT",
             PADDING,
             TOP_OVERLAY_WIDTH + PADDING,
             LEFT_OVERLAY_WIDTH - PADDING * 2,
@@ -86,26 +87,20 @@ impl RawComponent for Overlay {
         self.components.draw(frame, 0, 0);
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
-        unsafe {
-            match transmute::<u32, SDL_EventType>((*event).type_) {
-                SDL_EventType::SDL_KEYUP => {
-                    let key = (*event).key.keysym.scancode;
-                    match key {
-                        SDL_Scancode::SDL_SCANCODE_INSERT => {
-                            self.visible = !self.visible;
-                        }
-                        _ => (),
-                    }
-                }
-                _ => (),
-            };
+    fn handle_event(&mut self, event: &mut Event) {
+        if matches!(
+            event.r#type,
+            EventType::KeyDown(SDL_Scancode::SDL_SCANCODE_INSERT)
+        ) {
+            self.visible = !self.visible;
+            event.handled = true;
         }
-        if !self.visible{
+        if !self.visible {
             return;
         }
         self.components.handle_event(event);
     }
+
 }
 
 impl Component for Overlay {}

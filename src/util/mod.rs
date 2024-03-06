@@ -31,7 +31,7 @@ pub fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>>
     Ok(handle)
 }
 
-pub fn sdl_scancode_to_string(scan_code: SDL_Scancode) -> String {
+pub fn sdl_scancode_name_to_string(scan_code: SDL_Scancode) -> String {
     match scan_code {
         SDL_Scancode::SDL_SCANCODE_UNKNOWN => "UNKNOWN",
         SDL_Scancode::SDL_SCANCODE_A => "A",
@@ -279,4 +279,60 @@ pub fn sdl_scancode_to_string(scan_code: SDL_Scancode) -> String {
         SDL_Scancode::SDL_NUM_SCANCODES => "",
     }
     .to_owned()
+}
+
+pub fn sdl_scancode_to_char(key: SDL_Scancode) -> Option<char> {
+    match key {
+        SDL_Scancode::SDL_SCANCODE_A => Some('A'),
+        SDL_Scancode::SDL_SCANCODE_B => Some('B'),
+        SDL_Scancode::SDL_SCANCODE_C => Some('C'),
+        SDL_Scancode::SDL_SCANCODE_D => Some('D'),
+        SDL_Scancode::SDL_SCANCODE_E => Some('E'),
+        SDL_Scancode::SDL_SCANCODE_F => Some('F'),
+        SDL_Scancode::SDL_SCANCODE_G => Some('G'),
+        SDL_Scancode::SDL_SCANCODE_H => Some('H'),
+        SDL_Scancode::SDL_SCANCODE_I => Some('I'),
+        SDL_Scancode::SDL_SCANCODE_J => Some('J'),
+        SDL_Scancode::SDL_SCANCODE_K => Some('K'),
+        SDL_Scancode::SDL_SCANCODE_L => Some('L'),
+        SDL_Scancode::SDL_SCANCODE_M => Some('M'),
+        SDL_Scancode::SDL_SCANCODE_N => Some('N'),
+        SDL_Scancode::SDL_SCANCODE_O => Some('O'),
+        SDL_Scancode::SDL_SCANCODE_P => Some('P'),
+        SDL_Scancode::SDL_SCANCODE_Q => Some('Q'),
+        SDL_Scancode::SDL_SCANCODE_R => Some('R'),
+        SDL_Scancode::SDL_SCANCODE_S => Some('S'),
+        SDL_Scancode::SDL_SCANCODE_T => Some('T'),
+        SDL_Scancode::SDL_SCANCODE_U => Some('U'),
+        SDL_Scancode::SDL_SCANCODE_V => Some('V'),
+        SDL_Scancode::SDL_SCANCODE_W => Some('W'),
+        SDL_Scancode::SDL_SCANCODE_X => Some('X'),
+        SDL_Scancode::SDL_SCANCODE_Y => Some('Y'),
+        SDL_Scancode::SDL_SCANCODE_Z => Some('Z'),
+        SDL_Scancode::SDL_SCANCODE_1 => Some('1'),
+        SDL_Scancode::SDL_SCANCODE_2 => Some('2'),
+        SDL_Scancode::SDL_SCANCODE_3 => Some('3'),
+        SDL_Scancode::SDL_SCANCODE_4 => Some('4'),
+        SDL_Scancode::SDL_SCANCODE_5 => Some('5'),
+        SDL_Scancode::SDL_SCANCODE_6 => Some('6'),
+        SDL_Scancode::SDL_SCANCODE_7 => Some('7'),
+        SDL_Scancode::SDL_SCANCODE_8 => Some('8'),
+        SDL_Scancode::SDL_SCANCODE_9 => Some('9'),
+        SDL_Scancode::SDL_SCANCODE_0 => Some('0'),
+        SDL_Scancode::SDL_SCANCODE_PERIOD => Some('.'),
+        SDL_Scancode::SDL_SCANCODE_MINUS => Some('-'),
+        SDL_Scancode::SDL_SCANCODE_SPACE => Some(' '),
+        _ => Option::None,
+    }
+}
+
+pub fn point_in_bounds(
+    x: isize,
+    y: isize,
+    bound_x: isize,
+    bound_y: isize,
+    w: isize,
+    h: isize,
+) -> bool {
+    bound_x <= x && x <= bound_x + w && bound_y <= y && y <= bound_y + h
 }

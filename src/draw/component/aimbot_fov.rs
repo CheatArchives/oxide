@@ -38,7 +38,7 @@ impl RawComponent for AimbotFov {
         frame.circle(size.0 / 2, size.1 / 2, radius, YELLOW, 200);
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {}
+    fn handle_event(&mut self, event: &mut Event) {}
 }
 
 impl Component for AimbotFov {}

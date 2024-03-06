@@ -1,4 +1,5 @@
 use std::{
+    io::Cursor,
     sync::{Arc, Mutex},
     usize,
 };
@@ -74,43 +75,47 @@ impl RawComponent for Window {
         }
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
+    fn handle_event(&mut self, mut event: &mut Event) {
         if !*self.visible.lock().unwrap() {
-          return
+            return;
         }
+
         self.components.handle_event(event);
-        unsafe {
-            match transmute::<u32, SDL_EventType>((*event).type_) {
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => {
-                    if self.x <= self.last_cursor.0
-                        && self.last_cursor.0 <= self.x + self.w
-                        && self.y <= self.last_cursor.1
-                        && self.last_cursor.1 <= self.y + HEADER_HEIGHT
-                    {
-                        self.dragging = true;
-                    }
-                    if self.x <= self.last_cursor.0
-                        && self.last_cursor.0 <= self.x + self.w
-                        && self.y <= self.last_cursor.1
-                        && self.last_cursor.1 <= self.y + self.h
-                    {
-                        (*event).type_ = 0;
-                    }
+        match event.r#type {
+            EventType::CursorMove(pos) => {
+                if self.dragging {
+                    self.x += pos.0 as isize - self.last_cursor.0;
+                    self.y += pos.1 as isize - self.last_cursor.1;
                 }
-                SDL_EventType::SDL_MOUSEBUTTONUP => {
-                    self.dragging = false;
+            }
+            EventType::MouseButtonDown => {
+                if point_in_bounds(
+                    draw!().cursor.0,
+                    draw!().cursor.1,
+                    self.x,
+                    self.y,
+                    self.w,
+                    HEADER_HEIGHT,
+                ) {
+                    self.dragging = true;
                 }
-                SDL_EventType::SDL_MOUSEMOTION => {
-                    let motion = (*event).motion;
-                    if self.dragging {
-                        self.x += motion.x as isize - self.last_cursor.0;
-                        self.y += motion.y as isize - self.last_cursor.1;
-                    }
-                    self.last_cursor = (motion.x as isize, motion.y as isize);
+                if point_in_bounds(
+                    draw!().cursor.0,
+                    draw!().cursor.1,
+                    self.x,
+                    self.y,
+                    self.w,
+                    self.h,
+                ) {
+                    event.handled = true;
                 }
-                _ => (),
-            };
+            }
+            EventType::MouseButtonUp => {
+                self.dragging = false;
+            }
+            _ => (),
         }
+        self.last_cursor = draw!().cursor;
     }
 }
 

@@ -13,19 +13,19 @@ pub struct Button {
     y: isize,
     w: isize,
     h: isize,
-    cursor: (isize, isize),
     val: Arc<Mutex<bool>>,
+    text: String 
 }
 
 impl Button {
-    pub fn new(x: isize, y: isize, w: isize, h: isize, val: Arc<Mutex<bool>>) -> Button {
+    pub fn new(text: &str,x: isize, y: isize, w: isize, h: isize, val: Arc<Mutex<bool>>) -> Button {
         Button {
             x,
             y,
             w,
             h,
-            cursor: (0, 0),
             val,
+            text: text.to_owned()
         }
     }
 }
@@ -35,7 +35,7 @@ impl RawComponent for Button {
         frame.filled_rect(self.x, self.y, self.w, self.h, CURSOR_TEXT, 255);
         frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
         frame.text(
-            "AIMBOT",
+            &self.text,
             self.x + self.w / 2,
             self.y + self.h / 2,
             FontSize::Medium,
@@ -45,26 +45,23 @@ impl RawComponent for Button {
         );
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
-        unsafe {
-            match transmute::<u32, SDL_EventType>((*event).type_) {
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => {
-                    if self.x <= self.cursor.0
-                        && self.cursor.0 <= self.x + self.w
-                        && self.y <= self.cursor.1
-                        && self.cursor.1 <= self.y + self.h
-                    {
-                        let mut val = self.val.lock().unwrap();
-                        *val = !*val;
-                        (*event).type_ = 0;
-                    }
+    fn handle_event(&mut self, mut event: &mut Event) {
+        match event.r#type {
+            EventType::MouseButtonDown => {
+                if point_in_bounds(
+                    draw!().cursor.0,
+                    draw!().cursor.1,
+                    self.x,
+                    self.y,
+                    self.w,
+                    self.h,
+                ) {
+                    let mut val = self.val.lock().unwrap();
+                    *val = !*val;
+                    event.handled = true;
                 }
-                SDL_EventType::SDL_MOUSEMOTION => {
-                    let motion = (*event).motion;
-                    self.cursor = (motion.x as isize, motion.y as isize);
-                }
-                _ => (),
-            };
+            }
+            _ => (),
         }
     }
 }

@@ -49,7 +49,7 @@ impl RawComponent for KeyInput {
         let val = *self.val.lock().unwrap();
 
         frame.text(
-            &sdl_scancode_to_string(val),
+            &sdl_scancode_name_to_string(val),
             x + self.w / 2,
             y + SIZE / 2,
             FontSize::Small,
@@ -59,36 +59,35 @@ impl RawComponent for KeyInput {
         );
     }
 
-    fn handle_event(&mut self, event: *mut sdl2_sys::SDL_Event) {
-        unsafe {
-            match transmute::<u32, SDL_EventType>((*event).type_) {
-                SDL_EventType::SDL_MOUSEBUTTONDOWN => {
-                    if self.rooted_x <= self.cursor.0
-                        && self.cursor.0 <= self.rooted_x + self.w
-                        && self.rooted_y <= self.cursor.1
-                        && self.cursor.1 <= self.rooted_y + SIZE
-                    {
+    fn handle_event(&mut self, mut event: &mut Event) {
+        match event.r#type {
+            EventType::MouseButtonDown => {
+                if !self.focussed {
+                    if point_in_bounds(
+                        draw!().cursor.0,
+                        draw!().cursor.1,
+                        self.rooted_x,
+                        self.rooted_y,
+                        self.w,
+                        SIZE,
+                    ) {
                         self.focussed = true;
-                        (*event).type_ = 0;
-                    } else {
-                        self.focussed = false;
+                        event.handled = true;
                     }
-                }
-                SDL_EventType::SDL_MOUSEMOTION => {
-                    let motion = (*event).motion;
-                    self.cursor = (motion.x as isize, motion.y as isize);
-                }
-                SDL_EventType::SDL_KEYDOWN => {
-                    if !self.focussed {
-                        return;
-                    }
-                    let key = (*event).key.keysym.scancode;
-                     *self.val.lock().unwrap() = key;
+                } else {
                     self.focussed = false;
-                    (*event).type_ = 0;
+                    event.handled = true;
                 }
-                _ => (),
-            };
+            }
+            EventType::KeyDown(key) => {
+                if !self.focussed {
+                    return;
+                }
+                *self.val.lock().unwrap() = key;
+                event.handled = true;
+                self.focussed = false;
+            }
+            _ => (),
         }
     }
 }
