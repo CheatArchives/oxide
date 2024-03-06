@@ -47,13 +47,12 @@ pub trait HasVmt<T: 'static> {
     fn get_vmt(&self) -> &'static T;
     fn set_vmt(&mut self, vmt: *mut T);
 }
+
 impl<T: 'static + Clone + Debug> HasVmt<T> for WithVmt<T> {
     fn get_vmt(&self) -> &'static T {
         unsafe { &*self.vmt }
     }
     fn set_vmt(&mut self, vmt: *mut T) {
-        unsafe{
-            self.vmt = vmt
-        }
+        unsafe { self.vmt = vmt }
     }
 }

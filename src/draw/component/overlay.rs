@@ -18,27 +18,40 @@ const BUTTON_HEIGHT: isize = 50;
 pub struct Overlay {
     pub visible: bool,
     pub components: Components,
-    pub aimbot_visible: Arc<Mutex<bool>>,
 }
 
 impl Overlay {
     pub fn new() -> Overlay {
         let mut components = Components::new();
-        let show_aimbot = Arc::new(Mutex::new(false));
-        // ORDER OF ADDING IS IMPORTANT
+        let show_aimbot_window = Arc::new(Mutex::new(false));
+        let show_visuals_window = Arc::new(Mutex::new(false));
+
         components.add(Button::new(
             "AIMBOT",
             PADDING,
-            TOP_OVERLAY_HEIGHT + PADDING,
+            TOP_OVERLAY_HEIGHT + PADDING * 2,
             LEFT_OVERLAY_WIDTH - PADDING * 2,
             BUTTON_HEIGHT,
-            show_aimbot.clone(),
+            show_aimbot_window.clone(),
+            FontSize::Medium,
         ));
-        components.add(AimbotWindow::new(show_aimbot.clone()));
+
+        components.add(Button::new(
+            "VISUALS",
+            PADDING,
+            TOP_OVERLAY_HEIGHT + PADDING * 3 + BUTTON_HEIGHT,
+            LEFT_OVERLAY_WIDTH - PADDING * 2,
+            BUTTON_HEIGHT,
+            show_visuals_window.clone(),
+            FontSize::Medium,
+        ));
+
+        components.add(AimbotWindow::new(show_aimbot_window.clone()));
+        components.add(VisualsWindow::new(show_visuals_window.clone()));
+
         Overlay {
             visible: true,
             components,
-            aimbot_visible: show_aimbot,
         }
     }
 }

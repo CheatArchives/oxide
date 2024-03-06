@@ -8,6 +8,7 @@ module_export!(aimbot_fov);
 module_export!(overlay);
 module_export!(base);
 module_export!(aimbot_window);
+module_export!(visuals_window);
 
 pub trait RawComponent {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize);

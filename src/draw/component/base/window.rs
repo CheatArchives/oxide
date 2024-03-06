@@ -21,26 +21,36 @@ pub struct Window {
     pub visible: Arc<Mutex<bool>>,
     dragging: bool,
     components: Components,
+    close_button: Button,
 }
 
 impl Window {
-    pub fn new(
-        x: isize,
-        y: isize,
-        title: String,
-        visible: Arc<Mutex<bool>>,
-        components: Components,
-    ) -> Window {
+    pub fn new(title: String, visible: Arc<Mutex<bool>>, components: Components) -> Window {
+        let w = 500;
+        let h = 500;
+
+        let close_button_size = (FontSize::Small as isize + 2);
+        let close_button_pad = HEADER_HEIGHT / 2 - close_button_size / 2;
+        let close_button = Button::new(
+            "x",
+            w - close_button_pad - close_button_size,
+            close_button_pad,
+            close_button_size,
+            close_button_size,
+            visible.clone(),
+            FontSize::Small,
+        );
         Window {
-            x,
-            y,
-            w: 500,
-            h: 500,
+            x: 0,
+            y: 0,
+            w,
+            h,
             title,
             last_cursor: (0, 0),
             visible,
             dragging: false,
             components,
+            close_button,
         }
     }
 }
@@ -72,6 +82,7 @@ impl RawComponent for Window {
             frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
 
             self.components.draw(frame, self.x, self.y + HEADER_HEIGHT);
+            self.close_button.draw(frame, self.x, self.y)
         }
     }
 
@@ -79,8 +90,14 @@ impl RawComponent for Window {
         if !*self.visible.lock().unwrap() {
             return;
         }
-
         self.components.handle_event(event);
+        if event.handled {
+            return;
+        }
+        self.close_button.handle_event(event);
+        if event.handled {
+            return;
+        }
         match event.r#type {
             EventType::CursorMove(pos) => {
                 if self.dragging {

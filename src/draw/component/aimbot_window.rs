@@ -34,7 +34,7 @@ impl AimbotWindow {
         components.add(TextInput::new(10, 50, 100, aimbot_fov_val.clone()));
         components.add(KeyInput::new(10, 75, 100, aimbot_key.clone()));
 
-        let window = window::Window::new(0, 0, "AIMBOT".to_owned(), visible, components);
+        let window = window::Window::new("AIMBOT".to_owned(), visible, components);
         AimbotWindow {
             window,
             aimbot_val,
@@ -43,17 +43,19 @@ impl AimbotWindow {
             aimbot_key,
         }
     }
-}
-
-impl RawComponent for AimbotWindow {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
+    fn update_settings(&self) {
         settings!().aimbot = *self.aimbot_val.lock().unwrap();
         settings!().aimbot_draw_fov = *self.aimbot_draw_fov_val.lock().unwrap();
         if let Ok(fov) = self.aimbot_fov_val.lock().unwrap().parse() {
             settings!().aimbot_fov = fov;
         }
         settings!().aimbot_key = *self.aimbot_key.lock().unwrap();
+    }
+}
 
+impl RawComponent for AimbotWindow {
+    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
+        self.update_settings();
         self.window.draw(frame, root_x, root_y);
     }
 

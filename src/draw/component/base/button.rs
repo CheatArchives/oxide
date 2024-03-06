@@ -14,31 +14,43 @@ pub struct Button {
     w: isize,
     h: isize,
     val: Arc<Mutex<bool>>,
-    text: String 
+    text: String,
+    size: FontSize,
 }
 
 impl Button {
-    pub fn new(text: &str,x: isize, y: isize, w: isize, h: isize, val: Arc<Mutex<bool>>) -> Button {
+    pub fn new(
+        text: &str,
+        x: isize,
+        y: isize,
+        w: isize,
+        h: isize,
+        val: Arc<Mutex<bool>>,
+        size: FontSize,
+    ) -> Button {
         Button {
             x,
             y,
             w,
             h,
             val,
-            text: text.to_owned()
+            text: text.to_owned(),
+            size,
         }
     }
 }
 
 impl RawComponent for Button {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
-        frame.filled_rect(self.x, self.y, self.w, self.h, CURSOR_TEXT, 255);
-        frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
+        let x = self.x + root_x;
+        let y = self.y + root_y;
+        frame.filled_rect(x, y, self.w, self.h, CURSOR_TEXT, 255);
+        frame.outlined_rect(x, y, self.w, self.h, CURSOR, 255);
         frame.text(
             &self.text,
-            self.x + self.w / 2,
-            self.y + self.h / 2,
-            FontSize::Medium,
+            x + self.w / 2 - 1,
+            y + self.h / 2 + 1,
+            self.size.clone(),
             true,
             FOREGROUND,
             255,
