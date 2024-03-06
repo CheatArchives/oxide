@@ -75,8 +75,8 @@ impl RawComponent for TextInput {
                         event.handled = true;
                     }
                 } else {
-                        self.focussed = false;
-                        event.handled = true;
+                    self.focussed = false;
+                    event.handled = true;
                 }
             }
             EventType::KeyDown(key) => {
