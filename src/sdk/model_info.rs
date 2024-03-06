@@ -39,11 +39,25 @@ impl Hitbox {
     pub fn center(&self, bone: &Matrix3x4) -> Vector3 {
         let min = bone.transform(&self.bbmin);
         let max = bone.transform(&self.bbmax);
-        Vector3 {
-            x: (min.x + max.x) / 2.0,
-            y: (min.y + max.y) / 2.0,
-            z: (min.z + max.z) / 2.0,
-        }
+        Vector3::new(
+            (min.x + max.x) / 2.0,
+            (min.y + max.y) / 2.0,
+            (min.z + max.z) / 2.0,
+        )
+    }
+    pub fn corners(&self, bone: &Matrix3x4) -> [Vector3; 8] {
+        let min = bone.transform(&self.bbmin);
+        let max = bone.transform(&self.bbmax);
+        [
+            Vector3::new(min.x, min.y, min.z),
+            Vector3::new(max.x, min.y, min.z),
+            Vector3::new(min.x, max.y, min.z),
+            Vector3::new(min.x, min.y, max.z),
+            Vector3::new(max.x, max.y, min.z),
+            Vector3::new(min.x, max.y, max.z),
+            Vector3::new(max.x, min.y, max.z),
+            Vector3::new(min.x, min.y, min.z),
+        ]
     }
 }
 
