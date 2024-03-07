@@ -30,7 +30,7 @@ impl Aimbot {
             + (angle.pitch - my_angle.pitch).abs().powi(2))
         .sqrt();
 
-        if distance_to_center > settings!().aimbot_fov as f32 {
+        if distance_to_center > *settings!().aimbot.fov.lock().unwrap() as f32 {
             return None;
         }
 
@@ -110,7 +110,7 @@ impl Aimbot {
         }
     }
     pub fn should_run(&mut self) -> bool {
-        if !settings!().aimbot || !self.shoot_key_pressed {
+        if !*settings!().aimbot.enabled.lock().unwrap() || !self.shoot_key_pressed {
             return false;
         }
 
@@ -164,12 +164,11 @@ impl Aimbot {
                     return true;
                 }
                 return false;
-            }
+            },
             _ => {
                 cmd.buttons.set(ButtonFlags::InAttack, true);
                 true
             }
-        
         }
     }
 }

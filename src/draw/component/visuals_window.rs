@@ -15,6 +15,20 @@ impl VisualsWindow {
     pub fn new(visible: Arc<Mutex<bool>>) -> VisualsWindow {
         let mut components = Components::new();
 
+        components.add(Checkbox::new(
+            "third person",
+            settings!().visual.third_person.clone(),
+            10,
+            10,
+        ));
+
+        components.add(FloatInput::new(
+            "fov",
+            30,
+            10,
+            100,
+            settings!().visual.fov.clone()
+        ));
         let window = window::Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }
     }

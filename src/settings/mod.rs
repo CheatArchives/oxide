@@ -1,22 +1,54 @@
+use std::sync::{Arc, Mutex};
+
 use sdl2_sys::SDL_Scancode;
 
 use crate::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 pub struct Settings {
-    pub aimbot: bool,
-    pub aimbot_draw_fov: bool,
-    pub aimbot_fov: f32,
-    pub aimbot_key: SDL_Scancode,
+    pub aimbot: AimbotSettings,
+    pub visual: VisualSettings,
 }
 
 impl Settings {
     pub fn new() -> Settings {
         Settings {
-            aimbot: false,
-            aimbot_draw_fov: false,
-            aimbot_fov: 30f32,
-            aimbot_key: SDL_Scancode::SDL_SCANCODE_LSHIFT,
+            aimbot: AimbotSettings::new(),
+            visual: VisualSettings::new(),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AimbotSettings {
+    pub enabled: amt!(bool),
+    pub draw_fov: amt!(bool),
+    pub fov: amt!(f32),
+    pub key: amt!(SDL_Scancode),
+}
+
+impl AimbotSettings {
+    pub fn new() -> AimbotSettings {
+        AimbotSettings {
+            enabled: am!(false),
+            draw_fov: am!(false),
+            fov: am!(30f32),
+            key: am!(SDL_Scancode::SDL_SCANCODE_LSHIFT),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct VisualSettings {
+    pub third_person: amt!(bool),
+    pub fov: amt!(f32),
+}
+
+impl VisualSettings {
+    pub fn new() -> VisualSettings {
+        VisualSettings {
+            third_person: am!(false),
+            fov: am!(100f32),
         }
     }
 }

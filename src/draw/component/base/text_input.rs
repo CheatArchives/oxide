@@ -11,6 +11,7 @@ const SIZE: isize = FontSize::Small as isize + 4;
 
 #[derive(Debug)]
 pub struct TextInput {
+    label: &'static str,
     x: isize,
     y: isize,
     w: isize,
@@ -22,8 +23,9 @@ pub struct TextInput {
 }
 
 impl TextInput {
-    pub fn new(x: isize, y: isize, w: isize, val: Arc<Mutex<String>>) -> TextInput {
+    pub fn new(label: &'static str,x: isize, y: isize, w: isize, val: Arc<Mutex<String>>) -> TextInput {
         TextInput {
+            label,
             x,
             y,
             w,

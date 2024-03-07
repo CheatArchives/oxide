@@ -7,7 +7,7 @@ pub struct AimbotFov {}
 
 impl AimbotFov {
     fn should_draw(&self) -> bool {
-        if !settings!().aimbot || !settings!().aimbot_draw_fov{
+        if !*settings!().aimbot.enabled.lock().unwrap() || !*settings!().aimbot.draw_fov.lock().unwrap(){
             return false;
         }
 
@@ -28,7 +28,7 @@ impl RawComponent for AimbotFov {
             return;
         }
         let size = frame.window_size();
-        let aimbot_fov = settings!().aimbot_fov as f32;
+        let aimbot_fov = *settings!().aimbot.fov.lock().unwrap() as f32;
         let fov = oxide!().fov;
 
         let screen_fov = size.0 as f32 / size.1 as f32 / (4f32 / 3f32);

@@ -1,3 +1,9 @@
+use std::{
+    borrow::Borrow,
+    ops::{Deref, DerefMut},
+    sync::{Arc, Mutex},
+};
+
 use libc::{dlclose, dlerror, dlopen, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Scancode;
 

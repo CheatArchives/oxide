@@ -5,3 +5,4 @@ module_export!(window);
 module_export!(text_input);
 module_export!(key_input);
 module_export!(checkbox);
+module_export!(float_input);
