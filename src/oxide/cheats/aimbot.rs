@@ -34,7 +34,7 @@ impl Aimbot {
             return None;
         }
 
-        return Some(-distance_to_center as isize);
+        Some(-distance_to_center as isize)
     }
     pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
         unsafe {
@@ -42,26 +42,63 @@ impl Aimbot {
                 return None;
             }
         }
-        return Some(1 as isize);
+        Some(1 as isize)
     }
-    pub fn find_point(&self, p_local: &'static Entity, ent: &'static Entity) -> Option<Vector3> {
+
+    pub fn point_scan(
+        &self,
+        p_local: &'static Entity,
+        ent: &Entity,
+        hitboxid: HitboxId,
+        hitbox: &Hitbox,
+        bone: &Matrix3x4,
+    ) -> Option<Vector3> {
         let my_eyes = unsafe { call!(p_local, eye_position) };
-        for hitboxid in self.hitbox_order(p_local) {
-            let (hitbox, bone) = ent.get_hitbox(hitboxid).unwrap();
-            let target_point_candidate = hitbox.center(&bone);
 
-            let Some(prio) = self.point_priority(p_local, target_point_candidate.clone()) else { continue };
+        let points = vec![hitbox.center(bone)];
 
+        let mut corners = hitbox.corners(bone).to_vec();
+
+        corners.sort_by(|corner1, corner2| {
+            let diff1 = corner1.clone() - my_eyes.clone();
+            let diff2 = corner2.clone() - my_eyes.clone();
+            diff1.len().total_cmp(&diff2.len())
+        });
+
+        corners.pop();
+        corners.remove(0);
+
+        let points = vec![points, corners].concat();
+
+        for point in points {
             let trace = trace(
                 my_eyes.clone(),
-                target_point_candidate.clone(),
+                point.clone(),
                 MASK_SHOT | CONTENTS_GRATE,
                 p_local,
             );
             if trace.entity != ent || trace.hitbox != hitboxid {
                 continue;
             }
-            return Some(target_point_candidate);
+            return Some(point);
+        }
+        None
+    }
+
+    pub fn find_point(&self, p_local: &'static Entity, ent: &'static Entity) -> Option<Vector3> {
+        let my_eyes = unsafe { call!(p_local, eye_position) };
+        for hitboxid in self.hitbox_order(p_local) {
+            let (hitbox, bone) = ent.get_hitbox(hitboxid).unwrap();
+
+            let Some(point) = self.point_scan(p_local, ent, hitboxid, &hitbox, &bone) else {
+                continue;
+            };
+
+            let Some(prio) = self.point_priority(p_local, point.clone()) else {
+                continue;
+            };
+
+            return Some(point);
         }
         None
     }
@@ -77,17 +114,21 @@ impl Aimbot {
                 continue;
             };
 
-            let Some(prio) = self.ent_priority(p_local, ent) else { continue };
+            let Some(prio) = self.ent_priority(p_local, ent) else {
+                continue;
+            };
 
-            let Some(target_point) = self.find_point(p_local, ent) else { continue };
+            let Some(point) = self.find_point(p_local, ent) else {
+                continue;
+            };
 
-            let Some((_, target_prio)) = &target else {
-                    target = Some((target_point, prio));
-                    continue;
-                };
+            let Some((_, last_prio)) = &target else {
+                target = Some((point, prio));
+                continue;
+            };
 
-            if prio > *target_prio {
-                target = Some((target_point, prio))
+            if prio > *last_prio {
+                target = Some((point, prio))
             }
         }
 

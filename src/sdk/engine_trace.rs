@@ -51,7 +51,7 @@ impl Ray {
             start_offset: VectorAligned::default(),
             extents: VectorAligned::default(),
             is_ray: true,
-            is_swept: delta.len3d() != 0f32,
+            is_swept: delta.len() != 0f32,
         }
     }
 }
