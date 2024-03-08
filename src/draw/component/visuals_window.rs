@@ -24,10 +24,10 @@ impl VisualsWindow {
 
         components.add(FloatInput::new(
             "fov",
-            30,
             10,
+            30,
             100,
-            settings!().visual.fov.clone()
+            settings!().visual.fov.clone(),
         ));
         let window = window::Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }

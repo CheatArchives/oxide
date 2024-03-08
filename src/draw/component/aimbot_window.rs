@@ -27,7 +27,13 @@ impl AimbotWindow {
             10,
             30,
         ));
-        components.add(FloatInput::new("aimbot fov",10, 50, 100, settings!().aimbot.fov.clone()));
+        components.add(FloatInput::new(
+            "aimbot fov",
+            10,
+            50,
+            100,
+            settings!().aimbot.fov.clone(),
+        ));
         components.add(KeyInput::new(10, 75, 100, settings!().aimbot.key.clone()));
 
         let window = window::Window::new("AIMBOT".to_owned(), visible, components);

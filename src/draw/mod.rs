@@ -17,7 +17,7 @@ pub struct Draw {
     pub old_ctx: *mut c_void,
     pub ctx: *mut c_void,
     pub components: Components,
-    pub cursor: (isize,isize)
+    pub cursor: (isize, isize),
 }
 
 impl Draw {
@@ -54,7 +54,7 @@ impl Draw {
             old_ctx,
             ctx,
             renderer,
-            cursor: (0,0)
+            cursor: (0, 0),
         })
     }
 

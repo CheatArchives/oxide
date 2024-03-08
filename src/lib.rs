@@ -19,7 +19,7 @@ pub use libc::wchar_t;
 pub use std::{
     ffi::*,
     intrinsics::breakpoint,
-    mem::transmute,
+    mem::{transmute, MaybeUninit},
     ptr::{addr_of, addr_of_mut},
 };
 

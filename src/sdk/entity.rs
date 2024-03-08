@@ -1,5 +1,3 @@
-use std::{mem::MaybeUninit, usize};
-
 use derivative::Derivative;
 use libc::wait;
 
@@ -46,7 +44,7 @@ pub struct VMTEntity {
     pub world_space_center: cfn!(&Vector3, &Entity),
     #[derivative(Debug = "ignore")]
     _pad5: [u32; 10],
-    pub get_team_number: cfn!(isize, *const Entity),
+    pub get_team_number: cfn!(Team, *const Entity),
     #[derivative(Debug = "ignore")]
     _pad6: [u32; 34],
     pub get_health: cfn!(&isize, &Entity),
@@ -170,6 +168,7 @@ impl Entity {
         self.next_attack <= now
     }
 
+    //todo make this shit a result type
     pub fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<(Hitbox, Matrix3x4)> {
         unsafe {
             let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::zeroed().assume_init();
@@ -200,5 +199,30 @@ impl Entity {
     pub fn local() -> Option<&'static mut Entity> {
         let id = unsafe { call!(interface!(base_engine), get_local_player) };
         Self::get_player(id)
+    }
+    pub fn get_hitbox_raw(&self, bone: usize) -> (Vector3,Angles){
+        unsafe {
+            let pos = MaybeUninit::zeroed().assume_init();
+            let angle = MaybeUninit::zeroed().assume_init();
+
+            (oxide!().get_bone_position_fn)(&self, bone, &pos, &angle);
+            (pos, angle)
+        }
+    }
+}
+
+#[repr(C)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Team {
+    Red = 2,
+    Blue = 3,
+}
+
+impl Team {
+    pub fn color(&self) -> usize {
+        match self {
+            Team::Red => RED,
+            Team::Blue => BLUE,
+        }
     }
 }

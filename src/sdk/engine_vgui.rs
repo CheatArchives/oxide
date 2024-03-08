@@ -7,5 +7,5 @@ pub type EngineVgui = WithVmt<VMTEngineVgui>;
 #[derive(Debug,Clone)]
 pub struct VMTEngineVgui {
     _pad1: [u8;4*15],
-    pub paint:   cfn!(c_void, &'static WithVmt<VMTBaseClient>),
+    pub paint:   cfn!((), &EngineVgui,isize),
 }

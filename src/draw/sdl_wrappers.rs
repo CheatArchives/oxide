@@ -33,6 +33,13 @@ impl Frame {
         }
     }
 
+    pub fn line(&self, x1: isize, y1: isize, x2: isize, y2: isize, color: usize, alpha: u8) {
+        self.set_color(color, alpha);
+
+        unsafe {
+            SDL_RenderDrawLine(self.renderer, x1 as i32, y1 as i32, x2 as i32, y2 as i32);
+        }
+    }
     pub fn circle(&self, root_x: isize, root_y: isize, r: f32, color: usize, alpha: u8) {
         let mut points = Vec::new();
 
@@ -69,7 +76,7 @@ impl Frame {
         color: usize,
         alpha: u8,
     ) {
-        if text.len() == 0{
+        if text.len() == 0 {
             return;
         }
         let glyph = self
@@ -79,9 +86,9 @@ impl Frame {
 
         let mut x_offset = -(glyph.metrics.vertBearingX >> 6) as isize;
         if center_horizontaly {
-            x_offset -= calculated_size.0/2;
+            x_offset -= calculated_size.0 / 2;
         }
-        let mut y_offset = calculated_size.1/2 - calculated_size.2/2;
+        let mut y_offset = calculated_size.1 / 2 - calculated_size.2 / 2;
 
         let max_advance = unsafe {
             (self

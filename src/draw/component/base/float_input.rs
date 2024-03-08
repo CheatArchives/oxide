@@ -30,11 +30,12 @@ impl FloatInput {
 
 impl RawComponent for FloatInput {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
-        let mut float_val = *self.float_val.lock().unwrap();
+        let mut float_val = self.float_val.lock().unwrap();
         let mut text_val = self.text_val.lock().unwrap();
         if let Ok(val) = text_val.parse() {
-            float_val = val
+            *float_val = val
         }
+        drop(text_val);
         self.text_input.draw(frame, root_x, root_y)
     }
 

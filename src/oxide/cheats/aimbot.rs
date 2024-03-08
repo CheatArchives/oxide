@@ -15,6 +15,7 @@ impl Aimbot {
             shoot_key_pressed: false,
         }
     }
+
     pub fn point_priority(&self, p_local: &Entity, target_point: Vector3) -> Option<isize> {
         let my_eyes = unsafe { call!(p_local, eye_position) };
 
@@ -36,6 +37,7 @@ impl Aimbot {
 
         Some(-distance_to_center as isize)
     }
+
     pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
         unsafe {
             if call!(ent, get_team_number) == call!(p_local, get_team_number) {

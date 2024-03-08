@@ -10,6 +10,7 @@ module_export!(poll_event);
 module_export!(paint_traverse);
 module_export!(override_view);
 module_export!(frame_stage_notify);
+module_export!(paint);
 
 static SWAPWINDOW_OFFSET: usize = 0xFD648;
 static POLLEVENT_OFFSET: usize = 0xFCF64;
@@ -42,6 +43,7 @@ pub struct Hooks {
     pub paint_traverse: Hook<PaintRraverseFn>,
     pub override_view: Hook<OverrideViewFn>,
     pub frame_stage_notify: Hook<FrameStageNotifyFn>,
+    pub paint: Hook<PaintFn>,
 }
 
 impl Hooks {
@@ -66,6 +68,11 @@ impl Hooks {
             frame_stage_notify_hook,
         );
 
+        let paint = Hook::<PaintFn>::init(
+            transmute(&(*interfaces.engine_vgui.get_vmt()).paint),
+            paint_hook,
+        );
+
         let sdl_handle = get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _
             as *const *const *const c_void;
 
@@ -83,6 +90,7 @@ impl Hooks {
             swap_window,
             poll_event,
             frame_stage_notify,
+            paint,
         }
     }
     pub fn restore(&mut self) {
@@ -92,6 +100,6 @@ impl Hooks {
         self.swap_window.restore();
         self.poll_event.restore();
         self.frame_stage_notify.restore();
+        self.paint.restore();
     }
 }
-

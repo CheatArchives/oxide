@@ -15,24 +15,29 @@ pub struct Oxide {
     pub hooks: Hooks,
     pub global_vars: &'static GlobalVars,
     pub cheats: Cheats,
-    pub fov: f32
+    pub fov: f32,
+    pub get_bone_position_fn: GetBonePositionFn,
 }
+pub type GetBonePositionFn = cfn!((), &Entity, usize, &Vector3, &Angles);
 
 impl Oxide {
     pub unsafe fn init() -> Result<Oxide, std::boxed::Box<dyn Error>> {
+        let sig =
+            "55 89 E5 53 8D 5D ? 83 EC 44 8B 45 ? 89 5C 24 ? 89 44 24 ? 8B 45 ? 89 04 24 E8 ? ? ? ? 8B 45";
+        let get_bone_position_fn = transmute(find_sig("./tf/bin/client.so", &sig));
         let interfaces = Interfaces::init()?;
         let hooks = Hooks::init(&interfaces);
         let cheats = Cheats::init();
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
 
-        #[allow(invalid_value)]
         let oxide = Oxide {
             interfaces,
             cheats,
             hooks,
             global_vars,
             fov: 0f32,
+            get_bone_position_fn,
         };
 
         Ok(oxide)

@@ -21,7 +21,7 @@ pub type MatSurface = WithVmt<VMTMatSurface>;
 #[derive(Debug, Clone)]
 pub struct VMTMatSurface {
     _pad1: [u32; 10],
-    pub set_color: cfn!(c_void, &'static MatSurface, isize, isize, isize, isize),
+    pub set_color: cfn!(c_void, &'static MatSurface, u8, u8, u8, isize),
     _pad2: [u32; 1],
     pub draw_filled_rect: cfn!(c_void, &'static MatSurface, isize, isize, isize, isize),
     _pad3: [u32; 1],

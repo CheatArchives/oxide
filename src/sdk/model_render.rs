@@ -15,13 +15,27 @@ impl Matrix3x4 {
         let vec2 = Vector3::new(matrix[1][0], matrix[1][1], matrix[1][2]);
         let vec3 = Vector3::new(matrix[2][0], matrix[2][1], matrix[2][2]);
         Vector3 {
-            x: vec.dot(vec1) + matrix[0][3],
-            y: vec.dot(vec2) + matrix[1][3],
-            z: vec.dot(vec3) + matrix[2][3],
+            x: vec.dot(&vec1) + matrix[0][3],
+            y: vec.dot(&vec2) + matrix[1][3],
+            z: vec.dot(&vec3) + matrix[2][3],
         }
     }
+    pub fn zeroed() -> Matrix3x4 {
+        Matrix3x4([[0f32; 4]; 3])
+    }
 }
+impl std::ops::Index<usize> for Matrix3x4 {
+    type Output = [f32; 4];
 
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0[index]
+    }
+}
+impl std::ops::IndexMut<usize> for Matrix3x4 {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.0[index]
+    }
+}
 
 #[repr(C)]
 #[derive(Derivative, Clone)]

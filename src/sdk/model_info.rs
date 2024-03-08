@@ -28,17 +28,17 @@ impl HitboxSet {
 #[derive(Debug, Clone)]
 pub struct Hitbox {
     pub bone: usize,
-    group: usize,
-    bbmin: Vector3,
-    bbmax: Vector3,
-    szhitboxnameindex: usize,
+    pub group: usize,
+    pub min: Vector3,
+    pub max: Vector3,
+    pub hitboxnameindex: usize,
     unused: [usize; 8],
 }
 
 impl Hitbox {
     pub fn center(&self, bone: &Matrix3x4) -> Vector3 {
-        let min = bone.transform(&self.bbmin);
-        let max = bone.transform(&self.bbmax);
+        let min = bone.transform(&self.min);
+        let max = bone.transform(&self.max);
         Vector3::new(
             (min.x + max.x) / 2.0,
             (min.y + max.y) / 2.0,
@@ -46,17 +46,17 @@ impl Hitbox {
         )
     }
     pub fn corners(&self, bone: &Matrix3x4) -> [Vector3; 8] {
-        let min = bone.transform(&self.bbmin);
-        let max = bone.transform(&self.bbmax);
+        let min = bone.transform(&self.min);
+        let max = bone.transform(&self.max);
         [
             Vector3::new(min.x, min.y, min.z),
             Vector3::new(max.x, min.y, min.z),
             Vector3::new(min.x, max.y, min.z),
             Vector3::new(min.x, min.y, max.z),
-            Vector3::new(max.x, max.y, min.z),
             Vector3::new(min.x, max.y, max.z),
             Vector3::new(max.x, min.y, max.z),
-            Vector3::new(min.x, min.y, min.z),
+            Vector3::new(max.x, max.y, min.z),
+            Vector3::new(max.x, max.y, max.z),
         ]
     }
 }

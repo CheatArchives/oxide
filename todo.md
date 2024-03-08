@@ -1,3 +1,6 @@
 - [ ] auto versioning
 - [ ] pad macro that with debug ignore
-- [ ] my result type
+- [ ] results instead of options
+- [ ] point system for drawing
+- [ ] put hitbox and bone in one struct?
+- [ ] safer unhooking

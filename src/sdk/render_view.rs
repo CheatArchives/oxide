@@ -17,10 +17,11 @@ pub struct VMTRenderView {
     _pad2: [u32; 42],
     pub get_matrices_for_view: cfn!(
         c_void,
-        &'static RenderView,
-        &'static VMatrix,
-        &'static VMatrix,
-        &'static VMatrix,
-        &'static VMatrix
+        &RenderView,
+        &ViewSetup,
+        &VMatrix,
+        &VMatrix,
+        &VMatrix,
+        &VMatrix
     ),
 }

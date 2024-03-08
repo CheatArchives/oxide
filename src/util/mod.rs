@@ -1,15 +1,19 @@
 use std::{
     borrow::Borrow,
+    mem::MaybeUninit,
     ops::{Deref, DerefMut},
     sync::{Arc, Mutex},
+    usize,
 };
 
-use libc::{dlclose, dlerror, dlopen, RTLD_LAZY, RTLD_NOLOAD};
+use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
+use libc::{dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Scancode;
 
 use crate::*;
 
 pub mod macros;
+module_export!(sigscanner);
 
 pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let mut funcs = transmute::<_, *const *const c_void>(vmt);
@@ -35,6 +39,19 @@ pub fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>>
     }
     unsafe { dlclose(handle) };
     Ok(handle)
+}
+
+struct LinkMap {
+    addr: Elf64_Addr,
+    name: *const c_char,
+    ld: *const Elf64_Dyn,
+    next: *const LinkMap,
+    prev: *const LinkMap,
+    real: *const LinkMap,
+    ns: i32,
+    module_name: *const u8,
+    info: *const u8,
+    phdr: *const Elf64_Phdr,
 }
 
 pub fn sdl_scancode_name_to_string(scan_code: SDL_Scancode) -> String {
@@ -341,4 +358,53 @@ pub fn point_in_bounds(
     h: isize,
 ) -> bool {
     bound_x <= x && x <= bound_x + w && bound_y <= y && y <= bound_y + h
+}
+
+pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
+    let w2v = unsafe { MaybeUninit::zeroed().assume_init() };
+    let v2pr = unsafe { MaybeUninit::zeroed().assume_init() };
+    let w2px = unsafe { MaybeUninit::zeroed().assume_init() };
+    let w2s = unsafe { MaybeUninit::zeroed().assume_init() };
+
+    let player_view = unsafe { MaybeUninit::zeroed().assume_init() };
+    unsafe {
+        call!(interface!(base_client), get_player_view, &player_view);
+    }
+
+    unsafe {
+        call!(
+            interface!(render_view),
+            get_matrices_for_view,
+            &player_view,
+            &w2v,
+            &v2pr,
+            &w2s,
+            &w2px
+        );
+    }
+    let w = w2s[3][0] * vec.x + w2s[3][1] * vec.y + w2s[3][2] * vec.z + w2s[3][3];
+
+    if w < 0.01 {
+        return None;
+    }
+
+    let screen_w = 0;
+    let screen_h = 0;
+
+    unsafe {
+        call!(
+            interface!(base_engine),
+            get_screen_size,
+            &screen_w,
+            &screen_h
+        );
+    }
+
+    let x = w2s[0][0] * vec.x + w2s[0][1] * vec.y + w2s[0][2] * vec.z + w2s[0][3];
+    let y = w2s[1][0] * vec.x + w2s[1][1] * vec.y + w2s[1][2] * vec.z + w2s[1][3];
+
+    Some(Vector2::new(
+        screen_w as f32 / 2f32 * (1f32 + x / w),
+        screen_h as f32 / 2f32 * (1f32 - y / w),
+    ))
 }

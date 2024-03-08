@@ -1,6 +1,6 @@
 use std::{f32::consts::PI, ops::Sub};
 
-use crate::{Angles, VectorAligned};
+use crate::{Angles, Matrix3x4, VectorAligned};
 
 #[derive(Debug, Clone)]
 #[repr(C)]
@@ -10,11 +10,19 @@ pub struct Vector3 {
     pub z: f32,
 }
 
+impl  std::ops::AddAssign for Vector3 {
+    fn add_assign(&mut self, rhs: Self) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+        self.z += rhs.z;
+    }
+}
+
 impl Vector3 {
     pub fn new(x: f32, y: f32, z: f32) -> Vector3 {
         Vector3 { x, y, z }
     }
-    pub fn dot(&self, vec: Vector3) -> f32 {
+    pub fn dot(&self, vec: &Vector3) -> f32 {
         self.x * vec.x + self.y * vec.y + self.z * vec.z
     }
     pub fn len2d(&self) -> f32 {
@@ -30,8 +38,40 @@ impl Vector3 {
             roll: 0.0,
         }
     }
-    pub fn empty() -> Vector3 {
+    pub fn zeroed() -> Vector3 {
         Vector3::new(0.0, 0.0, 0.0)
+    }
+    pub fn rotate(&self, rotation: &[Vector3;3]) -> Vector3 {
+        Vector3::new(
+            self.dot(&rotation[0]),
+            self.dot(&rotation[1]),
+            self.dot(&rotation[2]),
+        )
+
+
+
+    }
+}
+
+#[derive(Debug, Clone)]
+#[repr(C)]
+pub struct Vector2 {
+    pub x: f32,
+    pub y: f32,
+}
+
+impl Vector2 {
+    pub fn new(x: f32, y: f32) -> Vector2 {
+        Vector2 { x, y }
+    }
+    pub fn dot(&self, vec: Vector2) -> f32 {
+        self.x * vec.x + self.y * vec.y
+    }
+    pub fn len(&self) -> f32 {
+        (self.x.powi(2) + self.y.powi(2)).sqrt()
+    }
+    pub fn empty() -> Vector2 {
+        Vector2::new(0.0, 0.0)
     }
 }
 

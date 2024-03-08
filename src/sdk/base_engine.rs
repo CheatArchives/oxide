@@ -24,9 +24,14 @@ pub struct PlayerInfo {
 #[derive(Debug, Clone)]
 pub struct VMTBaseEngine {
     _pad1: [u32; 5],
-    pub get_screen_size: cfn!(c_void, &'static BaseEngine, &'static isize, &'static isize),
+    pub get_screen_size: cfn!(c_void, &BaseEngine, &isize, &isize),
     _pad2: [u32; 2],
-    pub get_player_info: cfn!(bool, &'static BaseEngine, &'static isize, &'static PlayerInfo),
+    pub get_player_info: cfn!(
+        bool,
+        &'static BaseEngine,
+        &'static isize,
+        &'static PlayerInfo
+    ),
     _pad3: [u32; 3],
     pub get_local_player: cfn!(isize, *const BaseEngine),
     _pad4: [u32; 6],

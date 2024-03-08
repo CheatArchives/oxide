@@ -57,33 +57,34 @@ impl Window {
 
 impl RawComponent for Window {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
-        if *self.visible.lock().unwrap() {
-            frame.filled_rect(self.x, self.y, self.w, HEADER_HEIGHT, BACKGROUND, 255);
-            frame.filled_rect(
-                self.x,
-                self.y + HEADER_HEIGHT,
-                self.w,
-                self.h - HEADER_HEIGHT,
-                BACKGROUND,
-                220,
-            );
-
-            frame.text(
-                &self.title,
-                self.x + self.w / 2,
-                self.y + HEADER_HEIGHT / 2,
-                FontSize::Medium,
-                true,
-                FOREGROUND,
-                255,
-            );
-
-            frame.filled_rect(self.x, self.y + HEADER_HEIGHT, self.w, 1, CURSOR, 100);
-            frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
-
-            self.components.draw(frame, self.x, self.y + HEADER_HEIGHT);
-            self.close_button.draw(frame, self.x, self.y)
+        if !*self.visible.lock().unwrap() {
+            return;
         }
+        frame.filled_rect(self.x, self.y, self.w, HEADER_HEIGHT, BACKGROUND, 255);
+        frame.filled_rect(
+            self.x,
+            self.y + HEADER_HEIGHT,
+            self.w,
+            self.h - HEADER_HEIGHT,
+            BACKGROUND,
+            220,
+        );
+
+        frame.text(
+            &self.title,
+            self.x + self.w / 2,
+            self.y + HEADER_HEIGHT / 2,
+            FontSize::Medium,
+            true,
+            FOREGROUND,
+            255,
+        );
+
+        frame.filled_rect(self.x, self.y + HEADER_HEIGHT, self.w, 1, CURSOR, 100);
+        frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
+
+        self.components.draw(frame, self.x, self.y + HEADER_HEIGHT);
+        self.close_button.draw(frame, self.x, self.y)
     }
 
     fn handle_event(&mut self, mut event: &mut Event) {

@@ -1,7 +1,7 @@
 
 ###
 ```sh
-./toolbox.sh inject
+./toolbox.sh inject -d
 ```
 enjoy
 

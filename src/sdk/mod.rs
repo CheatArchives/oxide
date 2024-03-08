@@ -32,9 +32,7 @@ pub type CBaseHandle = usize;
 pub type ConCommand = *const c_void;
 pub type HFont = usize;
 
-#[repr(C)]
-#[derive(Debug, Clone)]
-pub struct VMatrix([[f32; 4]; 4]);
+pub type VMatrix = [[f32; 4]; 4];
 
 #[repr(C)]
 #[derive(Debug, Clone)]
