@@ -1,5 +1,3 @@
-use std::{intrinsics::transmute_unchecked, isize};
-
 use crate::*;
 
 use super::LinkMap;
@@ -20,7 +18,7 @@ fn parse_sig_str(sig: &str) -> Vec<Option<u8>> {
 
 pub fn find_sig(module: &str, sig: &str) -> *const u8 {
     unsafe {
-        let link_map: *const LinkMap = transmute_unchecked(get_handle(module).unwrap());
+        let link_map: *const LinkMap = transmute(get_handle(module).unwrap());
 
         let mod_size = link_map.read().phdr.read().p_memsz;
         let base_addr = link_map.read().addr as *const u8;

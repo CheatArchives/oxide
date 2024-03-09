@@ -1,7 +1,3 @@
-use std::{collections::HashMap, intrinsics::transmute_unchecked, mem::MaybeUninit};
-
-use libc::CLONE_VFORK;
-
 use crate::*;
 
 module_export!(swap_window_hook);

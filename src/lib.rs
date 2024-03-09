@@ -14,7 +14,6 @@ use std::{
 pub use libc::wchar_t;
 pub use std::{
     ffi::*,
-    intrinsics::breakpoint,
     mem::{transmute, MaybeUninit},
     ptr::{addr_of, addr_of_mut},
 };

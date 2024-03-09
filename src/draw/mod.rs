@@ -1,8 +1,5 @@
 use crate::*;
-use freetype_sys::FT_Bitmap;
 use sdl2_sys::*;
-use sdl2_sys::*;
-use std::{f32::consts::PI, intrinsics::offset, isize, mem::MaybeUninit, ptr::null, usize};
 
 module_export!(component);
 module_export!(colors);
