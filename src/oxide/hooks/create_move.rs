@@ -15,7 +15,7 @@ pub unsafe extern "C-unwind" fn create_move_hook(
     let Some(p_local) = Entity::local() else {
         return true;
     };
-    if !call!(p_local, is_alive) {
+    if !c!(p_local, is_alive) {
         return true;
     }
     remove_punch(p_local);
@@ -60,7 +60,7 @@ pub fn correct_movement(
 }
 
     pub fn remove_punch(p_local: &Entity) {
-        let mut my_angles = unsafe { call!(p_local, get_abs_angles).clone() };
+        let mut my_angles = unsafe { c!(p_local, get_abs_angles).clone() };
         my_angles.pitch += p_local.vec_punch_angle.pitch;
         my_angles.yaw += p_local.vec_punch_angle.yaw;
         my_angles.roll += p_local.vec_punch_angle.roll;

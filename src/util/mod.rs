@@ -1,10 +1,4 @@
-use std::{
-    borrow::Borrow,
-    mem::MaybeUninit,
-    ops::{Deref, DerefMut},
-    sync::{Arc, Mutex},
-    usize,
-};
+use std::{mem::MaybeUninit, usize};
 
 use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
 use libc::{dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
@@ -14,7 +8,6 @@ use crate::*;
 
 pub mod macros;
 module_export!(sigscanner);
-
 
 pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let mut funcs = transmute::<_, *const *const c_void>(vmt);
@@ -42,6 +35,7 @@ pub fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>>
     Ok(handle)
 }
 
+#[allow(unused)]
 struct LinkMap {
     addr: Elf64_Addr,
     name: *const c_char,
@@ -369,12 +363,12 @@ pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
 
     let player_view = unsafe { MaybeUninit::zeroed().assume_init() };
     unsafe {
-        call!(interface!(base_client), get_player_view, &player_view);
+        c!(i!(base_client), get_player_view, &player_view);
     }
 
     unsafe {
-        call!(
-            interface!(render_view),
+        c!(
+            i!(render_view),
             get_matrices_for_view,
             &player_view,
             &w2v,
@@ -393,12 +387,7 @@ pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
     let screen_h = 0;
 
     unsafe {
-        call!(
-            interface!(base_engine),
-            get_screen_size,
-            &screen_w,
-            &screen_h
-        );
+        c!(i!(base_engine), get_screen_size, &screen_w, &screen_h);
     }
 
     let x = w2s[0][0] * vec.x + w2s[0][1] * vec.y + w2s[0][2] * vec.z + w2s[0][3];

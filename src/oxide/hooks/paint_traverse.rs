@@ -10,7 +10,7 @@ pub unsafe extern "C-unwind" fn paint_traverse_hook(
     force_paint: bool,
     allow_force: bool,
 ) {
-    let panel_name = CStr::from_ptr(call!(panel, get_name, vpanel));
+    let panel_name = CStr::from_ptr(c!(panel, get_name, vpanel));
     match panel_name.to_str() {
         Ok("HudScope") => return,
         _ => {}

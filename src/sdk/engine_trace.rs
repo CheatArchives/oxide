@@ -158,13 +158,13 @@ pub struct VMTEngineTrace {
 
 pub fn trace(start: Vector3, end: Vector3, mask: u32, p_local: &'static Entity) -> Trace {
     unsafe {
-        let trace_engine = interface!(engine_trace);
+        let trace_engine = i!(engine_trace);
 
         let ray = Ray::new(start, end);
         let filter = TraceFilter::new(p_local);
         let mut trace = MaybeUninit::zeroed().assume_init();
 
-        let res = call!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
+        let res = c!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
         trace
     }
 }

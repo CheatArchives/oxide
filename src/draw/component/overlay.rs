@@ -55,7 +55,7 @@ impl Overlay {
         Overlay {
             visible: true,
             components,
-            windows
+            windows,
         }
     }
 }
@@ -95,6 +95,7 @@ impl RawComponent for Overlay {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let size = frame.window_size();
 
+        c!(i!(mat_surface), set_cursor_always_visible, self.visible);
         if !self.visible {
             self.draw_watermark(frame);
             return;
@@ -134,7 +135,8 @@ impl RawComponent for Overlay {
         );
 
         self.components.draw(frame, 0, 0);
-        self.windows.draw(frame, LEFT_OVERLAY_WIDTH, TOP_OVERLAY_HEIGHT);
+        self.windows
+            .draw(frame, LEFT_OVERLAY_WIDTH, TOP_OVERLAY_HEIGHT);
     }
 
     fn handle_event(&mut self, event: &mut Event) {

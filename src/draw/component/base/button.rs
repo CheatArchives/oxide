@@ -1,9 +1,4 @@
-use std::{
-    sync::{Arc, Mutex},
-    usize,
-};
-
-use sdl2_sys::*;
+use std::sync::{Arc, Mutex};
 
 use crate::*;
 
@@ -63,7 +58,7 @@ impl RawComponent for Button {
         );
     }
 
-    fn handle_event(&mut self, mut event: &mut Event) {
+    fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown => {
                 if point_in_bounds(

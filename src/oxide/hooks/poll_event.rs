@@ -4,10 +4,10 @@ use crate::*;
 pub type PollEventFn = cfn!(isize, *mut SDL_Event);
 
 pub unsafe extern "C-unwind" fn poll_event_hook(event: *mut SDL_Event) -> isize {
-    if DRAW.is_some() {
-        draw!().handle_event(transmute(event));
-    }
-    oxide!().handle_event(transmute(event));
+    let handled = oxide!().handle_event(transmute(event));
 
+    if handled {
+        (*event).type_ = 0
+    }
     (oxide!().hooks.poll_event.org)(event)
 }

@@ -74,11 +74,11 @@ impl Draw {
         }
     }
 
-    pub fn handle_event(&mut self, event: *mut SDL_Event) {
-        let mut event = Event::from(unsafe { *event });
+    pub fn handle_event(&mut self, event: &mut Event) -> bool{
         if let EventType::CursorMove(pos) = event.r#type {
             self.cursor = pos
         }
-        self.components.handle_event(&mut event);
+        self.components.handle_event(event);
+        event.handled
     }
 }

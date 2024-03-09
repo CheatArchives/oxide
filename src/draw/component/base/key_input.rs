@@ -1,7 +1,4 @@
-use std::{
-    sync::{Arc, Mutex},
-    usize,
-};
+use std::sync::{Arc, Mutex};
 
 use sdl2_sys::*;
 
@@ -16,7 +13,6 @@ pub struct KeyInput {
     w: isize,
     rooted_x: isize,
     rooted_y: isize,
-    cursor: (isize, isize),
     val: Arc<Mutex<SDL_Scancode>>,
     focussed: bool,
 }
@@ -29,7 +25,6 @@ impl KeyInput {
             w,
             rooted_x: 0,
             rooted_y: 0,
-            cursor: (0, 0),
             val,
             focussed: false,
         }
@@ -59,7 +54,7 @@ impl RawComponent for KeyInput {
         );
     }
 
-    fn handle_event(&mut self, mut event: &mut Event) {
+    fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown => {
                 if !self.focussed {

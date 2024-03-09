@@ -1,6 +1,5 @@
 use std::{
     sync::{Arc, Mutex},
-    usize,
 };
 
 use sdl2_sys::*;
@@ -17,7 +16,6 @@ pub struct TextInput {
     w: isize,
     rooted_x: isize,
     rooted_y: isize,
-    cursor: (isize, isize),
     val: Arc<Mutex<String>>,
     focussed: bool,
 }
@@ -31,7 +29,6 @@ impl TextInput {
             w,
             rooted_x: 0,
             rooted_y: 0,
-            cursor: (0, 0),
             val,
             focussed: false,
         }
@@ -44,6 +41,19 @@ impl RawComponent for TextInput {
         let y = self.y + root_y;
         self.rooted_x = x;
         self.rooted_y = y;
+
+        let label_size = frame.fonts.get_text_size(self.label, FontSize::Small);
+
+        frame.text(
+            self.label,
+            x,
+            y + SIZE / 2,
+            FontSize::Small,
+            false,
+            FOREGROUND,
+            255,
+        );
+
         frame.filled_rect(x, y, self.w, SIZE, BACKGROUND, 255);
         let outline = if self.focussed { BLUE } else { FOREGROUND };
         frame.outlined_rect(x, y, self.w, SIZE, outline, 255);
@@ -52,7 +62,7 @@ impl RawComponent for TextInput {
 
         frame.text(
             &val,
-            x + self.w / 2,
+            x + self.w / 2 + label_size.0 + 10,
             y + SIZE / 2,
             FontSize::Small,
             true,

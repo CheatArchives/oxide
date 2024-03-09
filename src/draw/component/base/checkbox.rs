@@ -1,14 +1,8 @@
-use std::{
-    isize,
-    mem::MaybeUninit,
-    ptr::null,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 const SIZE: isize = 12;
 
 use crate::*;
-use sdl2_sys::*;
 
 #[derive(Debug, Clone)]
 pub struct Checkbox {
@@ -17,7 +11,6 @@ pub struct Checkbox {
     y: isize,
     rooted_x: isize,
     rooted_y: isize,
-    motion: (isize, isize),
     text: &'static str,
 }
 impl Checkbox {
@@ -28,15 +21,14 @@ impl Checkbox {
             y,
             rooted_x: 0,
             rooted_y: 0,
-            motion: (0, 0),
             text,
         }
     }
 }
 impl RawComponent for Checkbox {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
-        self.rooted_x = (root_x + self.x);
-        self.rooted_y = (root_y + self.y);
+        self.rooted_x = root_x + self.x;
+        self.rooted_y = root_y + self.y;
         frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, FOREGROUND, 255);
         if !*self.checked.lock().unwrap() {
             frame.filled_rect(
@@ -59,7 +51,7 @@ impl RawComponent for Checkbox {
         );
     }
 
-    fn handle_event(&mut self, mut event: &mut Event) {
+    fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown => {
                 if draw!().cursor.0 as isize <= self.rooted_x + SIZE

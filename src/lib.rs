@@ -1,8 +1,10 @@
 #![feature(
     c_variadic,
     pointer_is_aligned,
-    associated_type_defaults
+    associated_type_defaults,
+    stmt_expr_attributes
 )]
+#![allow(improper_ctypes_definitions)]
 
 use std::{
     alloc::{alloc, Layout},
@@ -11,7 +13,6 @@ use std::{
     thread,
 };
 
-pub use libc::wchar_t;
 pub use std::{
     ffi::*,
     mem::{transmute, MaybeUninit},
@@ -53,6 +54,7 @@ unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
 }
 
 #[link_section = ".init_array"]
+#[allow(unused)]
 static LOAD: unsafe extern "C" fn() = {
     #[link_section = ".text.startup"]
     unsafe extern "C" fn load() {
@@ -67,6 +69,7 @@ static LOAD: unsafe extern "C" fn() = {
     load
 };
 
+#[allow(unused)]
 #[link_section = ".text.exit"]
 extern "C" fn unload() {
     unsafe {

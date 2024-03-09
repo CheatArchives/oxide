@@ -1,7 +1,5 @@
 use std::isize;
 
-use sdl2_sys::SDL_Event;
-
 use crate::*;
 
 #[derive(Debug, Clone)]
@@ -20,7 +18,7 @@ impl Aimbot {
     }
 
     pub fn point_priority(&self, p_local: &Entity, target_point: Vector3) -> Option<isize> {
-        let my_eyes = unsafe { call!(p_local, eye_position) };
+        let my_eyes = c!(p_local, eye_position);
 
         let diff = my_eyes - target_point;
         let angle = diff.angle();
@@ -42,10 +40,8 @@ impl Aimbot {
     }
 
     pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
-        unsafe {
-            if call!(ent, get_team_number) == call!(p_local, get_team_number) {
-                return None;
-            }
+        if c!(ent, get_team_number) == c!(p_local, get_team_number) {
+            return None;
         }
         Some(1 as isize)
     }
@@ -57,7 +53,7 @@ impl Aimbot {
         hitboxid: HitboxId,
         hitbox: &Hitbox,
     ) -> Option<(Vector3, isize)> {
-        let my_eyes = unsafe { call!(p_local, eye_position) };
+        let my_eyes = c!(p_local, eye_position);
 
         let mut scaled_hitbox = hitbox.clone();
 
@@ -97,11 +93,10 @@ impl Aimbot {
     }
 
     pub fn find_point(&self, p_local: &'static Entity, ent: &'static Entity) -> Option<Vector3> {
-        let my_eyes = unsafe { call!(p_local, eye_position) };
         for hitboxid in self.hitbox_order(p_local) {
             let hitbox = ent.get_hitbox(hitboxid).unwrap();
 
-            let Some((point,prio)) = self.point_scan(p_local, ent, hitboxid, &hitbox) else {
+            let Some((point,_)) = self.point_scan(p_local, ent, hitboxid, &hitbox) else {
                 continue;
             };
 
@@ -111,10 +106,10 @@ impl Aimbot {
     }
 
     pub fn find_target(&self, p_local: &'static Entity) -> Result<Option<Angles>, OxideError> {
-        let entity_count = unsafe { call!(interface!(entity_list), get_max_entities) };
+        let entity_count = c!(i!(entity_list), get_max_entities);
 
         let mut target: Option<(Vector3, isize)> = None;
-        let my_eyes = unsafe { call!(p_local, eye_position) };
+        let my_eyes = c!(p_local, eye_position);
 
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
@@ -148,8 +143,8 @@ impl Aimbot {
         Ok(None)
     }
     pub fn hitbox_order(&self, p_local: &Entity) -> Vec<HitboxId> {
-        let weapon = unsafe { call!(p_local, get_weapon) };
-        let id = unsafe { call!(weapon, get_weapon_id) };
+        let weapon = unsafe { c!(p_local, get_weapon) };
+        let id = unsafe { c!(weapon, get_weapon_id) };
         match id {
             WeaponType::Sniperrifle => {
                 vec![HitboxId::Head]
@@ -166,7 +161,7 @@ impl Aimbot {
             return false;
         };
 
-        if !unsafe { call!(p_local, is_alive) } {
+        if !unsafe { c!(p_local, is_alive) } {
             return false;
         }
 
@@ -189,17 +184,17 @@ impl Aimbot {
         Ok(())
     }
     pub fn shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
-        let weapon = unsafe { call!(p_local, get_weapon) };
-        let id = unsafe { call!(weapon, get_weapon_id) };
+        let weapon = unsafe { c!(p_local, get_weapon) };
+        let id = unsafe { c!(weapon, get_weapon_id) };
         match id {
             WeaponType::Sniperrifle => {
-                let weapon = unsafe { call!(p_local, get_weapon) };
+                let weapon = unsafe { c!(p_local, get_weapon) };
                 if !p_local.player_cond.get(ConditionFlags::Zoomed) {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;
                 }
                 unsafe {
-                    if !p_local.can_attack() || !call!(weapon, can_fire_critical_shot, true) {
+                    if !p_local.can_attack() || !c!(weapon, can_fire_critical_shot, true) {
                         return false;
                     }
                     cmd.buttons.set(ButtonFlags::InAttack, true);

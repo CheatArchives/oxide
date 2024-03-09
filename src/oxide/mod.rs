@@ -49,28 +49,28 @@ impl Oxide {
             transmute(hud_update_addr + 9);
         **global_vars
     }
-    pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) {
-        match transmute::<u32, SDL_EventType>((*event).type_) {
-            SDL_EventType::SDL_KEYDOWN => {
-                let key = (*event).key.keysym.scancode;
-                match key {
-                    SDL_Scancode::SDL_SCANCODE_LSHIFT => {
-                        self.cheats.aimbot.shoot_key_pressed = true
-                    }
-                    _ => (),
+    pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) -> bool {
+        let mut event = Event::from(unsafe { *event });
+        let aimbot_key = *settings!().aimbot.key.lock().unwrap();
+
+        match event.r#type {
+            EventType::KeyDown(key) => {
+                if key == aimbot_key {
+                    self.cheats.aimbot.shoot_key_pressed = true
                 }
             }
-            SDL_EventType::SDL_KEYUP => {
-                let key = (*event).key.keysym.scancode;
-                match key {
-                    SDL_Scancode::SDL_SCANCODE_LSHIFT => {
-                        self.cheats.aimbot.shoot_key_pressed = false
-                    }
-                    _ => (),
+            EventType::KeyUp(key) => {
+                if key == aimbot_key {
+                    self.cheats.aimbot.shoot_key_pressed = false
                 }
             }
             _ => (),
-        };
+        }
+
+        if DRAW.is_some() {
+            draw!().handle_event(&mut event);
+        }
+        return event.handled;
     }
     pub fn self_unload() {
         let lib_path = CString::new("/tmp/liboxide.so").unwrap();

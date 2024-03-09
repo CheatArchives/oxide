@@ -4,7 +4,7 @@ use crate::{Draw, *};
 use freetype_sys::*;
 use sdl2_sys::{
     SDL_BlendMode, SDL_CreateRGBSurfaceFrom, SDL_CreateTextureFromSurface, SDL_DestroyTexture,
-    SDL_FreeSurface, SDL_Rect, SDL_RenderCopy, SDL_SetSurfaceBlendMode, SDL_Surface,
+    SDL_FreeSurface, SDL_Rect, SDL_RenderCopy, SDL_SetSurfaceBlendMode,
 };
 
 static NERD_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
@@ -79,7 +79,7 @@ impl Fonts {
         let mut h_min = 0;
         let mut h_max = 0;
 
-        for (i, letter) in text.chars().enumerate() {
+        for letter in text.chars() {
             unsafe {
                 FT_Load_Char(face, letter as u32, FT_LOAD_RENDER);
 
@@ -135,7 +135,7 @@ impl Fonts {
                 h: bitmap.rows,
             };
 
-            let texture = unsafe { SDL_CreateTextureFromSurface(draw!().renderer, surface) };
+            let texture = SDL_CreateTextureFromSurface(draw!().renderer, surface);
             SDL_RenderCopy(draw!().renderer, texture, null(), &mut rect);
             SDL_DestroyTexture(texture);
             SDL_FreeSurface(surface);

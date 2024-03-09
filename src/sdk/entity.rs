@@ -148,13 +148,13 @@ impl Entity {
     }
     pub fn get_player(id: isize) -> Option<&'static mut Entity> {
         unsafe {
-            let ent = call!(interface!(entity_list), get_client_entity, id);
+            let ent = c!(i!(entity_list), get_client_entity, id);
             if ent.is_null() {
                 return None;
             }
             let ent = &mut *ent;
             let net = ent.as_networkable();
-            if call!(net, is_dormant) || !call!(ent, is_alive) || !call!(ent, is_player) {
+            if c!(net, is_dormant) || !c!(ent, is_alive) || !c!(ent, is_player) {
                 return None;
             }
 
@@ -164,7 +164,7 @@ impl Entity {
 
     pub unsafe fn can_attack(&self) -> bool {
         let now = oxide!().global_vars.now();
-        let weapon = call!(self, get_weapon);
+        let weapon = c!(self, get_weapon);
         self.next_attack <= now
     }
 
@@ -173,8 +173,8 @@ impl Entity {
         unsafe {
             let rend = self.as_renderable();
 
-            let model = call!(rend, get_model);
-            let studio_model = &*call!(interface!(model_info), get_studio_model, model);
+            let model = c!(rend, get_model);
+            let studio_model = &*c!(i!(model_info), get_studio_model, model);
 
             let Some(hitbox_set) = studio_model.get_hitbox_set(HITBOX_SET) else {
                 return None;
@@ -186,7 +186,7 @@ impl Entity {
         }
     }
     pub fn local() -> Option<&'static mut Entity> {
-        let id = unsafe { call!(interface!(base_engine), get_local_player) };
+        let id = unsafe { c!(i!(base_engine), get_local_player) };
         Self::get_player(id)
     }
 }

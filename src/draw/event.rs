@@ -28,7 +28,6 @@ impl From<SDL_Event> for Event {
                 }
                 SDL_EventType::SDL_MOUSEBUTTONDOWN => EventType::MouseButtonDown,
                 SDL_EventType::SDL_MOUSEBUTTONUP => EventType::MouseButtonUp,
-                SDL_EventType::SDL_MOUSEBUTTONUP => EventType::MouseButtonUp,
                 SDL_EventType::SDL_KEYDOWN => {
                     let key = event.key.keysym.scancode;
                     EventType::KeyDown(key)

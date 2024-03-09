@@ -1,10 +1,4 @@
-use std::{
-    io::Cursor,
-    sync::{Arc, Mutex},
-    usize,
-};
-
-use sdl2_sys::*;
+use std::sync::{Arc, Mutex};
 
 use crate::*;
 
@@ -31,7 +25,7 @@ impl Window {
         let w = 500;
         let h = 500;
 
-        let close_button_size = (FontSize::Small as isize + 2);
+        let close_button_size = FontSize::Small as isize + 2;
         let close_button_pad = HEADER_HEIGHT / 2 - close_button_size / 2;
         let close_button = Button::new(
             "x",
@@ -95,7 +89,7 @@ impl RawComponent for Window {
         self.close_button.draw(frame, x, y)
     }
 
-    fn handle_event(&mut self, mut event: &mut Event) {
+    fn handle_event(&mut self, event: &mut Event) {
         if !*self.visible.lock().unwrap() {
             return;
         }

@@ -1,10 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use sdl2_sys::SDL_Scancode;
-
 use crate::*;
-
-const HEADER_HEIGHT: isize = 50;
 
 #[derive(Debug)]
 pub struct AimbotWindow {

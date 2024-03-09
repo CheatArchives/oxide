@@ -1,4 +1,4 @@
-use std::{f32::consts::PI, ptr::null};
+use std::f32::consts::PI;
 
 use sdl2_sys::*;
 
@@ -88,7 +88,7 @@ impl Frame {
         if center_horizontaly {
             x_offset -= calculated_size.0 / 2;
         }
-        let mut y_offset = calculated_size.1 / 2 - calculated_size.2 / 2;
+        let y_offset = calculated_size.1 / 2 - calculated_size.2 / 2;
 
         let max_advance = unsafe {
             (self
@@ -113,9 +113,7 @@ impl Frame {
             let y = y + y_offset - (glyph.metrics.horiBearingY >> 6) as isize;
 
             x_offset += (glyph.metrics.horiAdvance >> 6) as isize;
-            unsafe {
-                Fonts::draw_glyph(glyph, x, y, color, alpha);
-            }
+            Fonts::draw_glyph(glyph, x, y, color, alpha);
         }
     }
 }

@@ -1,7 +1,9 @@
 use crate::*;
 
+#[allow(unused)]
 pub struct VMTMoveHelper(&'static mut c_void);
 
+#[allow(unused)]
 pub struct MoveHelper {
     vmt: *mut VMTMoveHelper,
 }

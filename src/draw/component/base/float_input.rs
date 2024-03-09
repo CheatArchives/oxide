@@ -1,13 +1,6 @@
-use std::{
-    sync::{Arc, Mutex},
-    usize,
-};
-
-use sdl2_sys::*;
+use std::sync::{Arc, Mutex};
 
 use crate::*;
-
-const SIZE: isize = FontSize::Small as isize + 4;
 
 #[derive(Debug)]
 pub struct FloatInput {
@@ -31,7 +24,7 @@ impl FloatInput {
 impl RawComponent for FloatInput {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let mut float_val = self.float_val.lock().unwrap();
-        let mut text_val = self.text_val.lock().unwrap();
+        let text_val = self.text_val.lock().unwrap();
         if let Ok(val) = text_val.parse() {
             *float_val = val
         }

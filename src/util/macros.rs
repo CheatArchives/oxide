@@ -16,6 +16,7 @@ macro_rules! module_export {
 #[macro_export]
 macro_rules! oxide {
     () => {
+        #[allow(unused_unsafe)]
         unsafe { &mut *(OXIDE.unwrap() as *mut _ as *mut Oxide) }
     };
 }
@@ -23,7 +24,10 @@ macro_rules! oxide {
 #[macro_export]
 macro_rules! draw {
     () => {
-        unsafe { &mut *(DRAW.unwrap() as *mut _ as *mut Draw) }
+        #[allow(unused_unsafe)]
+        unsafe {
+            &mut *(DRAW.unwrap() as *mut _ as *mut Draw)
+        }
     };
 }
 
@@ -42,15 +46,18 @@ macro_rules! interface_vmt {
 }
 
 #[macro_export]
-macro_rules! interface {
+macro_rules! i {
     ($n:ident) => {
         oxide!().interfaces.$n.interface_ref()
     };
 }
 #[macro_export]
-macro_rules! call {
+macro_rules! c {
     ($i:expr,$f:ident $(,$args: expr)*) => {
-        ((*$i.vmt).$f)($i,$($args),*)
+        #[allow(unused_unsafe)]
+        unsafe{
+            ((*$i.vmt).$f)($i,$($args),*)
+        }
     };
 }
 #[macro_export]

@@ -6,8 +6,8 @@ pub fn draw_hitboxes() {
     let Some(p_local) = Entity::local() else {
         return;
     };
-    if unsafe { call!(interface!(base_engine), is_in_game) } {
-        let entity_count = unsafe { call!(interface!(entity_list), get_highest_entity_index) };
+    if unsafe { c!(i!(base_engine), is_in_game) } {
+        let entity_count = unsafe { c!(i!(entity_list), get_highest_entity_index) };
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
                     continue;
@@ -15,7 +15,7 @@ pub fn draw_hitboxes() {
             if ent as *const _ == p_local as *const _ {
                 continue;
             }
-            let team = unsafe { call!(ent, get_team_number) };
+            let team = unsafe { c!(ent, get_team_number) };
 
             let scale = oxide!().cheats.aimbot.hitbox_scale;
 
@@ -65,8 +65,8 @@ pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
                     };
         let (r, g, b) = hex_to_rgb!(color);
         unsafe {
-            call!(
-                interface!(mat_surface),
+            c!(
+                i!(mat_surface),
                 set_color,
                 r as isize,
                 g as isize,
@@ -74,8 +74,8 @@ pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
                 alpha as isize
             );
 
-            call!(
-                interface!(mat_surface),
+            c!(
+                i!(mat_surface),
                 draw_line,
                 pos1.x as isize,
                 pos1.y as isize,

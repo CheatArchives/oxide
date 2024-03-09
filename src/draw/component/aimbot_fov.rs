@@ -15,7 +15,7 @@ impl AimbotFov {
             return false;
         };
 
-        if !unsafe { call!(p_local, is_alive) } {
+        if !unsafe { c!(p_local, is_alive) } {
             return false;
         }
         true

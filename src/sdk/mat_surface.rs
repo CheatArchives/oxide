@@ -36,7 +36,7 @@ pub struct VMTMatSurface {
     pub print_text: cfn!(
         c_void,
         &'static MatSurface,
-        &'static wchar_t,
+        &'static i32,
         isize,
         FontDrawType
     ),
@@ -62,7 +62,7 @@ pub struct VMTMatSurface {
         c_void,
         &'static MatSurface,
         HFont,
-        &'static wchar_t,
+        &'static i32,
         &'static mut isize,
         &'static mut isize
     ),
