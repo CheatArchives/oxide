@@ -9,4 +9,6 @@ with open("Cargo.toml",mode="r+") as f:
     if matches:
         g = matches.groups()
         print(f'version bumped to {int(g[1]) + 1}')
+        f.seek(0)
         f.write("".join([g[0],str(int(g[1]) + 1),g[2]]))
+        f.truncate()
