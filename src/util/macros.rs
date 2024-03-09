@@ -81,6 +81,12 @@ macro_rules! hex_to_rgb {
         (($h >> 16) as u8, ($h >> 8) as u8, $h as u8)
     };
 }
+#[macro_export]
+macro_rules! rgb_to_hex {
+    ($r:expr,$g:expr, $b:expr) => {
+        (($r as usize) << 16) + (($g as usize) << 8) + $b as usize
+    };
+}
 
 #[macro_export]
 macro_rules! amt {

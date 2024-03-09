@@ -1,4 +1,5 @@
-use std::intrinsics::size_of;
+
+use std::mem::{size_of};
 
 use crate::*;
 
@@ -14,9 +15,9 @@ pub struct HitboxSet {
 
 impl HitboxSet {
     pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<Hitbox> {
-        let ptr = ((self as *const _ as usize
+        let ptr = (self as *const _ as usize
             + self.hitboxindex
-            + size_of::<Hitbox>() * id as usize) as *const Hitbox);
+            + size_of::<Hitbox>() * id as usize) as *const Hitbox;
         if ptr.is_null() {
             return None;
         }

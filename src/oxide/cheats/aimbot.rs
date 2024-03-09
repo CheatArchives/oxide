@@ -7,12 +7,15 @@ use crate::*;
 #[derive(Debug, Clone)]
 pub struct Aimbot {
     pub shoot_key_pressed: bool,
+    pub hitbox_scale: f32,
 }
 
 impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
+            //todo make this higher once we figure out the nolerp n consistancy
+            hitbox_scale: 7.0 / 10.0,
         }
     }
 
@@ -58,8 +61,8 @@ impl Aimbot {
 
         let mut scaled_hitbox = hitbox.clone();
 
-        scaled_hitbox.min *= 9.0 / 10.0;
-        scaled_hitbox.max *= 9.0 / 10.0;
+        scaled_hitbox.min *= self.hitbox_scale;
+        scaled_hitbox.max *= self.hitbox_scale;
 
         let points = vec![scaled_hitbox.center(ent)];
         let mut corners = scaled_hitbox.corners(ent).to_vec();

@@ -8,6 +8,7 @@ use crate::*;
 module_export!(interfaces);
 module_export!(hooks);
 module_export!(cheats);
+module_export!(paint);
 
 #[derive(Debug, Clone)]
 pub struct Oxide {

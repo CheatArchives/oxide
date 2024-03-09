@@ -10,7 +10,7 @@ module_export!(poll_event);
 module_export!(paint_traverse);
 module_export!(override_view);
 module_export!(frame_stage_notify);
-module_export!(paint);
+pub mod paint;
 
 static SWAPWINDOW_OFFSET: usize = 0xFD648;
 static POLLEVENT_OFFSET: usize = 0xFCF64;
@@ -43,7 +43,7 @@ pub struct Hooks {
     pub paint_traverse: Hook<PaintRraverseFn>,
     pub override_view: Hook<OverrideViewFn>,
     pub frame_stage_notify: Hook<FrameStageNotifyFn>,
-    pub paint: Hook<PaintFn>,
+    pub paint: Hook<paint::PaintFn>,
 }
 
 impl Hooks {
@@ -68,9 +68,9 @@ impl Hooks {
             frame_stage_notify_hook,
         );
 
-        let paint = Hook::<PaintFn>::init(
+        let paint = Hook::<paint::PaintFn>::init(
             transmute(&(*interfaces.engine_vgui.get_vmt()).paint),
-            paint_hook,
+            paint::paint_hook,
         );
 
         let sdl_handle = get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _

@@ -1,18 +1,14 @@
 #![feature(
     c_variadic,
     pointer_is_aligned,
-    core_intrinsics,
     associated_type_defaults
 )]
-#![allow(improper_ctypes_definitions, internal_features, unused)]
-#![deny(warnings)]
 
 use std::{
     alloc::{alloc, Layout},
     error::Error,
     mem::ManuallyDrop,
     thread,
-    time::Duration,
 };
 
 pub use libc::wchar_t;
