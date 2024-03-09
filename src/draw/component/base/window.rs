@@ -16,6 +16,8 @@ pub struct Window {
     y: isize,
     w: isize,
     h: isize,
+    rooted_x: isize,
+    rooted_y: isize,
     title: String,
     last_cursor: (isize, isize),
     pub visible: Arc<Mutex<bool>>,
@@ -41,8 +43,10 @@ impl Window {
             FontSize::Small,
         );
         Window {
-            x: 0,
-            y: 0,
+            x: 100,
+            y: 100,
+            rooted_x: 0,
+            rooted_y: 0,
             w,
             h,
             title,
@@ -57,13 +61,17 @@ impl Window {
 
 impl RawComponent for Window {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
+        let x = root_x + self.x;
+        let y = root_y + self.y;
+        self.rooted_x = x;
+        self.rooted_y = y;
         if !*self.visible.lock().unwrap() {
             return;
         }
-        frame.filled_rect(self.x, self.y, self.w, HEADER_HEIGHT, BACKGROUND, 255);
+        frame.filled_rect(x, y, self.w, HEADER_HEIGHT, BACKGROUND, 255);
         frame.filled_rect(
-            self.x,
-            self.y + HEADER_HEIGHT,
+            x,
+            y + HEADER_HEIGHT,
             self.w,
             self.h - HEADER_HEIGHT,
             BACKGROUND,
@@ -72,19 +80,19 @@ impl RawComponent for Window {
 
         frame.text(
             &self.title,
-            self.x + self.w / 2,
-            self.y + HEADER_HEIGHT / 2,
+            x + self.w / 2,
+            y + HEADER_HEIGHT / 2,
             FontSize::Medium,
             true,
             FOREGROUND,
             255,
         );
 
-        frame.filled_rect(self.x, self.y + HEADER_HEIGHT, self.w, 1, CURSOR, 100);
-        frame.outlined_rect(self.x, self.y, self.w, self.h, CURSOR, 255);
+        frame.filled_rect(x, y + HEADER_HEIGHT, self.w, 1, CURSOR, 100);
+        frame.outlined_rect(x, y, self.w, self.h, CURSOR, 255);
 
-        self.components.draw(frame, self.x, self.y + HEADER_HEIGHT);
-        self.close_button.draw(frame, self.x, self.y)
+        self.components.draw(frame, x, y + HEADER_HEIGHT);
+        self.close_button.draw(frame, x, y)
     }
 
     fn handle_event(&mut self, mut event: &mut Event) {
@@ -110,8 +118,8 @@ impl RawComponent for Window {
                 if point_in_bounds(
                     draw!().cursor.0,
                     draw!().cursor.1,
-                    self.x,
-                    self.y,
+                    self.rooted_x,
+                    self.rooted_y,
                     self.w,
                     HEADER_HEIGHT,
                 ) {
@@ -120,8 +128,8 @@ impl RawComponent for Window {
                 if point_in_bounds(
                     draw!().cursor.0,
                     draw!().cursor.1,
-                    self.x,
-                    self.y,
+                    self.rooted_x,
+                    self.rooted_y,
                     self.w,
                     self.h,
                 ) {

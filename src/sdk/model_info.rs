@@ -36,28 +36,50 @@ pub struct Hitbox {
 }
 
 impl Hitbox {
-    pub fn center(&self, bone: &Matrix3x4) -> Vector3 {
-        let min = bone.transform(&self.min);
-        let max = bone.transform(&self.max);
+    pub fn center(&self, ent: &Entity) -> Vector3 {
+        let (pos,_) = self.get_bone_pos(ent);
         Vector3::new(
-            (min.x + max.x) / 2.0,
-            (min.y + max.y) / 2.0,
-            (min.z + max.z) / 2.0,
+            (self.min.x + self.max.x) / 2.0 + pos.x,
+            (self.min.y + self.max.y) / 2.0 + pos.y,
+            (self.min.z + self.max.z) / 2.0 + pos.z,
         )
     }
-    pub fn corners(&self, bone: &Matrix3x4) -> [Vector3; 8] {
-        let min = bone.transform(&self.min);
-        let max = bone.transform(&self.max);
-        [
-            Vector3::new(min.x, min.y, min.z),
-            Vector3::new(max.x, min.y, min.z),
-            Vector3::new(min.x, max.y, min.z),
-            Vector3::new(min.x, min.y, max.z),
-            Vector3::new(min.x, max.y, max.z),
-            Vector3::new(max.x, min.y, max.z),
-            Vector3::new(max.x, max.y, min.z),
-            Vector3::new(max.x, max.y, max.z),
-        ]
+    pub fn get_bone_pos(&self, ent: &Entity) -> (Vector3,Angles) {
+         unsafe {
+            let mut pos = MaybeUninit::zeroed().assume_init();
+            let mut angle = MaybeUninit::zeroed().assume_init();
+
+            (oxide!().get_bone_position_fn)(&ent, self.bone, &mut pos, &mut angle);
+            (pos,angle)
+        }
+    }
+    pub fn corners(&self, ent: &Entity) -> [Vector3; 8] {
+        let (pos,angle) = self.get_bone_pos(ent);
+        let rotation = angle.to_vectors();
+
+        let mut corners = [
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+            Vector3::zeroed(),
+        ];
+        let min = &self.min;
+        let max = &self.max;
+        for i in 0..8 {
+            let x = if i & 0x1 != 0 { max.x } else { min.x };
+            let y = if i & 0x2 != 0 { max.y } else { min.y };
+            let z = if i & 0x4 != 0 { max.z } else { min.z };
+
+            let mut corner = Vector3::new(x, y, z);
+
+            let mut corner = corner.rotate(&rotation);
+            corners[i] = (corner + pos.clone())
+        }
+        corners
     }
 }
 

@@ -18,7 +18,7 @@ pub struct Oxide {
     pub fov: f32,
     pub get_bone_position_fn: GetBonePositionFn,
 }
-pub type GetBonePositionFn = cfn!((), &Entity, usize, &Vector3, &Angles);
+pub type GetBonePositionFn = cfn!((), &Entity, usize, &mut Vector3, &mut Angles);
 
 impl Oxide {
     pub unsafe fn init() -> Result<Oxide, std::boxed::Box<dyn Error>> {

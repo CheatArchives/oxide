@@ -11,6 +11,8 @@ use crate::*;
 pub struct Button {
     x: isize,
     y: isize,
+    rooted_x: isize,
+    rooted_y: isize,
     w: isize,
     h: isize,
     val: Arc<Mutex<bool>>,
@@ -31,6 +33,8 @@ impl Button {
         Button {
             x,
             y,
+            rooted_x: 0,
+            rooted_y: 0,
             w,
             h,
             val,
@@ -44,6 +48,8 @@ impl RawComponent for Button {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let x = self.x + root_x;
         let y = self.y + root_y;
+        self.rooted_x = x;
+        self.rooted_y = y;
         frame.filled_rect(x, y, self.w, self.h, CURSOR_TEXT, 255);
         frame.outlined_rect(x, y, self.w, self.h, CURSOR, 255);
         frame.text(
@@ -63,8 +69,8 @@ impl RawComponent for Button {
                 if point_in_bounds(
                     draw!().cursor.0,
                     draw!().cursor.1,
-                    self.x,
-                    self.y,
+                    self.rooted_x,
+                    self.rooted_y,
                     self.w,
                     self.h,
                 ) {

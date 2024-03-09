@@ -1,6 +1,6 @@
 use std::{mem::MaybeUninit, ops::Sub};
 
-use crate::{Matrix3x4, Vector2, Vector3};
+use crate::*;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
@@ -15,12 +15,12 @@ impl Angles {
         Angles { pitch, yaw, roll }
     }
     pub fn to_vectors(&self) -> [Vector3;3] {
-        let sy = self.yaw.sin();
-        let cy = self.yaw.cos();
-        let sp = self.pitch.sin();
-        let cp = self.pitch.cos();
-        let sr = self.roll.sin();
-        let cr = self.roll.cos();
+        let sy = dtr(self.yaw).sin();
+        let cy = dtr(self.yaw).cos();
+        let sp = dtr(self.pitch).sin();
+        let cp = dtr(self.pitch).cos();
+        let sr = dtr(self.roll).sin();
+        let cr = dtr(self.roll).cos();
 
         let mut vecs = [Vector3::zeroed(),Vector3::zeroed(),Vector3::zeroed()];
         vecs[0].x = cp * cy;

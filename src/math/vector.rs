@@ -1,4 +1,4 @@
-use std::{f32::consts::PI, ops::Sub};
+use std::{f32::consts::PI, ops::Sub, process::Output};
 
 use crate::{Angles, Matrix3x4, VectorAligned};
 
@@ -10,11 +10,18 @@ pub struct Vector3 {
     pub z: f32,
 }
 
-impl  std::ops::AddAssign for Vector3 {
-    fn add_assign(&mut self, rhs: Self) {
-        self.x += rhs.x;
-        self.y += rhs.y;
-        self.z += rhs.z;
+impl std::ops::MulAssign<f32> for Vector3 {
+    fn mul_assign(&mut self, rhs: f32) {
+        self.x *= rhs;
+        self.y *= rhs;
+        self.z *= rhs;
+    }
+}
+
+impl std::ops::Add for Vector3 {
+    type Output = Vector3;
+    fn add(self, rhs: Self) -> Vector3 {
+        Vector3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 
@@ -41,15 +48,12 @@ impl Vector3 {
     pub fn zeroed() -> Vector3 {
         Vector3::new(0.0, 0.0, 0.0)
     }
-    pub fn rotate(&self, rotation: &[Vector3;3]) -> Vector3 {
+    pub fn rotate(&self, rotation: &[Vector3; 3]) -> Vector3 {
         Vector3::new(
             self.dot(&rotation[0]),
             self.dot(&rotation[1]),
             self.dot(&rotation[2]),
         )
-
-
-
     }
 }
 

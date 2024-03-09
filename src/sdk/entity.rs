@@ -169,21 +169,10 @@ impl Entity {
     }
 
     //todo make this shit a result type
-    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<(Hitbox, Matrix3x4)> {
+    pub fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<Hitbox> {
         unsafe {
-            let bones: [Matrix3x4; MAX_STUDIO_BONES] = MaybeUninit::zeroed().assume_init();
             let rend = self.as_renderable();
 
-            if !call!(
-                rend,
-                setup_bones,
-                &bones,
-                MAX_STUDIO_BONES,
-                BoneMask::BoneUsedByHitbox,
-                0f32
-            ) {
-                return None;
-            }
             let model = call!(rend, get_model);
             let studio_model = &*call!(interface!(model_info), get_studio_model, model);
 
@@ -193,21 +182,12 @@ impl Entity {
             let Some(hitbox) = hitbox_set.get_hitbox(hitbox_id) else {
                 return None;
             };
-            Some((hitbox.clone(), bones[hitbox.bone].clone()))
+            Some(hitbox)
         }
     }
     pub fn local() -> Option<&'static mut Entity> {
         let id = unsafe { call!(interface!(base_engine), get_local_player) };
         Self::get_player(id)
-    }
-    pub fn get_hitbox_raw(&self, bone: usize) -> (Vector3,Angles){
-        unsafe {
-            let pos = MaybeUninit::zeroed().assume_init();
-            let angle = MaybeUninit::zeroed().assume_init();
-
-            (oxide!().get_bone_position_fn)(&self, bone, &pos, &angle);
-            (pos, angle)
-        }
     }
 }
 

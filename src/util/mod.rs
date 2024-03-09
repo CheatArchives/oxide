@@ -15,6 +15,7 @@ use crate::*;
 pub mod macros;
 module_export!(sigscanner);
 
+
 pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
     let mut funcs = transmute::<_, *const *const c_void>(vmt);
     let size = std::mem::size_of::<*const c_void>();

@@ -18,11 +18,13 @@ const BUTTON_HEIGHT: isize = 50;
 pub struct Overlay {
     pub visible: bool,
     pub components: Components,
+    pub windows: Components,
 }
 
 impl Overlay {
     pub fn new() -> Overlay {
         let mut components = Components::new();
+
         let show_aimbot_window = Arc::new(Mutex::new(false));
         let show_visuals_window = Arc::new(Mutex::new(false));
 
@@ -46,12 +48,14 @@ impl Overlay {
             FontSize::Medium,
         ));
 
-        components.add(AimbotWindow::new(show_aimbot_window.clone()));
-        components.add(VisualsWindow::new(show_visuals_window.clone()));
+        let mut windows = Components::new();
+        windows.add(AimbotWindow::new(show_aimbot_window.clone()));
+        windows.add(VisualsWindow::new(show_visuals_window.clone()));
 
         Overlay {
             visible: true,
             components,
+            windows
         }
     }
 }
@@ -130,6 +134,7 @@ impl RawComponent for Overlay {
         );
 
         self.components.draw(frame, 0, 0);
+        self.windows.draw(frame, LEFT_OVERLAY_WIDTH, TOP_OVERLAY_HEIGHT);
     }
 
     fn handle_event(&mut self, event: &mut Event) {
@@ -143,6 +148,7 @@ impl RawComponent for Overlay {
         if !self.visible {
             return;
         }
+        self.windows.handle_event(event);
         self.components.handle_event(event);
     }
 }
