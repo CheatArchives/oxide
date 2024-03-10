@@ -1,6 +1,9 @@
-use std::usize;
+use std::{mem::transmute, usize};
 
-use crate::*;
+
+use libc::c_void;
+
+use crate::math::angles::Angles;
 
 #[repr(C)]
 #[derive(Debug, Clone)]

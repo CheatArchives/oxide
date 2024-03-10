@@ -1,6 +1,16 @@
-use std::{f32::consts::PI, usize};
+use std::f32::consts::PI;
 
-use crate::*;
+use crate::{
+    c, cfn,
+    math::angles::Angles,
+    o,
+    sdk::{
+        client_mode::ClientMode,
+        entity::Entity,
+        user_cmd::{ButtonFlags, UserCmd},
+    },
+    DRAW,
+};
 
 pub type CreateMoveFn = cfn!(bool, &'static mut ClientMode, f32, &'static mut UserCmd);
 
@@ -22,11 +32,13 @@ pub unsafe extern "C-unwind" fn create_move_hook(
 
     let org_cmd = cmd.clone();
 
-    if let Err(err) = { oxide!().cheats.aimbot.pre_create_move(cmd) } {
+    if let Err(err) = { o!().cheats.aimbot.pre_create_move(cmd) } {
         eprintln!("{}", err);
     }
 
-    if cmd.buttons.get(ButtonFlags::InJump) && true /*draw!().bhop_checkbox.checked*/ {
+    if cmd.buttons.get(ButtonFlags::InJump) && true
+    /*draw!().bhop_checkbox.checked*/
+    {
         cmd.buttons
             .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);
     }
@@ -42,7 +54,7 @@ pub unsafe extern "C-unwind" fn create_move_hook(
         cmd.sidemove = correct_side;
     }
 
-    false
+    (o!().hooks.create_move.org)(client_mode, input_sample_time, cmd)
 }
 
 pub fn correct_movement(
@@ -59,9 +71,9 @@ pub fn correct_movement(
     (forward, side)
 }
 
-    pub fn remove_punch(p_local: &Entity) {
-        let mut my_angles = unsafe { c!(p_local, get_abs_angles).clone() };
-        my_angles.pitch += p_local.vec_punch_angle.pitch;
-        my_angles.yaw += p_local.vec_punch_angle.yaw;
-        my_angles.roll += p_local.vec_punch_angle.roll;
-    }
+pub fn remove_punch(p_local: &Entity) {
+    let mut my_angles = c!(p_local, get_abs_angles).clone();
+    my_angles.pitch += p_local.vec_punch_angle.pitch;
+    my_angles.yaw += p_local.vec_punch_angle.yaw;
+    my_angles.roll += p_local.vec_punch_angle.roll;
+}

@@ -1,4 +1,5 @@
-use crate::*;
+
+use crate::{c, hex_to_rgb, i, o, rgb_to_hex, sdk::{entity::Entity, model_info::{Hitbox, HitboxId}}, util::world_to_screen};
 
 const COLOR_SCALE: f32 = 1.0 / 2.0;
 
@@ -6,8 +7,8 @@ pub fn draw_hitboxes() {
     let Some(p_local) = Entity::local() else {
         return;
     };
-    if unsafe { c!(i!(base_engine), is_in_game) } {
-        let entity_count = unsafe { c!(i!(entity_list), get_highest_entity_index) };
+    if c!(i!(base_engine), is_in_game) {
+        let entity_count = c!(i!(entity_list), get_highest_entity_index);
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
                     continue;
@@ -15,16 +16,16 @@ pub fn draw_hitboxes() {
             if ent as *const _ == p_local as *const _ {
                 continue;
             }
-            let team = unsafe { c!(ent, get_team_number) };
+            let team = c!(ent, get_team_number);
 
-            let scale = oxide!().cheats.aimbot.hitbox_scale;
+            let scale = o!().cheats.aimbot.hitbox_scale;
 
             let mut hitbox = ent.get_hitbox(HitboxId::Head).unwrap();
             hitbox.min *= scale;
             hitbox.max *= scale;
             draw_hitbox(ent, hitbox, team.color(), 5);
             for hitbox_id in HitboxId::body() {
-                let (mut r, mut g, mut b) = hex_to_rgb!(team.color());
+                let (r, g, b) = hex_to_rgb!(team.color());
                 let color = rgb_to_hex!(
                     r as f32 * COLOR_SCALE,
                     g as f32 * COLOR_SCALE,
@@ -64,24 +65,22 @@ pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
                         continue;
                     };
         let (r, g, b) = hex_to_rgb!(color);
-        unsafe {
-            c!(
-                i!(mat_surface),
-                set_color,
-                r as isize,
-                g as isize,
-                b as isize,
-                alpha as isize
-            );
+        c!(
+            i!(mat_surface),
+            set_color,
+            r as isize,
+            g as isize,
+            b as isize,
+            alpha as isize
+        );
 
-            c!(
-                i!(mat_surface),
-                draw_line,
-                pos1.x as isize,
-                pos1.y as isize,
-                pos2.x as isize,
-                pos2.y as isize
-            );
-        }
+        c!(
+            i!(mat_surface),
+            draw_line,
+            pos1.x as isize,
+            pos1.y as isize,
+            pos2.x as isize,
+            pos2.y as isize
+        );
     }
 }

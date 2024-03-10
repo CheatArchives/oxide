@@ -9,26 +9,21 @@
 use std::{
     alloc::{alloc, Layout},
     error::Error,
+    ffi::*,
     mem::ManuallyDrop,
     thread,
 };
 
-pub use std::{
-    ffi::*,
-    mem::{transmute, MaybeUninit},
-    ptr::{addr_of, addr_of_mut},
-};
+pub mod util;
 
-mod util;
-pub use derivative::*;
-pub use util::*;
+use crate::{draw::Draw, oxide::Oxide, settings::Settings};
 
-module_export!(oxide);
-module_export!(sdk);
-module_export!(error);
-module_export!(math);
-module_export!(draw);
-module_export!(settings);
+pub mod draw;
+pub mod error;
+pub mod math;
+pub mod oxide;
+pub mod sdk;
+pub mod settings;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const NAME: &str = env!("CARGO_PKG_NAME");
@@ -76,12 +71,12 @@ extern "C" fn unload() {
         println!("unloading");
 
         if DRAW.is_some() {
-            draw!().restore();
-            std::ptr::drop_in_place(draw!());
+            d!().restore();
+            std::ptr::drop_in_place(d!());
         }
         if OXIDE.is_some() {
-            oxide!().restore();
-            std::ptr::drop_in_place(oxide!());
+            o!().restore();
+            std::ptr::drop_in_place(o!());
         }
 
         println!("unloaded");

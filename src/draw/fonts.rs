@@ -1,11 +1,13 @@
 use std::{mem::MaybeUninit, ptr::null, usize};
 
-use crate::{Draw, *};
 use freetype_sys::*;
+use libc::c_void;
 use sdl2_sys::{
     SDL_BlendMode, SDL_CreateRGBSurfaceFrom, SDL_CreateTextureFromSurface, SDL_DestroyTexture,
     SDL_FreeSurface, SDL_Rect, SDL_RenderCopy, SDL_SetSurfaceBlendMode,
 };
+
+use crate::{d, hex_to_rgb};
 
 static NERD_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
 
@@ -135,8 +137,8 @@ impl Fonts {
                 h: bitmap.rows,
             };
 
-            let texture = SDL_CreateTextureFromSurface(draw!().renderer, surface);
-            SDL_RenderCopy(draw!().renderer, texture, null(), &mut rect);
+            let texture = SDL_CreateTextureFromSurface(d!().renderer, surface);
+            SDL_RenderCopy(d!().renderer, texture, null(), &mut rect);
             SDL_DestroyTexture(texture);
             SDL_FreeSurface(surface);
         }

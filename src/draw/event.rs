@@ -1,4 +1,5 @@
-use crate::*;
+
+use std::mem::transmute;
 
 use sdl2_sys::*;
 

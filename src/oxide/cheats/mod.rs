@@ -1,6 +1,6 @@
-use crate::*;
+use self::aimbot::Aimbot;
 
-module_export!(aimbot);
+pub mod aimbot;
 
 #[derive(Debug, Clone)]
 pub struct Cheats {

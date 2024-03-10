@@ -1,14 +1,23 @@
-use std::{backtrace::Backtrace, collections::HashMap, mem::MaybeUninit, ops::Deref, usize};
+use std::{error::Error, ffi::CString, mem::transmute};
 
-use libc::{dlclose, dlopen, wait};
-use sdl2_sys::{SDL_Event, SDL_EventType, SDL_Scancode};
+use libc::{dlclose, dlopen};
+use sdl2_sys::SDL_Event;
 
-use crate::*;
+use crate::{
+    d,
+    draw::event::{Event, EventType},
+    math::{angles::Angles, vector::Vector3},
+    oxide::{cheats::Cheats, hooks::Hooks, interfaces::Interfaces},
+    s,
+    sdk::{base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
+    util::sigscanner::find_sig,
+    DRAW,
+};
 
-module_export!(interfaces);
-module_export!(hooks);
-module_export!(cheats);
-module_export!(paint);
+pub mod cheats;
+pub mod hooks;
+pub mod interfaces;
+pub mod paint;
 
 #[derive(Debug, Clone)]
 pub struct Oxide {
@@ -19,7 +28,8 @@ pub struct Oxide {
     pub fov: f32,
     pub get_bone_position_fn: GetBonePositionFn,
 }
-pub type GetBonePositionFn = cfn!((), &Entity, usize, &mut Vector3, &mut Angles);
+pub type GetBonePositionFn =
+    unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
 
 impl Oxide {
     pub unsafe fn init() -> Result<Oxide, std::boxed::Box<dyn Error>> {
@@ -51,7 +61,7 @@ impl Oxide {
     }
     pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) -> bool {
         let mut event = Event::from(unsafe { *event });
-        let aimbot_key = *settings!().aimbot.key.lock().unwrap();
+        let aimbot_key = *s!().aimbot.key.lock().unwrap();
 
         match event.r#type {
             EventType::KeyDown(key) => {
@@ -68,7 +78,7 @@ impl Oxide {
         }
 
         if DRAW.is_some() {
-            draw!().handle_event(&mut event);
+            d!().handle_event(&mut event);
         }
         return event.handled;
     }
@@ -83,5 +93,13 @@ impl Oxide {
     pub fn restore(&mut self) {
         self.interfaces.restore();
         self.hooks.restore();
+    }
+
+    pub fn global_vars(&self) -> &GlobalVars {
+        self.global_vars
+    }
+
+    pub fn global_vars_mut(&mut self) -> &mut &'static GlobalVars {
+        &mut self.global_vars
     }
 }

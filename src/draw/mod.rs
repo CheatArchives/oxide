@@ -1,12 +1,18 @@
-use crate::*;
+use std::{error::Error, ffi::CString};
+
+use libc::c_void;
 use sdl2_sys::*;
 
-module_export!(component);
-module_export!(colors);
-module_export!(fonts);
-module_export!(sdl_wrappers);
-module_export!(frame);
-module_export!(event);
+use crate::{draw::component::{aimbot_fov::AimbotFov, overlay::Overlay}, AUTHOR, NAME, VERSION};
+
+use self::{component::Components, event::{Event, EventType}, fonts::Fonts, frame::Frame};
+
+pub mod colors;
+pub mod component;
+pub mod event;
+pub mod fonts;
+pub mod frame;
+pub mod sdl_wrappers;
 
 pub struct Draw {
     pub fonts: Fonts,
@@ -74,7 +80,7 @@ impl Draw {
         }
     }
 
-    pub fn handle_event(&mut self, event: &mut Event) -> bool{
+    pub fn handle_event(&mut self, event: &mut Event) -> bool {
         if let EventType::CursorMove(pos) = event.r#type {
             self.cursor = pos
         }

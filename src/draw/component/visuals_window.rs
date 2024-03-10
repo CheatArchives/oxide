@@ -1,10 +1,13 @@
 use std::sync::{Arc, Mutex};
 
-use crate::*;
+
+use crate::{draw::{event::Event, frame::Frame}, s};
+
+use super::{base::{checkbox::Checkbox, float_input::FloatInput, window::Window}, Component, Components, RawComponent};
 
 #[derive(Debug)]
 pub struct VisualsWindow {
-    window: window::Window,
+    window: Window,
 }
 
 impl VisualsWindow {
@@ -13,7 +16,7 @@ impl VisualsWindow {
 
         components.add(Checkbox::new(
             "third person",
-            settings!().visual.third_person.clone(),
+            s!().visual.third_person.clone(),
             10,
             10,
         ));
@@ -23,9 +26,9 @@ impl VisualsWindow {
             10,
             30,
             100,
-            settings!().visual.fov.clone(),
+            s!().visual.fov.clone(),
         ));
-        let window = window::Window::new("VISUALS".to_owned(), visible, components);
+        let window = Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }
     }
 }

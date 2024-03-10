@@ -1,4 +1,6 @@
-use crate::*;
+use crate::{cfn, math::{angles::Angles, vector::Vector3}};
+
+use super::{entity::Entity, CBaseHandle, WithVmt};
 
 pub type GameMovement = WithVmt<VMTGameMovement>;
 
@@ -6,13 +8,13 @@ type EntityHandle = CBaseHandle;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
-pub struct CMoveData{
+pub struct CMoveData {
     first_run_of_functions: bool,
     game_code_moved_player: bool,
     player_handle: EntityHandle,
     impulse_command: isize,
-    view_angles: Angles,    
-    abs_view_angles: Angles, 
+    view_angles: Angles,
+    abs_view_angles: Angles,
     buttons: isize,
     old_buttons: isize,
     forward_bove: f32,
@@ -22,8 +24,8 @@ pub struct CMoveData{
     max_speed: f32,
     client_max_speed: f32,
     velocity: Vector3,
-    angles: Angles,    
-    old_angles: Angles, 
+    angles: Angles,
+    old_angles: Angles,
     step_height: f32,
     wish_vel: Vector3,
     jump_vel: Vector3,
@@ -34,12 +36,17 @@ pub struct CMoveData{
     abs_origin: Vector3,
 }
 
-
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTGameMovement {
     _pad1: [u32; 2],
-    pub process_movement: cfn!(c_void, &'static mut GameMovement, &'static mut Entity, &'static mut CMoveData),
-    pub start_track_prediction_errors: cfn!(c_void, &'static mut GameMovement, &'static mut Entity),
-    pub finish_track_prediction_errors: cfn!(c_void, &'static mut GameMovement, &'static mut Entity),
+    pub process_movement: cfn!(
+        (),
+        &'static mut GameMovement,
+        &'static mut Entity,
+        &'static mut CMoveData
+    ),
+    pub start_track_prediction_errors: cfn!((), &'static mut GameMovement, &'static mut Entity),
+    pub finish_track_prediction_errors:
+        cfn!((), &'static mut GameMovement, &'static mut Entity),
 }

@@ -1,13 +1,15 @@
 use std::f32::consts::PI;
 
-use crate::*;
+use crate::{c, draw::{colors::YELLOW, event::Event, frame::Frame}, o, s, sdk::entity::Entity};
+
+use super::{Component, RawComponent};
 
 #[derive(Debug)]
 pub struct AimbotFov {}
 
 impl AimbotFov {
     fn should_draw(&self) -> bool {
-        if !*settings!().aimbot.enabled.lock().unwrap() || !*settings!().aimbot.draw_fov.lock().unwrap(){
+        if !*s!().aimbot.enabled.lock().unwrap() || !*s!().aimbot.draw_fov.lock().unwrap(){
             return false;
         }
 
@@ -15,7 +17,7 @@ impl AimbotFov {
             return false;
         };
 
-        if !unsafe { c!(p_local, is_alive) } {
+        if ! c!(p_local, is_alive) {
             return false;
         }
         true
@@ -23,13 +25,13 @@ impl AimbotFov {
 }
 
 impl RawComponent for AimbotFov {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
+    fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) {
         if !self.should_draw() {
             return;
         }
         let size = frame.window_size();
-        let aimbot_fov = *settings!().aimbot.fov.lock().unwrap() as f32;
-        let fov = oxide!().fov;
+        let aimbot_fov = *s!().aimbot.fov.lock().unwrap() as f32;
+        let fov = o!().fov;
 
         let screen_fov = size.0 as f32 / size.1 as f32 / (4f32 / 3f32);
         let real_fov = (screen_fov * (fov / 360f32 * PI).tan()).atan();
@@ -38,7 +40,7 @@ impl RawComponent for AimbotFov {
         frame.circle(size.0 / 2, size.1 / 2, radius, YELLOW, 200);
     }
 
-    fn handle_event(&mut self, event: &mut Event) {}
+    fn handle_event(&mut self, _: &mut Event) {}
 }
 
 impl Component for AimbotFov {}

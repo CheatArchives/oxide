@@ -1,4 +1,8 @@
-use crate::*;
+use std::ffi::CStr;
+
+use crate::o;
+
+use super::*;
 
 #[repr(C)]
 #[derive(Derivative, Clone)]
@@ -12,7 +16,7 @@ pub struct VMTWeapon {
     pub get_slot: cfn!(isize, &'static Weapon),
     #[derivative(Debug="ignore")]
     _pad3: [u8; 4 * 1],
-    pub get_name: cfn!(&'static CStr, &'static Weapon),
+    pub get_name: cfn!(CStr, &'static Weapon),
     #[derivative(Debug="ignore")]
     _pad4: [u8; 4 * 48],
     pub get_weapon_id: cfn!(WeaponType, &'static Weapon),
@@ -52,7 +56,7 @@ pub struct Weapon {
 
 impl Weapon {
     pub fn can_attack_primary(&mut self) -> bool {
-        let now = oxide!().global_vars.now();
+        let now = o!().global_vars.now();
         self.next_primary_attack <= now
     }
 }

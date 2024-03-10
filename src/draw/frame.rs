@@ -1,6 +1,6 @@
 use sdl2_sys::*;
 
-use crate::*;
+use super::fonts::Fonts;
 
 pub struct Frame {
     window: *mut SDL_Window,

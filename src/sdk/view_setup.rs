@@ -1,4 +1,7 @@
-use crate::*;
+
+use crate::math::{angles::Angles, vector::Vector3};
+
+use super::VMatrix;
 
 #[repr(C)]
 #[derive(Debug, Clone)]

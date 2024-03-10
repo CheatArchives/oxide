@@ -2,7 +2,15 @@ use std::sync::{Arc, Mutex};
 
 use sdl2_sys::*;
 
-use crate::*;
+use crate::{
+    d, draw::{
+        colors::{BACKGROUND, BLUE, FOREGROUND},
+        component::{Component, RawComponent},
+        event::{Event, EventType},
+        fonts::FontSize,
+        frame::Frame,
+    }, util::{point_in_bounds, sdl_scancode_name_to_string}
+};
 
 const SIZE: isize = FontSize::Small as isize + 4;
 
@@ -59,8 +67,8 @@ impl RawComponent for KeyInput {
             EventType::MouseButtonDown => {
                 if !self.focussed {
                     if point_in_bounds(
-                        draw!().cursor.0,
-                        draw!().cursor.1,
+                        d!().cursor.0,
+                        d!().cursor.1,
                         self.rooted_x,
                         self.rooted_y,
                         self.w,

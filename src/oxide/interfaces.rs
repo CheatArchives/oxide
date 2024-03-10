@@ -1,13 +1,10 @@
 use std::{
-    alloc::{alloc, Layout},
-    mem::{align_of, MaybeUninit},
-    ptr::copy_nonoverlapping,
-    usize,
+    alloc::{alloc, Layout}, error::Error, ffi::CString, mem::transmute, usize
 };
 
-use libc::dlsym;
+use libc::{c_void, dlsym};
 
-use crate::*;
+use crate::{cfn, sdk::{base_client::{BaseClient, VMTBaseClient}, base_engine::{BaseEngine, VMTBaseEngine}, client_mode::{ClientMode, VMTClientMode}, cvar::{CVar, VMTCVar}, engine_trace::{EngineTrace, VMTEngineTrace}, engine_vgui::{EngineVgui, VMTEngineVgui}, entity_list::{EntityList, VMTEntityList}, game_movement::{GameMovement, VMTGameMovement}, mat_surface::{MatSurface, VMTMatSurface}, material_system::{MaterialSystem, VMTMaterialSystem}, model_info::{ModelInfo, VMTModelInfo}, model_render::{ModelRender, VMTModelRender}, panel::{Panel, VMTPanel}, predictions::{Prediction, VMTPrediction}, render_view::{RenderView, VMTRenderView}, HasVmt}, util::{get_handle, vmt_size}};
 
 #[derive(Debug, Clone)]
 pub struct Interface<T: HasVmt<V> + 'static, V: 'static> {
@@ -58,7 +55,6 @@ impl<T: HasVmt<V>, V> Interface<T, V> {
         unsafe { &mut *self.interface_ref }
     }
 }
-
 
 #[derive(Debug, Clone)]
 pub struct Interfaces {

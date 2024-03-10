@@ -1,21 +1,17 @@
+use super::{event::Event, frame::Frame};
 
-use crate::*;
-use freetype_sys::*;
-use libc::CS;
-use sdl2_sys::*;
-
-module_export!(aimbot_fov);
-module_export!(overlay);
-module_export!(base);
-module_export!(aimbot_window);
-module_export!(visuals_window);
+pub mod aimbot_fov;
+pub mod aimbot_window;
+pub mod base;
+pub mod overlay;
+pub mod visuals_window;
 
 pub trait RawComponent {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize);
     fn handle_event(&mut self, event: &mut Event);
 }
 
-pub trait Component: component::RawComponent + std::fmt::Debug {}
+pub trait Component: RawComponent + std::fmt::Debug {}
 
 #[derive(Debug)]
 pub struct Components(Vec<Box<dyn Component>>);

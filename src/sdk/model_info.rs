@@ -1,7 +1,18 @@
+use std::mem::MaybeUninit;
+pub use std::{
+    ffi::{c_char, CStr},
+    mem::{size_of, transmute},
+};
 
-use std::mem::{size_of};
+use libc::c_void;
 
-use crate::*;
+use crate::{
+    cfn,
+    math::{angles::Angles, vector::{Vector3, Vector4}},
+    o,
+};
+
+use super::{entity::Entity, model_render::Matrix3x4, WithVmt};
 
 pub type ModelInfo = WithVmt<VMTModelInfo>;
 
@@ -15,9 +26,8 @@ pub struct HitboxSet {
 
 impl HitboxSet {
     pub unsafe fn get_hitbox(&self, id: HitboxId) -> Option<Hitbox> {
-        let ptr = (self as *const _ as usize
-            + self.hitboxindex
-            + size_of::<Hitbox>() * id as usize) as *const Hitbox;
+        let ptr = (self as *const _ as usize + self.hitboxindex + size_of::<Hitbox>() * id as usize)
+            as *const Hitbox;
         if ptr.is_null() {
             return None;
         }
@@ -38,24 +48,24 @@ pub struct Hitbox {
 
 impl Hitbox {
     pub fn center(&self, ent: &Entity) -> Vector3 {
-        let (pos,_) = self.get_bone_pos(ent);
+        let (pos, _) = self.get_bone_pos(ent);
         Vector3::new(
             (self.min.x + self.max.x) / 2.0 + pos.x,
             (self.min.y + self.max.y) / 2.0 + pos.y,
             (self.min.z + self.max.z) / 2.0 + pos.z,
         )
     }
-    pub fn get_bone_pos(&self, ent: &Entity) -> (Vector3,Angles) {
-         unsafe {
+    pub fn get_bone_pos(&self, ent: &Entity) -> (Vector3, Angles) {
+        unsafe {
             let mut pos = MaybeUninit::zeroed().assume_init();
             let mut angle = MaybeUninit::zeroed().assume_init();
 
-            (oxide!().get_bone_position_fn)(&ent, self.bone, &mut pos, &mut angle);
-            (pos,angle)
+            (o!().get_bone_position_fn)(&ent, self.bone, &mut pos, &mut angle);
+            (pos, angle)
         }
     }
     pub fn corners(&self, ent: &Entity) -> [Vector3; 8] {
-        let (pos,angle) = self.get_bone_pos(ent);
+        let (pos, angle) = self.get_bone_pos(ent);
         let rotation = angle.to_vectors();
 
         let mut corners = [
@@ -75,10 +85,10 @@ impl Hitbox {
             let y = if i & 0x2 != 0 { max.y } else { min.y };
             let z = if i & 0x4 != 0 { max.z } else { min.z };
 
-            let mut corner = Vector3::new(x, y, z);
+            let corner = Vector3::new(x, y, z);
 
-            let mut corner = corner.rotate(&rotation);
-            corners[i] = (corner + pos.clone())
+            let corner = corner.rotate(&rotation);
+            corners[i] = corner + pos.clone()
         }
         corners
     }
@@ -119,7 +129,7 @@ impl HitboxId {
 #[derive(Debug, Clone)]
 pub struct Model {
     pub handle: &'static c_void,
-    pub name: &'static CStr,
+    pub name: *const c_char,
     pub load_flags: isize,
     pub server_count: isize,
     pub r#type: isize,

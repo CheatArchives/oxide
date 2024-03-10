@@ -1,4 +1,9 @@
-use crate::*;
+
+use libc::c_void;
+
+use crate::{cfn, impl_has_vmt, math::angles::Angles};
+
+use super::{entity::Entity, game_movement::CMoveData, user_cmd::UserCmd};
 
 #[allow(unused)]
 pub struct VMTMoveHelper(&'static mut c_void);
@@ -12,25 +17,30 @@ pub struct MoveHelper {
 #[derive(Debug, Clone)]
 pub struct VMTPrediction {
     _pad1: [u32; 13],
-    pub get_local_view_angles: cfn!(c_void, &'static mut Prediction, &'static mut Angles),
-    pub set_local_view_angles: cfn!(c_void, &'static Prediction, &'static mut Angles),
+    pub get_local_view_angles: cfn!((), &'static mut Prediction, &'static mut Angles),
+    pub set_local_view_angles: cfn!((), &'static Prediction, &'static mut Angles),
     _pad2: [u32; 3],
     pub run_command: cfn!(
-        c_void,
+        (),
         &'static mut Prediction,
         &'static mut Entity,
         &'static mut UserCmd,
         &'static mut MoveHelper
     ),
     pub setup_move: cfn!(
-        c_void,
+        (),
         &'static mut Prediction,
         &'static mut Entity,
         &'static mut UserCmd,
         &'static mut MoveHelper,
         &'static mut CMoveData
     ),
-    pub finish_move: cfn!(c_void, &'static mut Prediction, &'static mut Entity, &'static mut UserCmd),
+    pub finish_move: cfn!(
+        (),
+        &'static mut Prediction,
+        &'static mut Entity,
+        &'static mut UserCmd
+    ),
 }
 
 #[repr(C)]

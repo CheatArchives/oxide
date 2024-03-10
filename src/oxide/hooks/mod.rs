@@ -1,12 +1,27 @@
-use crate::*;
+use std::mem::transmute;
 
-module_export!(swap_window_hook);
-module_export!(create_move);
-module_export!(poll_event);
-module_export!(paint_traverse);
-module_export!(override_view);
-module_export!(frame_stage_notify);
+use libc::c_void;
+
+use crate::util::get_handle;
+
+use self::{
+    create_move::{create_move_hook, CreateMoveFn},
+    frame_stage_notify::{frame_stage_notify_hook, FrameStageNotifyFn},
+    override_view::{override_view_hook, OverrideViewFn},
+    paint_traverse::{paint_traverse_hook, PaintRraverseFn},
+    poll_event::{poll_event_hook, PollEventFn},
+    swap_window::{swap_window_hook, SwapWindowFn},
+};
+
+use super::interfaces::Interfaces;
+
+pub mod create_move;
+pub mod frame_stage_notify;
+pub mod override_view;
 pub mod paint;
+pub mod paint_traverse;
+pub mod poll_event;
+pub mod swap_window;
 
 static SWAPWINDOW_OFFSET: usize = 0xFD648;
 static POLLEVENT_OFFSET: usize = 0xFCF64;
@@ -73,7 +88,8 @@ impl Hooks {
             as *const *const *const c_void;
 
         let swap_window_ptr = ((*sdl_handle) as usize + SWAPWINDOW_OFFSET) as *mut SwapWindowFn;
-        let swap_window = Hook::init(swap_window_ptr, swap_window_hook);
+        let init = Hook::init(swap_window_ptr, swap_window_hook);
+        let swap_window = init;
 
         let poll_event_ptr = ((*sdl_handle) as usize + POLLEVENT_OFFSET) as *mut PollEventFn;
         let poll_event = Hook::init(poll_event_ptr, poll_event_hook);

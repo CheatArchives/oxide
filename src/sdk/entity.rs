@@ -1,7 +1,24 @@
-use derivative::Derivative;
-use libc::wait;
+use std::mem::transmute;
 
-use crate::*;
+use derivative::Derivative;
+
+use crate::{
+    c,
+    draw::colors::{BLUE, RED},
+    i,
+    math::{angles::Angles, vector::Vector3},
+    o,
+};
+
+use self::model_info::{Hitbox, HitboxId};
+
+use super::*;
+
+use super::{
+    collideable::Collideable, condition::Condition, model_render::Renderable,
+    networkable::Networkable, player_class::PlayerClass, user_cmd::UserCmd, weapon::Weapon,
+    CBaseHandle,
+};
 
 pub const MAX_WEAPONS: usize = 48;
 pub const MAX_STUDIO_BONES: usize = 128;
@@ -59,14 +76,14 @@ pub struct VMTEntity {
     #[derivative(Debug = "ignore")]
     _pad9: [u32; 2],
     pub is_weapon: cfn!(bool, &Entity),
-    pub get_weapon2: cfn!(*mut c_void, &Entity),
+    pub get_weapon2: cfn!(*mut u8, &Entity),
     #[derivative(Debug = "ignore")]
     _pad10: [u32; 2],
     pub eye_position: cfn!(Vector3, *const Entity),
     pub eye_angles: cfn!(Angles, *const Entity),
     #[derivative(Debug = "ignore")]
     _pad11: [u32; 12],
-    pub third_person_switch: cfn!(c_void, &Entity, bool),
+    pub third_person_switch: cfn!((), &Entity, bool),
     #[derivative(Debug = "ignore")]
     _pad12: [u32; 82],
     pub get_weapon: cfn!(&'static mut Weapon, *const Entity),
@@ -163,8 +180,7 @@ impl Entity {
     }
 
     pub unsafe fn can_attack(&self) -> bool {
-        let now = oxide!().global_vars.now();
-        let weapon = c!(self, get_weapon);
+        let now = o!().global_vars.now();
         self.next_attack <= now
     }
 
@@ -186,7 +202,7 @@ impl Entity {
         }
     }
     pub fn local() -> Option<&'static mut Entity> {
-        let id = unsafe { c!(i!(base_engine), get_local_player) };
+        let id = c!(i!(base_engine), get_local_player);
         Self::get_player(id)
     }
 }

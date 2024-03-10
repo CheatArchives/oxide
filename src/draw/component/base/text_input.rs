@@ -1,10 +1,17 @@
-use std::{
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 use sdl2_sys::*;
 
-use crate::*;
+
+use crate::{
+    d, draw::{
+        colors::{BACKGROUND, BLUE, FOREGROUND},
+        component::{Component, RawComponent},
+        event::{Event, EventType},
+        fonts::FontSize,
+        frame::Frame,
+    }, util::{point_in_bounds, sdl_scancode_to_char}
+};
 
 const SIZE: isize = FontSize::Small as isize + 4;
 
@@ -21,7 +28,13 @@ pub struct TextInput {
 }
 
 impl TextInput {
-    pub fn new(label: &'static str,x: isize, y: isize, w: isize, val: Arc<Mutex<String>>) -> TextInput {
+    pub fn new(
+        label: &'static str,
+        x: isize,
+        y: isize,
+        w: isize,
+        val: Arc<Mutex<String>>,
+    ) -> TextInput {
         TextInput {
             label,
             x,
@@ -41,11 +54,12 @@ impl RawComponent for TextInput {
         let y = self.y + root_y;
         self.rooted_x = x;
         self.rooted_y = y;
+        let label = format!("{}:", self.label);
 
-        let label_size = frame.fonts.get_text_size(self.label, FontSize::Small);
+        let label_size = frame.fonts.get_text_size(&label, FontSize::Small);
 
         frame.text(
-            self.label,
+            &label,
             x,
             y + SIZE / 2,
             FontSize::Small,
@@ -53,6 +67,7 @@ impl RawComponent for TextInput {
             FOREGROUND,
             255,
         );
+        let x = x + label_size.0 + 10;
 
         frame.filled_rect(x, y, self.w, SIZE, BACKGROUND, 255);
         let outline = if self.focussed { BLUE } else { FOREGROUND };
@@ -62,7 +77,7 @@ impl RawComponent for TextInput {
 
         frame.text(
             &val,
-            x + self.w / 2 + label_size.0 + 10,
+            x + self.w / 2,
             y + SIZE / 2,
             FontSize::Small,
             true,
@@ -76,8 +91,8 @@ impl RawComponent for TextInput {
             EventType::MouseButtonDown => {
                 if !self.focussed {
                     if point_in_bounds(
-                        draw!().cursor.0,
-                        draw!().cursor.1,
+                        d!().cursor.0,
+                        d!().cursor.1,
                         self.rooted_x,
                         self.rooted_y,
                         self.w,

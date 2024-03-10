@@ -1,10 +1,8 @@
 use std::f32::consts::PI;
 
-use crate::*;
+pub mod angles;
+pub mod vector;
 
-module_export!(angles);
-module_export!(vector);
-
-pub fn dtr(deg: f32) -> f32{
+pub fn dtr(deg: f32) -> f32 {
     deg / 180f32 * PI
 }

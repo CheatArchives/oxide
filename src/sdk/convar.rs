@@ -1,13 +1,17 @@
-use crate::*;
+use std::ffi::CStr;
+
+use libc::c_void;
+
+use crate::cfn;
 
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTConVar {
     _pad: [u8; 4*14],
-    pub internal_set_value: cfn!(c_void, &'static ConVar , &CStr),
-    pub internal_set_float_value: cfn!(c_void, &'static ConVar,f32 , bool),
-    pub internal_set_int_value: cfn!(c_void, &'static ConVar, isize),
+    pub internal_set_value: cfn!((), &'static ConVar , &CStr),
+    pub internal_set_float_value: cfn!((), &'static ConVar,f32 , bool),
+    pub internal_set_int_value: cfn!((), &'static ConVar, isize),
 }
 
 #[repr(C)]

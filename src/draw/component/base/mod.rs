@@ -1,8 +1,6 @@
-use crate::*;
-
-module_export!(button);
-module_export!(window);
-module_export!(text_input);
-module_export!(key_input);
-module_export!(checkbox);
-module_export!(float_input);
+pub mod button;
+pub mod checkbox;
+pub mod float_input;
+pub mod key_input;
+pub mod text_input;
+pub mod window;

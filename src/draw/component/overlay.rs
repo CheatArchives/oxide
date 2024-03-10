@@ -1,13 +1,14 @@
 use std::{
     isize,
-    rc::Rc,
     sync::{Arc, Mutex},
-    usize,
 };
 
 use sdl2_sys::*;
 
-use crate::*;
+
+use crate::{c, draw::{colors::*, event::{Event, EventType}, fonts::FontSize, frame::Frame}, i, NAME, VERSION};
+
+use super::{aimbot_window::AimbotWindow, base::button::Button, visuals_window::VisualsWindow, Component, Components, RawComponent};
 
 const LEFT_OVERLAY_WIDTH: isize = 300;
 const TOP_OVERLAY_HEIGHT: isize = 50;
@@ -66,7 +67,7 @@ impl Overlay {
             .fonts
             .get_text_size(&NAME.to_uppercase(), FontSize::Small);
 
-        let offset = (TOP_OVERLAY_HEIGHT / 2);
+        let offset = TOP_OVERLAY_HEIGHT / 2;
         let x = offset + text_size.0 / 2 + 2 + PADDING / 2;
         let y = offset - (text_size.1 + text_size.2) / 2 - 2 - PADDING / 2;
 
@@ -92,7 +93,7 @@ impl Overlay {
 }
 
 impl RawComponent for Overlay {
-    fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
+    fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) {
         let size = frame.window_size();
 
         c!(i!(mat_surface), set_cursor_always_visible, self.visible);

@@ -1,4 +1,4 @@
-use crate::*;
+use libc::c_void;
 
 #[repr(C)]
 #[derive(Debug, Clone)]

@@ -2,7 +2,8 @@ use std::sync::{Arc, Mutex};
 
 use sdl2_sys::SDL_Scancode;
 
-use crate::*;
+use crate::{am, amt};
+
 
 #[derive(Debug, Clone)]
 pub struct Settings {

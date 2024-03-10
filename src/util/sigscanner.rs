@@ -1,6 +1,6 @@
-use crate::*;
+use std::mem::transmute;
 
-use super::LinkMap;
+use super::{get_handle, LinkMap};
 
 fn parse_sig_str(sig: &str) -> Vec<Option<u8>> {
     let split: Vec<&str> = sig.split(" ").collect();

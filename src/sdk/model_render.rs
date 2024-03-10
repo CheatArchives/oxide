@@ -1,6 +1,11 @@
-use libc::c_ushort;
 
-use crate::*;
+use std::ffi::c_ushort;
+
+use libc::c_void;
+
+use crate::{math::{angles::Angles, vector::Vector3}, sdk::*};
+
+use self::{entity::{BoneMask, MAX_STUDIO_BONES}, material_system::IMaterial, model_info::{Model, StudioHdr}};
 
 pub type ModelRender = WithVmt<VMTModelRender>;
 

@@ -1,10 +1,13 @@
 use std::sync::{Arc, Mutex};
 
-use crate::*;
+
+use crate::{draw::{event::Event, frame::Frame}, s};
+
+use super::{base::{checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, window::Window}, Component, Components, RawComponent};
 
 #[derive(Debug)]
 pub struct AimbotWindow {
-    window: window::Window,
+    window: Window,
 }
 
 impl AimbotWindow {
@@ -13,13 +16,13 @@ impl AimbotWindow {
 
         components.add(Checkbox::new(
             "enable",
-            settings!().aimbot.enabled.clone(),
+            s!().aimbot.enabled.clone(),
             10,
             10,
         ));
         components.add(Checkbox::new(
             "draw_fov",
-            settings!().aimbot.draw_fov.clone(),
+            s!().aimbot.draw_fov.clone(),
             10,
             30,
         ));
@@ -28,11 +31,11 @@ impl AimbotWindow {
             10,
             50,
             100,
-            settings!().aimbot.fov.clone(),
+            s!().aimbot.fov.clone(),
         ));
-        components.add(KeyInput::new(10, 75, 100, settings!().aimbot.key.clone()));
+        components.add(KeyInput::new(10, 75, 100, s!().aimbot.key.clone()));
 
-        let window = window::Window::new("AIMBOT".to_owned(), visible, components);
+        let window = Window::new("AIMBOT".to_owned(), visible, components);
         AimbotWindow { window }
     }
 }

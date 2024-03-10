@@ -1,35 +1,36 @@
 use std::fmt::Debug;
+use crate::{cfn,impl_has_vmt};
 
-use crate::*;
+pub use derivative::Derivative;
 
-module_export!(base_client);
-module_export!(base_engine);
-module_export!(entity_list);
-module_export!(entity);
-module_export!(collideable);
-module_export!(user_cmd);
-module_export!(engine_vgui);
-module_export!(cvar);
-module_export!(convar);
-module_export!(view_setup);
-module_export!(mat_surface);
-module_export!(panel);
-module_export!(weapon);
-module_export!(model_info);
-module_export!(render_view);
-module_export!(engine_trace);
-module_export!(material_system);
-module_export!(model_render);
-module_export!(game_movement);
-module_export!(predictions);
-module_export!(client_mode);
-module_export!(networkable);
-module_export!(condition);
-module_export!(global_vars);
-module_export!(player_class);
+pub mod base_client;
+pub mod base_engine;
+pub mod entity_list;
+pub mod entity;
+pub mod collideable;
+pub mod user_cmd;
+pub mod engine_vgui;
+pub mod cvar;
+pub mod convar;
+pub mod view_setup;
+pub mod mat_surface;
+pub mod panel;
+pub mod weapon;
+pub mod model_info;
+pub mod render_view;
+pub mod engine_trace;
+pub mod material_system;
+pub mod model_render;
+pub mod game_movement;
+pub mod predictions;
+pub mod client_mode;
+pub mod networkable;
+pub mod condition;
+pub mod global_vars;
+pub mod player_class;
 
 pub type CBaseHandle = usize;
-pub type ConCommand = *const c_void;
+pub type ConCommand = *const u8;
 pub type HFont = usize;
 
 pub type VMatrix = [[f32; 4]; 4];
@@ -51,6 +52,6 @@ impl<T: 'static + Clone + Debug> HasVmt<T> for WithVmt<T> {
         unsafe { &*self.vmt }
     }
     fn set_vmt(&mut self, vmt: *mut T) {
-        unsafe { self.vmt = vmt }
+         self.vmt = vmt
     }
 }

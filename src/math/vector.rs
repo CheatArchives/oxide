@@ -1,6 +1,8 @@
-use std::{f32::consts::PI, ops::Sub, process::Output};
+use std::{f32::consts::PI, ops::Sub};
 
-use crate::{Angles, Matrix3x4, VectorAligned};
+use crate::sdk::engine_trace::VectorAligned;
+
+use super::angles::Angles;
 
 #[derive(Debug, Clone)]
 #[repr(C)]

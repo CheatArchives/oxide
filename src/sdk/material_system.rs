@@ -1,4 +1,8 @@
-use crate::*;
+use std::ffi::CStr;
+
+use libc::c_void;
+
+use super::*;
 
 pub type MaterialSystem = WithVmt<VMTMaterialSystem>;
 
@@ -6,7 +10,7 @@ pub type MaterialSystem = WithVmt<VMTMaterialSystem>;
 #[derive(Debug, Clone)]
 pub struct VMTMaterialSystem {
     _pad1: [u8;4 * 73],
-    pub find_material: cfn!(&'static IMaterial, &'static MaterialSystem , &CStr, &CStr, bool, &CStr),
+    pub find_material: cfn!(&'static IMaterial, &'static MaterialSystem , CStr, CStr, bool, &CStr),
     _pad2: [u8;4 * 26],
     pub get_render_context: cfn!(&'static IMatRenderContext,&'static MaterialSystem),
 }

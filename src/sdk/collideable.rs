@@ -1,4 +1,6 @@
-use crate::*;
+use crate::math::vector::Vector3;
+
+use super::*;
 
 #[repr(C)]
 #[derive(Debug, Clone)]

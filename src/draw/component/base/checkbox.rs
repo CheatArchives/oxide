@@ -1,8 +1,17 @@
 use std::sync::{Arc, Mutex};
 
-const SIZE: isize = 12;
+use crate::{
+    d,
+    draw::{
+        colors::{BACKGROUND, FOREGROUND},
+        component::{Component, RawComponent},
+        event::{Event, EventType},
+        fonts::FontSize,
+        frame::Frame,
+    },
+};
 
-use crate::*;
+const SIZE: isize = 12;
 
 #[derive(Debug, Clone)]
 pub struct Checkbox {
@@ -27,7 +36,7 @@ impl Checkbox {
 }
 impl RawComponent for Checkbox {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
-        self.rooted_x = root_x + self.x;
+        self.rooted_x = root_x.wrapping_add(self.x);
         self.rooted_y = root_y + self.y;
         frame.filled_rect(self.rooted_x, self.rooted_y, SIZE, SIZE, FOREGROUND, 255);
         if !*self.checked.lock().unwrap() {
@@ -54,10 +63,10 @@ impl RawComponent for Checkbox {
     fn handle_event(&mut self, event: &mut Event) {
         match event.r#type {
             EventType::MouseButtonDown => {
-                if draw!().cursor.0 as isize <= self.rooted_x + SIZE
-                    && self.rooted_x <= draw!().cursor.0 as isize
-                    && draw!().cursor.1 as isize <= self.rooted_y + SIZE
-                    && self.rooted_y <= draw!().cursor.1 as isize
+                if d!().cursor.0 as isize <= self.rooted_x + SIZE
+                    && self.rooted_x <= d!().cursor.0 as isize
+                    && d!().cursor.1 as isize <= self.rooted_y + SIZE
+                    && self.rooted_y <= d!().cursor.1 as isize
                 {
                     let mut checked = self.checked.lock().unwrap();
                     *checked = !*checked;

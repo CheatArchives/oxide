@@ -1,11 +1,13 @@
-use crate::*;
+use std::ffi::c_char;
+
+use crate::{cfn, sdk::*};
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct ClientClass{
     _pad1: [usize;2],
     pub get_client_class: cfn!(&ClientClass, &Networkable),
-    pub network_name: &'static CStr,
+    pub network_name: *const c_char,
     _pad2: [usize;2],
     class_id: usize
 }

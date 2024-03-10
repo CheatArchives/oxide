@@ -2,7 +2,12 @@ use std::f32::consts::PI;
 
 use sdl2_sys::*;
 
-use crate::*;
+use crate::hex_to_rgb;
+
+use super::{
+    fonts::{FontSize, Fonts},
+    frame::Frame,
+};
 
 impl Frame {
     pub fn filled_rect(&self, x: isize, y: isize, w: isize, h: isize, color: usize, alpha: u8) {

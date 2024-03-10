@@ -1,6 +1,8 @@
-use libc::isblank;
+use std::ffi::CStr;
 
-use crate::*;
+use crate::{
+    c, cfn, o, sdk::panel::{Panel, VPanel}, OXIDE
+};
 
 pub type PaintRraverseFn = cfn!((), &'static Panel, VPanel, bool, bool);
 
@@ -16,6 +18,6 @@ pub unsafe extern "C-unwind" fn paint_traverse_hook(
         _ => {}
     }
     if OXIDE.is_some() {
-        (oxide!().hooks.paint_traverse.org)(panel, vpanel, force_paint, allow_force);
+        (o!().hooks.paint_traverse.org)(panel, vpanel, force_paint, allow_force);
     }
 }

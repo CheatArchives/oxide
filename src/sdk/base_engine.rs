@@ -1,4 +1,9 @@
-use crate::*;
+
+use std::ffi::c_char;
+
+use crate::math::angles::Angles;
+
+use super::*;
 
 pub type BaseEngine = WithVmt<VMTBaseEngine>;
 
@@ -17,14 +22,14 @@ pub struct PlayerInfo {
     fakeplayer: bool,
     ishltv: bool,
     custom_files: [usize; MAX_CUSTOM_FILES],
-    files_downloaded: c_uchar,
+    files_downloaded: c_char,
 }
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTBaseEngine {
     _pad1: [u32; 5],
-    pub get_screen_size: cfn!(c_void, &BaseEngine, &isize, &isize),
+    pub get_screen_size: cfn!((), &BaseEngine, &isize, &isize),
     _pad2: [u32; 2],
     pub get_player_info: cfn!(
         bool,
@@ -33,16 +38,16 @@ pub struct VMTBaseEngine {
         &'static PlayerInfo
     ),
     _pad3: [u32; 3],
-    pub get_local_player: cfn!(isize, *const BaseEngine),
+    pub get_local_player: cfn!(isize, &BaseEngine),
     _pad4: [u32; 6],
-    pub get_view_angles: cfn!(c_void, &'static BaseEngine, Angles),
-    pub set_view_angles: cfn!(c_void, *const BaseEngine, Angles),
-    pub get_max_clients: cfn!(isize, &'static BaseEngine),
+    pub get_view_angles: cfn!((), &BaseEngine, Angles),
+    pub set_view_angles: cfn!((), &BaseEngine, Angles),
+    pub get_max_clients: cfn!(isize, &BaseEngine),
     _pad5: [u32; 4],
-    pub is_in_game: cfn!(bool, &'static BaseEngine),
-    pub is_connected: cfn!(bool, &'static BaseEngine),
+    pub is_in_game: cfn!(bool, &BaseEngine),
+    pub is_connected: cfn!(bool, &BaseEngine),
     _pad6: [u32; 8],
-    pub world_to_screen_matrix: cfn!(VMatrix, &'static BaseEngine),
+    pub world_to_screen_matrix: cfn!(VMatrix, &BaseEngine),
     _pad7: [u32; 48],
-    pub is_taking_screenshot: cfn!(bool, &'static BaseEngine),
+    pub is_taking_screenshot: cfn!(bool, &BaseEngine),
 }

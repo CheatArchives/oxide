@@ -1,38 +1,43 @@
-use std::{mem::MaybeUninit, usize};
+use std::{error::Error, ffi::{c_char, CStr, CString}, mem::{transmute, MaybeUninit}, usize};
 
 use elf::{dynamic::Elf64_Dyn, segment::Elf64_Phdr};
-use libc::{dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
+use libc::{c_void, dlclose, dlerror, dlopen, Elf64_Addr, RTLD_LAZY, RTLD_NOLOAD};
 use sdl2_sys::SDL_Scancode;
 
-use crate::*;
+
+use crate::{c, error::OxideError, i, math::vector::{Vector2, Vector3}};
 
 pub mod macros;
-module_export!(sigscanner);
+pub mod sigscanner;
 
-pub unsafe fn vmt_size(vmt: *const c_void) -> usize {
-    let mut funcs = transmute::<_, *const *const c_void>(vmt);
-    let size = std::mem::size_of::<*const c_void>();
+pub fn vmt_size(vmt: *const c_void) -> usize {
+    unsafe {
+        let mut funcs = transmute::<_, *const *const c_void>(vmt);
+        let size = std::mem::size_of::<*const c_void>();
 
-    let mut i = 0;
-    while !(*funcs).is_null() {
-        i += 1;
-        funcs = (funcs as usize + size) as *const *const c_void;
+        let mut i = 0;
+        while !(*funcs).is_null() {
+            i += 1;
+            funcs = (funcs as usize + size) as *const *const c_void;
+        }
+
+        i * size
     }
-
-    i * size
 }
 
 pub fn get_handle(name: &str) -> Result<*mut c_void, std::boxed::Box<dyn Error>> {
-    let handle = unsafe { dlopen(CString::new(name)?.as_ptr(), RTLD_NOLOAD | RTLD_LAZY) };
-    if handle.is_null() {
-        let error = unsafe { CStr::from_ptr(dlerror()).to_str() }?;
-        return Err(std::boxed::Box::new(OxideError::new(&format!(
-            "{} handle not found\n {}",
-            name, error
-        ))));
+    unsafe {
+        let handle = dlopen(CString::new(name)?.as_ptr(), RTLD_NOLOAD | RTLD_LAZY);
+        if handle.is_null() {
+            let error = CStr::from_ptr(dlerror()).to_str()?;
+            return Err(std::boxed::Box::new(OxideError::new(&format!(
+                "{} handle not found\n {}",
+                name, error
+            ))));
+        }
+        dlclose(handle);
+        Ok(handle)
     }
-    unsafe { dlclose(handle) };
-    Ok(handle)
 }
 
 #[allow(unused)]
@@ -362,21 +367,17 @@ pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
     let w2s = unsafe { MaybeUninit::zeroed().assume_init() };
 
     let player_view = unsafe { MaybeUninit::zeroed().assume_init() };
-    unsafe {
-        c!(i!(base_client), get_player_view, &player_view);
-    }
+    c!(i!(base_client), get_player_view, &player_view);
 
-    unsafe {
-        c!(
-            i!(render_view),
-            get_matrices_for_view,
-            &player_view,
-            &w2v,
-            &v2pr,
-            &w2s,
-            &w2px
-        );
-    }
+    c!(
+        i!(render_view),
+        get_matrices_for_view,
+        &player_view,
+        &w2v,
+        &v2pr,
+        &w2s,
+        &w2px
+    );
     let w = w2s[3][0] * vec.x + w2s[3][1] * vec.y + w2s[3][2] * vec.z + w2s[3][3];
 
     if w < 0.01 {
@@ -386,9 +387,7 @@ pub fn world_to_screen(vec: &Vector3) -> Option<Vector2> {
     let screen_w = 0;
     let screen_h = 0;
 
-    unsafe {
-        c!(i!(base_engine), get_screen_size, &screen_w, &screen_h);
-    }
+    c!(i!(base_engine), get_screen_size, &screen_w, &screen_h);
 
     let x = w2s[0][0] * vec.x + w2s[0][1] * vec.y + w2s[0][2] * vec.z + w2s[0][3];
     let y = w2s[1][0] * vec.x + w2s[1][1] * vec.y + w2s[1][2] * vec.z + w2s[1][3];

@@ -1,6 +1,8 @@
 use std::sync::{Arc, Mutex};
 
-use crate::*;
+use crate::{am, amt, draw::{component::{Component, RawComponent}, event::Event, frame::Frame}};
+
+use super::text_input::TextInput;
 
 #[derive(Debug)]
 pub struct FloatInput {

@@ -1,6 +1,18 @@
-use std::isize;
-
-use crate::*;
+use crate::{
+    c,
+    error::OxideError,
+    i,
+    math::{angles::Angles, vector::Vector3},
+    s,
+    sdk::{
+        condition::ConditionFlags,
+        engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+        entity::Entity,
+        model_info::{Hitbox, HitboxId},
+        user_cmd::{ButtonFlags, UserCmd},
+        weapon::WeaponType,
+    },
+};
 
 #[derive(Debug, Clone)]
 pub struct Aimbot {
@@ -32,7 +44,7 @@ impl Aimbot {
             + (angle.pitch - my_angle.pitch).abs().powi(2))
         .sqrt();
 
-        if distance_to_center > *settings!().aimbot.fov.lock().unwrap() as f32 {
+        if distance_to_center > *s!().aimbot.fov.lock().unwrap() as f32 {
             return None;
         }
 
@@ -134,17 +146,16 @@ impl Aimbot {
             }
         }
 
-        let Some((target_point, prio)) = target else {
+        let Some((target_point, _)) = target else {
             return Ok(None);
         };
         let diff = my_eyes - target_point;
 
-        return Ok(Some(diff.angle()));
-        Ok(None)
+        Ok(Some(diff.angle()))
     }
     pub fn hitbox_order(&self, p_local: &Entity) -> Vec<HitboxId> {
-        let weapon = unsafe { c!(p_local, get_weapon) };
-        let id = unsafe { c!(weapon, get_weapon_id) };
+        let weapon = c!(p_local, get_weapon);
+        let id = c!(weapon, get_weapon_id);
         match id {
             WeaponType::Sniperrifle => {
                 vec![HitboxId::Head]
@@ -153,7 +164,7 @@ impl Aimbot {
         }
     }
     pub fn should_run(&mut self) -> bool {
-        if !*settings!().aimbot.enabled.lock().unwrap() || !self.shoot_key_pressed {
+        if !*s!().aimbot.enabled.lock().unwrap() || !self.shoot_key_pressed {
             return false;
         }
 
@@ -161,14 +172,14 @@ impl Aimbot {
             return false;
         };
 
-        if !unsafe { c!(p_local, is_alive) } {
+        if !c!(p_local, is_alive) {
             return false;
         }
 
         true
     }
 
-    pub unsafe fn pre_create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
+    pub fn pre_create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
         if !self.should_run() {
             return Ok(());
         }
@@ -184,11 +195,11 @@ impl Aimbot {
         Ok(())
     }
     pub fn shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
-        let weapon = unsafe { c!(p_local, get_weapon) };
-        let id = unsafe { c!(weapon, get_weapon_id) };
+        let weapon = c!(p_local, get_weapon);
+        let id = c!(weapon, get_weapon_id);
         match id {
             WeaponType::Sniperrifle => {
-                let weapon = unsafe { c!(p_local, get_weapon) };
+                let weapon = c!(p_local, get_weapon);
                 if !p_local.player_cond.get(ConditionFlags::Zoomed) {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;
@@ -201,13 +212,13 @@ impl Aimbot {
                     true
                 }
             }
-            WeaponType::Knife => unsafe {
+            WeaponType::Knife => {
                 if weapon.ready_to_backstab {
                     cmd.buttons.set(ButtonFlags::InAttack, true);
                     return true;
                 }
-                return false;
-            },
+                false
+            }
             _ => {
                 cmd.buttons.set(ButtonFlags::InAttack, true);
                 true

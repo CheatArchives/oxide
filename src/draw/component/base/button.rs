@@ -1,6 +1,14 @@
 use std::sync::{Arc, Mutex};
 
-use crate::*;
+use crate::{
+    d, draw::{
+        colors::{CURSOR, CURSOR_TEXT, FOREGROUND},
+        component::{Component, RawComponent},
+        event::{Event, EventType},
+        fonts::FontSize,
+        frame::Frame,
+    }, util::point_in_bounds
+};
 
 #[derive(Debug)]
 pub struct Button {
@@ -62,8 +70,8 @@ impl RawComponent for Button {
         match event.r#type {
             EventType::MouseButtonDown => {
                 if point_in_bounds(
-                    draw!().cursor.0,
-                    draw!().cursor.1,
+                    d!().cursor.0,
+                    d!().cursor.1,
                     self.rooted_x,
                     self.rooted_y,
                     self.w,

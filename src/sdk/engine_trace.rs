@@ -1,6 +1,13 @@
-use std::{mem::MaybeUninit, ops::Sub};
+use std::{
+    alloc::{alloc, Layout},
+    ffi::CStr,
+    mem::MaybeUninit,
+    ops::Sub,
+};
 
-use crate::*;
+use crate::{c, cfn, i, math::vector::Vector3};
+
+use super::{entity::Entity, model_info::HitboxId, WithVmt};
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
@@ -80,27 +87,25 @@ pub enum TraceType {
 unsafe extern "C-unwind" fn should_hit_entity(
     trace_filter: *const TraceFilter,
     ent: *const Entity,
-    mask: i32,
+    _: i32,
 ) -> bool {
     ent != unsafe { trace_filter.read().p_local }
 }
 
-unsafe extern "C-unwind" fn get_trace_type(trace_filter: *const TraceFilter) -> TraceType {
+unsafe extern "C-unwind" fn get_trace_type(_: *const TraceFilter) -> TraceType {
     TraceType::Everything
 }
 
 impl TraceFilter {
     pub fn new(p_local: &'static Entity) -> TraceFilter {
         unsafe {
-            let mut ptr = alloc(Layout::new::<VMTTraceFilter>()) as *mut VMTTraceFilter;
+            let alloc = alloc(Layout::new::<VMTTraceFilter>());
+            let ptr = alloc as *mut VMTTraceFilter;
             *ptr = VMTTraceFilter {
                 should_hit_entity,
                 get_trace_type,
             };
-            TraceFilter {
-                vmt: ptr,
-                p_local,
-            }
+            TraceFilter { vmt: ptr, p_local }
         }
     }
 }
@@ -118,7 +123,7 @@ pub struct Plane {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Surface {
-    name: *const c_char,
+    name: *const CStr,
     surface_props: i16,
     flags: u16,
 }
@@ -164,7 +169,7 @@ pub fn trace(start: Vector3, end: Vector3, mask: u32, p_local: &'static Entity) 
         let filter = TraceFilter::new(p_local);
         let mut trace = MaybeUninit::zeroed().assume_init();
 
-        let res = c!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
+        c!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
         trace
     }
 }
@@ -179,7 +184,7 @@ pub const CONTENTS_WATER: u32 = 0x20;
 pub const CONTENTS_BLOCKLOS: u32 = 0x40;
 pub const CONTENTS_OPAQUE: u32 = 0x80;
 pub const LAST_VISIBLE_CONTENTS: u32 = 0x80;
-pub const ALL_VISIBLE_CONTENTS: u32 = (LAST_VISIBLE_CONTENTS | (LAST_VISIBLE_CONTENTS - 1));
+pub const ALL_VISIBLE_CONTENTS: u32 = LAST_VISIBLE_CONTENTS | (LAST_VISIBLE_CONTENTS - 1);
 pub const CONTENTS_TESTFOGVOLUME: u32 = 0x100;
 pub const CONTENTS_UNUSED: u32 = 0x200;
 pub const CONTENTS_UNUSED6: u32 = 0x400;
@@ -204,56 +209,56 @@ pub const CONTENTS_TRANSLUCENT: u32 = 0x10000000;
 pub const CONTENTS_LADDER: u32 = 0x20000000;
 pub const CONTENTS_HITBOX: u32 = 0x40000000;
 
-pub const MASK_ALL: u32 = (0xFFFFFFFF);
+pub const MASK_ALL: u32 = 0xFFFFFFFF;
 pub const MASK_SOLID: u32 =
-    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER | CONTENTS_GRATE);
-pub const MASK_PLAYERSOLID: u32 = (CONTENTS_SOLID
+    CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER | CONTENTS_GRATE;
+pub const MASK_PLAYERSOLID: u32 = CONTENTS_SOLID
     | CONTENTS_MOVEABLE
     | CONTENTS_PLAYERCLIP
     | CONTENTS_WINDOW
     | CONTENTS_MONSTER
-    | CONTENTS_GRATE);
-pub const MASK_NPCSOLID: u32 = (CONTENTS_SOLID
+    | CONTENTS_GRATE;
+pub const MASK_NPCSOLID: u32 = CONTENTS_SOLID
     | CONTENTS_MOVEABLE
     | CONTENTS_MONSTERCLIP
     | CONTENTS_WINDOW
     | CONTENTS_MONSTER
-    | CONTENTS_GRATE);
-pub const MASK_WATER: u32 = (CONTENTS_WATER | CONTENTS_MOVEABLE | CONTENTS_SLIME);
-pub const MASK_OPAQUE: u32 = (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_OPAQUE);
-pub const MASK_OPAQUE_AND_NPCS: u32 = (MASK_OPAQUE | CONTENTS_MONSTER);
-pub const MASK_BLOCKLOS: u32 = (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_BLOCKLOS);
-pub const MASK_BLOCKLOS_AND_NPCS: u32 = (MASK_BLOCKLOS | CONTENTS_MONSTER);
-pub const MASK_VISIBLE: u32 = (MASK_OPAQUE | CONTENTS_IGNORE_NODRAW_OPAQUE);
-pub const MASK_VISIBLE_AND_NPCS: u32 = (MASK_OPAQUE_AND_NPCS | CONTENTS_IGNORE_NODRAW_OPAQUE);
-pub const MASK_SHOT: u32 = (CONTENTS_SOLID
+    | CONTENTS_GRATE;
+pub const MASK_WATER: u32 = CONTENTS_WATER | CONTENTS_MOVEABLE | CONTENTS_SLIME;
+pub const MASK_OPAQUE: u32 = CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_OPAQUE;
+pub const MASK_OPAQUE_AND_NPCS: u32 = MASK_OPAQUE | CONTENTS_MONSTER;
+pub const MASK_BLOCKLOS: u32 = CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_BLOCKLOS;
+pub const MASK_BLOCKLOS_AND_NPCS: u32 = MASK_BLOCKLOS | CONTENTS_MONSTER;
+pub const MASK_VISIBLE: u32 = MASK_OPAQUE | CONTENTS_IGNORE_NODRAW_OPAQUE;
+pub const MASK_VISIBLE_AND_NPCS: u32 = MASK_OPAQUE_AND_NPCS | CONTENTS_IGNORE_NODRAW_OPAQUE;
+pub const MASK_SHOT: u32 = CONTENTS_SOLID
     | CONTENTS_MOVEABLE
     | CONTENTS_MONSTER
     | CONTENTS_WINDOW
     | CONTENTS_DEBRIS
-    | CONTENTS_HITBOX);
-pub const MASK_SHOT_HULL: u32 = (CONTENTS_SOLID
+    | CONTENTS_HITBOX;
+pub const MASK_SHOT_HULL: u32 = CONTENTS_SOLID
     | CONTENTS_MOVEABLE
     | CONTENTS_MONSTER
     | CONTENTS_WINDOW
     | CONTENTS_DEBRIS
-    | CONTENTS_GRATE);
+    | CONTENTS_GRATE;
 pub const MASK_SHOT_PORTAL: u32 =
-    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER);
+    CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTER;
 pub const MASK_SOLID_BRUSHONLY: u32 =
-    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_GRATE);
+    CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_GRATE;
 pub const MASK_PLAYERSOLID_BRUSHONLY: u32 =
-    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_PLAYERCLIP | CONTENTS_GRATE);
+    CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_PLAYERCLIP | CONTENTS_GRATE;
 pub const MASK_NPCSOLID_BRUSHONLY: u32 =
-    (CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP | CONTENTS_GRATE);
+    CONTENTS_SOLID | CONTENTS_MOVEABLE | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP | CONTENTS_GRATE;
 pub const MASK_NPCWORLDSTATIC: u32 =
-    (CONTENTS_SOLID | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP | CONTENTS_GRATE);
-pub const MASK_SPLITAREAPORTAL: u32 = (CONTENTS_WATER | CONTENTS_SLIME);
-pub const MASK_CURRENT: u32 = (CONTENTS_CURRENT_0
+    CONTENTS_SOLID | CONTENTS_WINDOW | CONTENTS_MONSTERCLIP | CONTENTS_GRATE;
+pub const MASK_SPLITAREAPORTAL: u32 = CONTENTS_WATER | CONTENTS_SLIME;
+pub const MASK_CURRENT: u32 = CONTENTS_CURRENT_0
     | CONTENTS_CURRENT_90
     | CONTENTS_CURRENT_180
     | CONTENTS_CURRENT_270
     | CONTENTS_CURRENT_UP
-    | CONTENTS_CURRENT_DOWN);
+    | CONTENTS_CURRENT_DOWN;
 pub const MASK_DEADSOLID: u32 =
-    (CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW | CONTENTS_GRATE);
+    CONTENTS_SOLID | CONTENTS_PLAYERCLIP | CONTENTS_WINDOW | CONTENTS_GRATE;

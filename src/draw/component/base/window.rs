@@ -1,6 +1,12 @@
 use std::sync::{Arc, Mutex};
 
-use crate::*;
+use crate::{
+    d, draw::{
+        colors::{BACKGROUND, CURSOR, FOREGROUND}, component::{Component, Components, RawComponent}, event::{Event, EventType}, fonts::FontSize, frame::Frame
+    }, util::point_in_bounds
+};
+
+use super::button::Button;
 
 const HEADER_HEIGHT: isize = 50;
 
@@ -110,8 +116,8 @@ impl RawComponent for Window {
             }
             EventType::MouseButtonDown => {
                 if point_in_bounds(
-                    draw!().cursor.0,
-                    draw!().cursor.1,
+                    d!().cursor.0,
+                    d!().cursor.1,
                     self.rooted_x,
                     self.rooted_y,
                     self.w,
@@ -120,8 +126,8 @@ impl RawComponent for Window {
                     self.dragging = true;
                 }
                 if point_in_bounds(
-                    draw!().cursor.0,
-                    draw!().cursor.1,
+                    d!().cursor.0,
+                    d!().cursor.1,
                     self.rooted_x,
                     self.rooted_y,
                     self.w,
@@ -135,7 +141,7 @@ impl RawComponent for Window {
             }
             _ => (),
         }
-        self.last_cursor = draw!().cursor;
+        self.last_cursor = d!().cursor;
     }
 }
 

@@ -6,50 +6,51 @@ macro_rules! cfn {
 }
 
 #[macro_export]
-macro_rules! module_export {
-    ($m:ident) => {
-        pub mod $m;
-        pub use $m::*;
-    };
-}
-
-#[macro_export]
-macro_rules! oxide {
-    () => {
-        #[allow(unused_unsafe)]
-        unsafe { &mut *(OXIDE.unwrap() as *mut _ as *mut Oxide) }
-    };
-}
-
-#[macro_export]
-macro_rules! draw {
+macro_rules! o {
     () => {
         #[allow(unused_unsafe)]
         unsafe {
+            use crate::{Oxide, OXIDE};
+            &mut *(OXIDE.unwrap() as *mut _ as *mut Oxide)
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! d {
+    () => {
+        #[allow(unused_unsafe)]
+        unsafe {
+            use crate::{Draw, DRAW};
             &mut *(DRAW.unwrap() as *mut _ as *mut Draw)
         }
     };
 }
 
 #[macro_export]
-macro_rules! settings {
+macro_rules! s {
     () => {
-        unsafe { &mut *(SETTINGS.unwrap() as *mut _ as *mut Settings) }
+        #[allow(unused_unsafe)]
+        unsafe {
+            use crate::{Settings, SETTINGS};
+            &mut *(SETTINGS.unwrap() as *mut _ as *mut Settings)
+        }
     };
 }
 
 #[macro_export]
 macro_rules! interface_vmt {
     ($n:ident) => {
-        (*oxide!().interfaces.$n.get_vmt())
+        (*o!().interfaces.$n.get_vmt())
     };
 }
 
 #[macro_export]
 macro_rules! i {
-    ($n:ident) => {
-        oxide!().interfaces.$n.interface_ref()
-    };
+    ($n:ident) => {{
+        use crate::o;
+        o!().interfaces.$n.interface_ref()
+    }};
 }
 #[macro_export]
 macro_rules! c {
@@ -70,6 +71,7 @@ macro_rules! call_interface {
 #[macro_export]
 macro_rules! impl_has_vmt {
     ($t:tt,$tv:tt) => {
+        use crate::sdk::HasVmt;
         impl HasVmt<$tv> for $t {
             fn get_vmt(&self) -> &'static $tv {
                 unsafe { &*self.vmt }

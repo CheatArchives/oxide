@@ -1,4 +1,6 @@
-use crate::*;
+use crate::cfn;
+
+use super::{entity::Entity, CBaseHandle, WithVmt};
 
 
 pub type EntityList = WithVmt<VMTEntityList>;
