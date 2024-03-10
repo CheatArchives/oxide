@@ -1,9 +1,14 @@
 use std::sync::{Arc, Mutex};
 
+use crate::{
+    draw::{event::Event, frame::Frame},
+    s,
+};
 
-use crate::{draw::{event::Event, frame::Frame}, s};
-
-use super::{base::{checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, window::Window}, Component, Components, RawComponent};
+use super::{
+    base::{checkbox::Checkbox, float_input::FloatInput, key_input::KeyInput, window::Window},
+    Component, Components,
+};
 
 #[derive(Debug)]
 pub struct AimbotWindow {
@@ -14,12 +19,7 @@ impl AimbotWindow {
     pub fn new(visible: Arc<Mutex<bool>>) -> AimbotWindow {
         let mut components = Components::new();
 
-        components.add(Checkbox::new(
-            "enable",
-            s!().aimbot.enabled.clone(),
-            10,
-            10,
-        ));
+        components.add(Checkbox::new("enable", s!().aimbot.enabled.clone(), 10, 10));
         components.add(Checkbox::new(
             "draw_fov",
             s!().aimbot.draw_fov.clone(),
@@ -40,7 +40,7 @@ impl AimbotWindow {
     }
 }
 
-impl RawComponent for AimbotWindow {
+impl Component for AimbotWindow {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.window.draw(frame, root_x, root_y);
     }
@@ -49,5 +49,3 @@ impl RawComponent for AimbotWindow {
         self.window.handle_event(event);
     }
 }
-
-impl Component for AimbotWindow {}

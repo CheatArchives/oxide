@@ -19,7 +19,7 @@ pub mod hooks;
 pub mod interfaces;
 pub mod paint;
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Oxide {
     pub interfaces: Interfaces,
     pub hooks: Hooks,
@@ -37,8 +37,8 @@ impl Oxide {
             "55 89 E5 53 8D 5D ? 83 EC 44 8B 45 ? 89 5C 24 ? 89 44 24 ? 8B 45 ? 89 04 24 E8 ? ? ? ? 8B 45";
         let get_bone_position_fn = transmute(find_sig("./tf/bin/client.so", &sig));
         let interfaces = Interfaces::init()?;
-        let hooks = Hooks::init(&interfaces);
-        let cheats = Cheats::init();
+        let mut hooks = Hooks::init(&interfaces);
+        let cheats = Cheats::init(&mut hooks);
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
 
@@ -61,21 +61,6 @@ impl Oxide {
     }
     pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) -> bool {
         let mut event = Event::from(unsafe { *event });
-        let aimbot_key = *s!().aimbot.key.lock().unwrap();
-
-        match event.r#type {
-            EventType::KeyDown(key) => {
-                if key == aimbot_key {
-                    self.cheats.aimbot.shoot_key_pressed = true
-                }
-            }
-            EventType::KeyUp(key) => {
-                if key == aimbot_key {
-                    self.cheats.aimbot.shoot_key_pressed = false
-                }
-            }
-            _ => (),
-        }
 
         if DRAW.is_some() {
             d!().handle_event(&mut event);

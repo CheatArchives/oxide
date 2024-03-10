@@ -8,7 +8,10 @@ use libc::c_void;
 
 use crate::{
     cfn,
-    math::{angles::Angles, vector::{Vector3, Vector4}},
+    math::{
+        angles::Angles,
+        vector::{Vector3, Vector4},
+    },
     o,
 };
 
@@ -91,6 +94,12 @@ impl Hitbox {
             corners[i] = corner + pos.clone()
         }
         corners
+    }
+    pub fn scaled(&self, scale: f32) -> Hitbox{
+        let mut hitbox = self.clone();
+        hitbox.min *= scale;
+        hitbox.max *= scale;
+        hitbox
     }
 }
 

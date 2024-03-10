@@ -32,12 +32,11 @@ pub unsafe extern "C-unwind" fn create_move_hook(
 
     let org_cmd = cmd.clone();
 
-    if let Err(err) = { o!().cheats.aimbot.pre_create_move(cmd) } {
-        eprintln!("{}", err);
-    }
+    //if let Err(err) = { o!().cheats.aimbot.pre_create_move(cmd) } {
+    //    eprintln!("{}", err);
+    //}
 
     if cmd.buttons.get(ButtonFlags::InJump) && true
-    /*draw!().bhop_checkbox.checked*/
     {
         cmd.buttons
             .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);

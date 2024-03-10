@@ -4,7 +4,7 @@ use crate::{
     d,
     draw::{
         colors::{BACKGROUND, FOREGROUND},
-        component::{Component, RawComponent},
+        component::Component,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
@@ -34,7 +34,7 @@ impl Checkbox {
         }
     }
 }
-impl RawComponent for Checkbox {
+impl Component for Checkbox {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.rooted_x = root_x.wrapping_add(self.x);
         self.rooted_y = root_y + self.y;
@@ -77,4 +77,3 @@ impl RawComponent for Checkbox {
         }
     }
 }
-impl Component for Checkbox {}

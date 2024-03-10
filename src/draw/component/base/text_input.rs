@@ -2,15 +2,16 @@ use std::sync::{Arc, Mutex};
 
 use sdl2_sys::*;
 
-
 use crate::{
-    d, draw::{
+    d,
+    draw::{
         colors::{BACKGROUND, BLUE, FOREGROUND},
-        component::{Component, RawComponent},
+        component::Component,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
-    }, util::{point_in_bounds, sdl_scancode_to_char}
+    },
+    util::{point_in_bounds, sdl_scancode_to_char},
 };
 
 const SIZE: isize = FontSize::Small as isize + 4;
@@ -48,7 +49,7 @@ impl TextInput {
     }
 }
 
-impl RawComponent for TextInput {
+impl Component for TextInput {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let x = self.x + root_x;
         let y = self.y + root_y;
@@ -131,5 +132,3 @@ impl RawComponent for TextInput {
         }
     }
 }
-
-impl Component for TextInput {}

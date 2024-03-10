@@ -2,7 +2,7 @@ use std::sync::{Arc, Mutex};
 
 use crate::{
     d, draw::{
-        colors::{BACKGROUND, CURSOR, FOREGROUND}, component::{Component, Components, RawComponent}, event::{Event, EventType}, fonts::FontSize, frame::Frame
+        colors::{BACKGROUND, CURSOR, FOREGROUND}, component::{Components, Component}, event::{Event, EventType}, fonts::FontSize, frame::Frame
     }, util::point_in_bounds
 };
 
@@ -59,7 +59,7 @@ impl Window {
     }
 }
 
-impl RawComponent for Window {
+impl Component for Window {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let x = root_x + self.x;
         let y = root_y + self.y;
@@ -145,4 +145,3 @@ impl RawComponent for Window {
     }
 }
 
-impl Component for Window {}

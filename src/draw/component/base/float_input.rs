@@ -1,6 +1,6 @@
 use std::sync::{Arc, Mutex};
 
-use crate::{am, amt, draw::{component::{Component, RawComponent}, event::Event, frame::Frame}};
+use crate::{am, amt, draw::{component::Component, event::Event, frame::Frame}};
 
 use super::text_input::TextInput;
 
@@ -23,7 +23,7 @@ impl FloatInput {
     }
 }
 
-impl RawComponent for FloatInput {
+impl Component for FloatInput {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let mut float_val = self.float_val.lock().unwrap();
         let text_val = self.text_val.lock().unwrap();
@@ -39,4 +39,3 @@ impl RawComponent for FloatInput {
     }
 }
 
-impl Component for FloatInput {}

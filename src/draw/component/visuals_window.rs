@@ -1,9 +1,14 @@
 use std::sync::{Arc, Mutex};
 
+use crate::{
+    draw::{event::Event, frame::Frame},
+    s,
+};
 
-use crate::{draw::{event::Event, frame::Frame}, s};
-
-use super::{base::{checkbox::Checkbox, float_input::FloatInput, window::Window}, Component, Components, RawComponent};
+use super::{
+    base::{checkbox::Checkbox, float_input::FloatInput, window::Window},
+    Component, Components,
+};
 
 #[derive(Debug)]
 pub struct VisualsWindow {
@@ -21,19 +26,13 @@ impl VisualsWindow {
             10,
         ));
 
-        components.add(FloatInput::new(
-            "fov",
-            10,
-            30,
-            100,
-            s!().visual.fov.clone(),
-        ));
+        components.add(FloatInput::new("fov", 10, 30, 100, s!().visual.fov.clone()));
         let window = Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }
     }
 }
 
-impl RawComponent for VisualsWindow {
+impl Component for VisualsWindow {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         self.window.draw(frame, root_x, root_y);
     }
@@ -42,5 +41,3 @@ impl RawComponent for VisualsWindow {
         self.window.handle_event(event);
     }
 }
-
-impl Component for VisualsWindow {}

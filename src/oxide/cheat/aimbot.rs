@@ -1,5 +1,6 @@
 use crate::{
     c,
+    draw::event::EventType,
     error::OxideError,
     i,
     math::{angles::Angles, vector::Vector3},
@@ -14,10 +15,13 @@ use crate::{
     },
 };
 
+use super::Cheat;
+
+pub const HITBOX_SCALE: f32 = 9.0/ 10.0;
+
 #[derive(Debug, Clone)]
 pub struct Aimbot {
     pub shoot_key_pressed: bool,
-    pub hitbox_scale: f32,
 }
 
 impl Aimbot {
@@ -25,7 +29,6 @@ impl Aimbot {
         Aimbot {
             shoot_key_pressed: false,
             //todo make this higher once we figure out the nolerp n consistancy
-            hitbox_scale: 7.0 / 10.0,
         }
     }
 
@@ -67,10 +70,7 @@ impl Aimbot {
     ) -> Option<(Vector3, isize)> {
         let my_eyes = c!(p_local, eye_position);
 
-        let mut scaled_hitbox = hitbox.clone();
-
-        scaled_hitbox.min *= self.hitbox_scale;
-        scaled_hitbox.max *= self.hitbox_scale;
+        let scaled_hitbox = hitbox.scaled(HITBOX_SCALE);
 
         let points = vec![scaled_hitbox.center(ent)];
         let mut corners = scaled_hitbox.corners(ent).to_vec();
@@ -223,6 +223,27 @@ impl Aimbot {
                 cmd.buttons.set(ButtonFlags::InAttack, true);
                 true
             }
+        }
+    }
+}
+
+impl Cheat for Aimbot {
+    fn handle_event(&mut self, event: &mut crate::draw::event::Event) {
+        let aimbot_key = *s!().aimbot.key.lock().unwrap();
+        match event.r#type {
+            EventType::KeyDown(key) => {
+                if key == aimbot_key {
+                    self.shoot_key_pressed = true
+                }
+                event.handled = true
+            }
+            EventType::KeyUp(key) => {
+                if key == aimbot_key {
+                    self.shoot_key_pressed = false
+                }
+                event.handled = true
+            }
+            _ => (),
         }
     }
 }

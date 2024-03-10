@@ -6,12 +6,10 @@ pub mod base;
 pub mod overlay;
 pub mod visuals_window;
 
-pub trait RawComponent {
+pub trait Component: std::fmt::Debug {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize);
     fn handle_event(&mut self, event: &mut Event);
 }
-
-pub trait Component: RawComponent + std::fmt::Debug {}
 
 #[derive(Debug)]
 pub struct Components(Vec<Box<dyn Component>>);

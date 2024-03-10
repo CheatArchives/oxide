@@ -3,7 +3,7 @@ use std::sync::{Arc, Mutex};
 use crate::{
     d, draw::{
         colors::{CURSOR, CURSOR_TEXT, FOREGROUND},
-        component::{Component, RawComponent},
+        component::Component,
         event::{Event, EventType},
         fonts::FontSize,
         frame::Frame,
@@ -47,7 +47,7 @@ impl Button {
     }
 }
 
-impl RawComponent for Button {
+impl Component for Button {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let x = self.x + root_x;
         let y = self.y + root_y;
@@ -87,4 +87,3 @@ impl RawComponent for Button {
     }
 }
 
-impl Component for Button {}

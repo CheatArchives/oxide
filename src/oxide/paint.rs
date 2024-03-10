@@ -1,5 +1,13 @@
+use crate::{
+    c, hex_to_rgb, i, o, rgb_to_hex,
+    sdk::{
+        entity::Entity,
+        model_info::{Hitbox, HitboxId},
+    },
+    util::world_to_screen,
+};
 
-use crate::{c, hex_to_rgb, i, o, rgb_to_hex, sdk::{entity::Entity, model_info::{Hitbox, HitboxId}}, util::world_to_screen};
+use super::cheat::aimbot::HITBOX_SCALE;
 
 const COLOR_SCALE: f32 = 1.0 / 2.0;
 
@@ -18,12 +26,8 @@ pub fn draw_hitboxes() {
             }
             let team = c!(ent, get_team_number);
 
-            let scale = o!().cheats.aimbot.hitbox_scale;
-
-            let mut hitbox = ent.get_hitbox(HitboxId::Head).unwrap();
-            hitbox.min *= scale;
-            hitbox.max *= scale;
-            draw_hitbox(ent, hitbox, team.color(), 5);
+            let hitbox = ent.get_hitbox(HitboxId::Head).unwrap().scaled(HITBOX_SCALE);
+            draw_hitbox(ent, hitbox, team.color(), 10);
             for hitbox_id in HitboxId::body() {
                 let (r, g, b) = hex_to_rgb!(team.color());
                 let color = rgb_to_hex!(
@@ -31,10 +35,8 @@ pub fn draw_hitboxes() {
                     g as f32 * COLOR_SCALE,
                     b as f32 * COLOR_SCALE
                 );
-                let mut hitbox = ent.get_hitbox(hitbox_id).unwrap();
-                hitbox.min *= scale;
-                hitbox.max *= scale;
-                draw_hitbox(ent, hitbox, color, 5);
+                let hitbox = ent.get_hitbox(hitbox_id).unwrap().scaled(HITBOX_SCALE);
+                draw_hitbox(ent, hitbox, color, 10);
             }
         }
     }

@@ -2,7 +2,7 @@ use std::f32::consts::PI;
 
 use crate::{c, draw::{colors::YELLOW, event::Event, frame::Frame}, o, s, sdk::entity::Entity};
 
-use super::{Component, RawComponent};
+use super::Component;
 
 #[derive(Debug)]
 pub struct AimbotFov {}
@@ -24,7 +24,7 @@ impl AimbotFov {
     }
 }
 
-impl RawComponent for AimbotFov {
+impl Component for AimbotFov {
     fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) {
         if !self.should_draw() {
             return;
@@ -43,4 +43,3 @@ impl RawComponent for AimbotFov {
     fn handle_event(&mut self, _: &mut Event) {}
 }
 
-impl Component for AimbotFov {}

@@ -8,7 +8,7 @@ use sdl2_sys::*;
 
 use crate::{c, draw::{colors::*, event::{Event, EventType}, fonts::FontSize, frame::Frame}, i, NAME, VERSION};
 
-use super::{aimbot_window::AimbotWindow, base::button::Button, visuals_window::VisualsWindow, Component, Components, RawComponent};
+use super::{aimbot_window::AimbotWindow, base::button::Button, visuals_window::VisualsWindow, Component, Components};
 
 const LEFT_OVERLAY_WIDTH: isize = 300;
 const TOP_OVERLAY_HEIGHT: isize = 50;
@@ -92,7 +92,7 @@ impl Overlay {
     }
 }
 
-impl RawComponent for Overlay {
+impl Component for Overlay {
     fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) {
         let size = frame.window_size();
 
@@ -156,4 +156,3 @@ impl RawComponent for Overlay {
     }
 }
 
-impl Component for Overlay {}
