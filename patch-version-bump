@@ -1,6 +1,6 @@
 #!/bin/python3.11
 import re
-import subprocess
+from subprocess import run;
 
 with open("Cargo.toml",mode="r+") as f:
     
@@ -8,7 +8,10 @@ with open("Cargo.toml",mode="r+") as f:
     matches = re.search(r"(.*version = \"[0-9]*\.[0-9]*\.)([0-9]*)(\".*)",old_file,re.S)
     if matches:
         g = matches.groups()
-        print(f'version bumped to {int(g[1]) + 1}')
+        message = f'patch version bumped to {int(g[1]) + 1}'
+        print(message)
         f.seek(0)
         f.write("".join([g[0],str(int(g[1]) + 1),g[2]]))
         f.truncate()
+        run(["git","stage","Cargo.toml"])
+        run(["git","commit","-m",message])
