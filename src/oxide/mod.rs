@@ -7,14 +7,14 @@ use crate::{
     d,
     draw::event::{Event, EventType},
     math::{angles::Angles, vector::Vector3},
-    oxide::{cheats::Cheats, hooks::Hooks, interfaces::Interfaces},
+    oxide::{cheat::cheats::Cheats, hooks::Hooks, interfaces::Interfaces},
     s,
     sdk::{base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
     util::sigscanner::find_sig,
     DRAW,
 };
 
-pub mod cheats;
+pub mod cheat;
 pub mod hooks;
 pub mod interfaces;
 pub mod paint;

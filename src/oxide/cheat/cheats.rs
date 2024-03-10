@@ -1,6 +1,5 @@
-use self::aimbot::Aimbot;
+use super::aimbot::Aimbot;
 
-pub mod aimbot;
 
 #[derive(Debug, Clone)]
 pub struct Cheats {

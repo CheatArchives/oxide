@@ -5,10 +5,10 @@ from subprocess import run;
 with open("Cargo.toml",mode="r+") as f:
     
     old_file = f.read()
-    matches = re.search(r"(.*version = \"[0-9]*\.[0-9]*\.)([0-9]*)(\".*)",old_file,re.S)
+    matches = re.search(r"(.*version = \"[0-9]*\.([0-9]*)\.)[0-9]*(\".*)",old_file,re.S)
     if matches:
         g = matches.groups()
-        message = f'patch version bumped to {int(g[1]) + 1}'
+        message = f'minor version bumped to {int(g[1]) + 1}'
         print(message)
         f.seek(0)
         f.write("".join([g[0],str(int(g[1]) + 1),g[2]]))
