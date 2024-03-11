@@ -5,17 +5,16 @@ use sdl2_sys::SDL_Event;
 
 use crate::{
     d,
-    draw::event::{Event, EventType},
+    draw::event::Event,
     math::{angles::Angles, vector::Vector3},
-    oxide::{cheat::cheats::Cheats, hooks::Hooks, interfaces::Interfaces},
-    s,
+    oxide::{cheat::cheats::Cheats, hook::hooks::Hooks, interfaces::Interfaces},
     sdk::{base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
     util::sigscanner::find_sig,
     DRAW,
 };
 
 pub mod cheat;
-pub mod hooks;
+pub mod hook;
 pub mod interfaces;
 pub mod paint;
 

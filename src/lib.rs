@@ -2,9 +2,11 @@
     c_variadic,
     pointer_is_aligned,
     associated_type_defaults,
-    stmt_expr_attributes
+    stmt_expr_attributes,
+    core_intrinsics,
+    unboxed_closures
 )]
-#![allow(improper_ctypes_definitions)]
+#![allow(improper_ctypes_definitions, internal_features)]
 
 use std::{
     alloc::{alloc, Layout},
@@ -14,7 +16,6 @@ use std::{
     thread,
 };
 
-pub mod util;
 
 use crate::{draw::Draw, oxide::Oxide, settings::Settings};
 
@@ -24,6 +25,7 @@ pub mod math;
 pub mod oxide;
 pub mod sdk;
 pub mod settings;
+pub mod util;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 pub const NAME: &str = env!("CARGO_PKG_NAME");

@@ -1,4 +1,4 @@
-use crate::oxide::hooks::Hooks;
+use crate::oxide::hook::hooks::Hooks;
 
 use super::{aimbot::Aimbot, Cheat};
 
