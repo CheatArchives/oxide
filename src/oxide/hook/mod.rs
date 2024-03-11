@@ -15,10 +15,10 @@ pub trait Hook: std::fmt::Debug {
 #[macro_export]
 macro_rules! define_hook{
     ($name:ident,$stringName:expr,$return:ty,$default:ident,$($argName:ident,$argType:ty),*) => {
-        use crate::{cfn,o,OXIDE};
+        use crate::{cfn,o,OXIDE,oxide::hook::Hook};
         use core::intrinsics::transmute_unchecked;
-        use crate::oxide::hook::Hook;
         use core::intrinsics::breakpoint;
+        use std::mem::ManuallyDrop;
 
 
         type RawHookFn = cfn!($return,$($argType),*);
@@ -55,16 +55,15 @@ macro_rules! define_hook{
                 if OXIDE.is_none() {
                     return $default;
                 }
-                let mut hook: Box<CreateMoveHook> = transmute_unchecked(o!().hooks.hooks.get($stringName).unwrap());
+                let mut hook = ManuallyDrop::new(transmute_unchecked::<_,&Box<CreateMoveHook>>(o!().hooks.hooks.get($stringName).unwrap()));
 
-                breakpoint();
-                for fun in hook.before {
+                for fun in &hook.before {
                     (fun)($($argName),*);
                 }
 
                 let mut res = (hook.org)($($argName),*);
 
-                for fun in hook.after {
+                for fun in &hook.after {
                     (fun)($($argName),*,&mut res);
                 }
                 res
