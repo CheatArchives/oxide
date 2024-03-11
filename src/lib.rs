@@ -4,9 +4,10 @@
     associated_type_defaults,
     stmt_expr_attributes,
     core_intrinsics,
-    unboxed_closures
+    unboxed_closures,
+    inherent_associated_types
 )]
-#![allow(improper_ctypes_definitions, internal_features)]
+#![allow(improper_ctypes_definitions, internal_features, incomplete_features)]
 
 use std::{
     alloc::{alloc, Layout},
@@ -15,7 +16,6 @@ use std::{
     mem::ManuallyDrop,
     thread,
 };
-
 
 use crate::{draw::Draw, oxide::Oxide, settings::Settings};
 
@@ -46,6 +46,7 @@ unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     *oxide_ptr = ManuallyDrop::new(Oxide::init()?);
     OXIDE = Some(oxide_ptr as *mut _ as *mut c_void);
 
+    Draw::hook(&mut o!().hooks);
 
     println!("loaded");
     Ok(())

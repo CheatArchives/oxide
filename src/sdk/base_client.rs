@@ -3,7 +3,7 @@ use crate::cfn;
 use super::{view_setup::ViewSetup, WithVmt};
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone,Copy)]
 pub enum FrameStage {
     FrameUndefined = -1,
     FrameStart,

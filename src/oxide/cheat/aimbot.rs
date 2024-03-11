@@ -28,7 +28,6 @@ impl Aimbot {
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
-            //todo make this higher once we figure out the nolerp n consistancy
         }
     }
 

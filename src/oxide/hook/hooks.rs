@@ -1,103 +1,82 @@
-use std::{
-    collections::HashMap,
-    ptr::{addr_of, addr_of_mut},
+use std::{collections::HashMap, mem::{transmute, ManuallyDrop}};
+
+use libc::c_void;
+
+use crate::{oxide::interfaces::Interfaces, util::get_handle};
+
+use super::{
+    create_move::CreateMoveHook, frame_stage_notify::FrameStageNotifyHook,
+    override_view::OverrideViewHook, paint::PaintHook, paint_traverse::PaintTraverseHook,
+    poll_event::PollEventHook, swap_window::SwapWindowHook, Hook,
 };
-
-//use super::{
-//    create_move::{create_move_hook, CreateMoveFn},
-//    frame_stage_notify::{frame_stage_notify_hook, FrameStageNotifyFn},
-//    override_view::{override_view_hook, OverrideViewFn},
-//    paint,
-//    paint_traverse::{paint_traverse_hook, PaintRraverseFn},
-//    poll_event::{poll_event_hook, PollEventFn},
-//    swap_window::{swap_window_hook, SwapWindowFn}, Hook,
-//};
-
-use crate::oxide::interfaces::Interfaces;
-
-use super::{create_move::CreateMoveHook, Hook};
 
 static SWAPWINDOW_OFFSET: usize = 0xFD648;
 static POLLEVENT_OFFSET: usize = 0xFCF64;
 
 #[derive(Debug)]
 
-pub struct Hooks {
-    pub hooks: HashMap<String, Box<dyn Hook + 'static>>, //pub create_move: Hook<CreateMoveFn>,
-                                                         //pub swap_window: Hook<SwapWindowFn>,
-                                                         //pub poll_event: Hook<PollEventFn>,
-                                                         //pub paint_traverse: Hook<PaintRraverseFn>,
-                                                         //pub override_view: Hook<OverrideViewFn>,
-                                                         //pub frame_stage_notify: Hook<FrameStageNotifyFn>,
-                                                         //pub paint: Hook<paint::PaintFn>,
-}
+pub struct Hooks(HashMap<String, Box<dyn Hook + 'static>>);
 
 impl Hooks {
     pub unsafe fn init(interfaces: &Interfaces) -> Hooks {
-        //let create_move = Hook::<CreateMoveFn>::init(
-        //    transmute(&(*interfaces.client_mode.get_vmt()).create_move),
-        //    create_move_hook,
-        //);
-
-        //let override_view = Hook::<OverrideViewFn>::init(
-        //    transmute(&(*interfaces.client_mode.get_vmt()).override_view),
-        //    override_view_hook,
-        //);
-
-        //let paint_traverse = Hook::<PaintRraverseFn>::init(
-        //    transmute(&(*interfaces.panel.get_vmt()).paint_traverse),
-        //    paint_traverse_hook,
-        //);
-
-        //let frame_stage_notify = Hook::<FrameStageNotifyFn>::init(
-        //    transmute(&(*interfaces.base_client.get_vmt()).frame_stage_notify),
-        //    frame_stage_notify_hook,
-        //);
-
-        //let paint = Hook::<paint::PaintFn>::init(
-        //    transmute(&(*interfaces.engine_vgui.get_vmt()).paint),
-        //    paint::paint_hook,
-        //);
-
-        //let sdl_handle = get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _
-        //    as *const *const *const c_void;
-
-        //let swap_window_ptr = ((*sdl_handle) as usize + SWAPWINDOW_OFFSET) as *mut SwapWindowFn;
-        //let init = Hook::init(swap_window_ptr, swap_window_hook);
-        //let swap_window = init;
-
-        //let poll_event_ptr = ((*sdl_handle) as usize + POLLEVENT_OFFSET) as *mut PollEventFn;
-        //let poll_event = Hook::init(poll_event_ptr, poll_event_hook);
-
-        let mut create_move_hook =
-            CreateMoveHook::init(&((*interfaces.client_mode.get_vmt()).create_move));
         let mut hooks = HashMap::new();
 
-        create_move_hook.before.push(|_, _, _| {
-            dbg!("create_move");
-        });
+        let override_view_hook =
+            OverrideViewHook::init(&(*interfaces.client_mode.get_vmt()).override_view);
         hooks.insert(
-            CreateMoveHook::name().to_owned(),
+            OverrideViewHook::name(),
+            Box::new(override_view_hook) as Box<dyn Hook>,
+        );
+
+        let frame_stage_notify_hook =
+            FrameStageNotifyHook::init(&(*interfaces.base_client.get_vmt()).frame_stage_notify);
+        hooks.insert(
+            FrameStageNotifyHook::name(),
+            Box::new(frame_stage_notify_hook) as Box<dyn Hook>,
+        );
+
+        let paint_hook = PaintHook::init(&(*interfaces.engine_vgui.get_vmt()).paint);
+        hooks.insert(PaintHook::name(), Box::new(paint_hook) as Box<dyn Hook>);
+
+        let paint_traverse_hook =
+            PaintTraverseHook::init(&(*interfaces.panel.get_vmt()).paint_traverse);
+        hooks.insert(
+            PaintTraverseHook::name(),
+            Box::new(paint_traverse_hook) as Box<dyn Hook>,
+        );
+
+        let create_move_hook =
+            CreateMoveHook::init(&((*interfaces.client_mode.get_vmt()).create_move));
+        hooks.insert(
+            CreateMoveHook::name(),
             Box::new(create_move_hook) as Box<dyn Hook>,
         );
 
-        Hooks {
-            hooks, //create_move,
-                   //override_view,
-                   //paint_traverse,
-                   //swap_window,
-                   //poll_event,
-                   //frame_stage_notify,
-                   //paint,
-        }
+        let sdl_handle = get_handle("./bin/libSDL2-2.0.so.0").unwrap() as *const _
+            as *const *const *const c_void;
+
+        let swap_window_ptr = (*sdl_handle) as usize + SWAPWINDOW_OFFSET;
+        let swap_window_hook = SwapWindowHook::init(transmute(swap_window_ptr));
+        hooks.insert(
+            SwapWindowHook::name(),
+            Box::new(swap_window_hook) as Box<dyn Hook>,
+        );
+
+        let poll_event_ptr = (*sdl_handle) as usize + POLLEVENT_OFFSET;
+        let poll_event_hook = PollEventHook::init(transmute(poll_event_ptr));
+        hooks.insert(
+            PollEventHook::name(),
+            Box::new(poll_event_hook) as Box<dyn Hook>,
+        );
+
+        Hooks(hooks)
+    }
+    pub fn get<T: Hook>(&mut self) -> ManuallyDrop<&mut Box<T>>{
+        unsafe { ManuallyDrop::new(transmute(self.0.get_mut(&SwapWindowHook::name()).unwrap())) }
     }
     pub fn restore(&mut self) {
-        //self.create_move.restore();
-        //self.override_view.restore();
-        //self.paint_traverse.restore();
-        //self.swap_window.restore();
-        //self.poll_event.restore();
-        //self.frame_stage_notify.restore();
-        //self.paint.restore();
+        for (_, hook) in &mut self.0 {
+            hook.restore()
+        }
     }
 }

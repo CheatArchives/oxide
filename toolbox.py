@@ -97,6 +97,7 @@ def start_tf2():
          "-nosteamcontroller", "-nohltv", "-particles", "1",
          "-precachefontchars", "-noquicktime", "-nobreakpad"], cwd=TF2_DIR,
         env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
+    os.remove("/tmp/source_engine_2925226592.lock")
 
 
 parser = argparse.ArgumentParser(

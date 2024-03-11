@@ -1,11 +1,27 @@
-use std::{error::Error, ffi::CString};
+use std::{
+    alloc::{alloc, Layout},
+    error::Error,
+    ffi::CString,
+    intrinsics::breakpoint,
+    mem::ManuallyDrop,
+};
 
 use libc::c_void;
 use sdl2_sys::*;
 
-use crate::{draw::component::{aimbot_fov::AimbotFov, overlay::Overlay}, AUTHOR, NAME, VERSION};
+use crate::{
+    d,
+    draw::component::{aimbot_fov::AimbotFov, overlay::Overlay},
+    oxide::hook::{hooks::Hooks, swap_window::SwapWindowHook},
+    AUTHOR, DRAW, NAME, VERSION,
+};
 
-use self::{component::Components, event::{Event, EventType}, fonts::Fonts, frame::Frame};
+use self::{
+    component::Components,
+    event::{Event, EventType},
+    fonts::Fonts,
+    frame::Frame,
+};
 
 pub mod colors;
 pub mod component;
@@ -25,12 +41,13 @@ pub struct Draw {
 
 impl Draw {
     pub unsafe fn init(window: *mut SDL_Window) -> Result<Draw, std::boxed::Box<dyn Error>> {
+        breakpoint();
         println!("loading menu");
         let old_ctx = SDL_GL_GetCurrentContext();
         let ctx = SDL_GL_CreateContext(window);
+        breakpoint();
         let mut renderer = SDL_CreateRenderer(window, -1, 0);
 
-        //STUPID WORKOAROUND
         if renderer.is_null() {
             renderer = SDL_GetRenderer(window);
         }
@@ -61,9 +78,25 @@ impl Draw {
         })
     }
 
-    pub unsafe fn restore(&self) {
-        SDL_GL_DeleteContext(self.ctx);
+    pub fn restore(&self) {
+        unsafe {
+            SDL_GL_DeleteContext(self.ctx);
+        }
         self.fonts.restore();
+    }
+
+    pub fn hook(hooks: &mut Hooks) {
+        let mut hook = hooks.get::<SwapWindowHook>();
+        hook.before.push(|window| unsafe {
+            breakpoint();
+            if DRAW.is_none() {
+                let draw_ptr = alloc(Layout::new::<Draw>()) as *mut _ as *mut ManuallyDrop<Draw>;
+                let draw = ManuallyDrop::new(Draw::init(window).unwrap());
+                *draw_ptr = draw;
+                DRAW = Some(draw_ptr as *mut _ as *mut c_void);
+            }
+            d!().run(window);
+        })
     }
 
     pub fn run(&'static mut self, window: *mut SDL_Window) {

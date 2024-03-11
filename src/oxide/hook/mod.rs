@@ -14,16 +14,14 @@ pub trait Hook: std::fmt::Debug {
 
 #[macro_export]
 macro_rules! define_hook{
-    ($name:ident,$stringName:expr,$return:ty,$default:ident,$($argName:ident,$argType:ty),*) => {
+    ($name:ident,$stringName:expr,$return:ty,$default:expr,$($argName:ident,$argType:ty),*) => {
         use crate::{cfn,o,OXIDE,oxide::hook::Hook};
-        use core::intrinsics::transmute_unchecked;
-        use core::intrinsics::breakpoint;
-        use std::mem::ManuallyDrop;
-
+        use core::intrinsics::{breakpoint,transmute_unchecked};
 
         type RawHookFn = cfn!($return,$($argType),*);
         type BeforeHookFn =  fn ($($argType),*) -> ();
         type AfterHookFn = fn ($($argType),*,&mut $return) -> ();
+
 
         #[derive(Debug)]
         pub struct $name
@@ -35,8 +33,11 @@ macro_rules! define_hook{
         }
 
         impl $name {
-            pub fn name() -> &'static str{
-                $stringName
+            pub type RawFn = RawHookFn;
+            pub type BeforeFn = BeforeHookFn;
+            pub type AfterFn = AfterHookFn;
+            fn restore(&mut self) {
+                *self.target = self.org
             }
             pub fn init(target: &RawHookFn) -> Self {
                 let target = unsafe {transmute_unchecked::<_,&'static mut RawHookFn>(target)};
@@ -47,17 +48,19 @@ macro_rules! define_hook{
                 *hook.target = $name::hook_fn;
                 hook
             }
-            fn restore(&mut self) {
-        *self.target = self.org
-        }
+            pub fn name() -> String{
+                $stringName.to_owned()
+            }
             #[allow(unused)]
             unsafe extern "C-unwind" fn hook_fn($($argName:$argType),*) -> $return{
                 if OXIDE.is_none() {
                     return $default;
                 }
-                let mut hook = ManuallyDrop::new(transmute_unchecked::<_,&Box<CreateMoveHook>>(o!().hooks.hooks.get($stringName).unwrap()));
+
+                let mut hook = o!().hooks.get::<$name>();
 
                 for fun in &hook.before {
+                    breakpoint();
                     (fun)($($argName),*);
                 }
 
@@ -74,6 +77,7 @@ macro_rules! define_hook{
                 self.restore()
 
             }
+
 
         }
     }
