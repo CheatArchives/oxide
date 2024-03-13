@@ -16,7 +16,7 @@ pub trait Hook: std::fmt::Debug {
 macro_rules! define_hook{
     ($name:ident,$stringName:expr,$return:ty,$default:expr,$($argName:ident,$argType:ty),*) => {
         use crate::{cfn,o,OXIDE,oxide::hook::Hook};
-        use core::intrinsics::{breakpoint,transmute_unchecked};
+        use core::intrinsics::{transmute_unchecked};
 
         type RawHookFn = cfn!($return,$($argType),*);
         type BeforeHookFn =  fn ($($argType),*) -> ();
@@ -29,7 +29,7 @@ macro_rules! define_hook{
             pub org: RawHookFn,
             pub target: &'static mut RawHookFn,
             pub before: Vec<BeforeHookFn>,
-            pub after: Vec<AfterHookFn>,
+            pub after: Option<AfterHookFn>,
         }
 
         impl $name {
@@ -43,8 +43,7 @@ macro_rules! define_hook{
                 let target = unsafe {transmute_unchecked::<_,&'static mut RawHookFn>(target)};
                 let org = (*target).clone();
                 let before = Vec::new();
-                let after = Vec::new();
-                let hook = $name { org, target, before, after };
+                let hook = $name { org, target, before, after: None };
                 *hook.target = $name::hook_fn;
                 hook
             }
@@ -57,17 +56,16 @@ macro_rules! define_hook{
                     return $default;
                 }
 
-                let mut hook = o!().hooks.get::<$name>();
+                let mut hook = o!().hooks.get::<Self>(Self::name());
 
                 for fun in &hook.before {
-                    breakpoint();
                     (fun)($($argName),*);
                 }
 
                 let mut res = (hook.org)($($argName),*);
 
-                for fun in &hook.after {
-                    (fun)($($argName),*,&mut res);
+                if let Some(after) = hook.after {
+                    (after)($($argName),*,&mut res);
                 }
                 res
             }

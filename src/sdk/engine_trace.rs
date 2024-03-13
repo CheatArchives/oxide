@@ -1,6 +1,5 @@
 use std::{
     alloc::{alloc, Layout},
-    ffi::CStr,
     mem::MaybeUninit,
     ops::Sub,
 };
@@ -123,7 +122,7 @@ pub struct Plane {
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct Surface {
-    name: *const CStr,
+    name: *const u8,
     surface_props: i16,
     flags: u16,
 }

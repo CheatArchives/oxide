@@ -26,11 +26,13 @@ pub struct AimbotSettings {
     pub draw_fov: amt!(bool),
     pub fov: amt!(f32),
     pub key: amt!(SDL_Scancode),
+    pub multipoint: amt!(bool),
 }
 
 impl AimbotSettings {
     pub fn new() -> AimbotSettings {
         AimbotSettings {
+            multipoint: am!(false),
             enabled: am!(false),
             draw_fov: am!(false),
             fov: am!(30f32),

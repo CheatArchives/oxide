@@ -14,23 +14,6 @@ define_hook!(
     &mut UserCmd
 );
 
-
-//use std::f32::consts::PI;
-//
-//use crate::{
-//    c, cfn,
-//    math::angles::Angles,
-//    o,
-//    sdk::{
-//        client_mode::ClientMode,
-//        entity::Entity,
-//        user_cmd::{ButtonFlags, UserCmd},
-//    },
-//    DRAW,
-//};
-//
-//pub type CreateMoveFn = cfn!(bool, &'static mut ClientMode, f32, &'static mut UserCmd);
-//
 //pub unsafe extern "C-unwind" fn create_move_hook(
 //    client_mode: &'static mut ClientMode,
 //    input_sample_time: f32,

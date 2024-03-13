@@ -18,6 +18,7 @@ const SIZE: isize = FontSize::Small as isize + 4;
 
 #[derive(Debug)]
 pub struct KeyInput {
+    label: &'static str,
     x: isize,
     y: isize,
     w: isize,
@@ -28,8 +29,9 @@ pub struct KeyInput {
 }
 
 impl KeyInput {
-    pub fn new(x: isize, y: isize, w: isize, val: Arc<Mutex<SDL_Scancode>>) -> KeyInput {
+    pub fn new(label: &'static str,x: isize, y: isize, w: isize, val: Arc<Mutex<SDL_Scancode>>) -> KeyInput {
         KeyInput {
+            label,
             x,
             y,
             w,
@@ -47,7 +49,24 @@ impl Component for KeyInput {
         let y = self.y + root_y;
         self.rooted_x = x;
         self.rooted_y = y;
+
+        let label = format!("{}:", self.label);
+
+        let label_size = frame.fonts.get_text_size(&label, FontSize::Small);
+
+        frame.text(
+            &label,
+            x,
+            y + SIZE / 2,
+            FontSize::Small,
+            false,
+            FOREGROUND,
+            255,
+        );
+        let x = x + label_size.0 + 10;
+
         frame.filled_rect(x, y, self.w, SIZE, BACKGROUND, 255);
+
         let outline = if self.focussed { BLUE } else { FOREGROUND };
         frame.outlined_rect(x, y, self.w, SIZE, outline, 255);
 

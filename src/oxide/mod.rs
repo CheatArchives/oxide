@@ -5,13 +5,17 @@ use sdl2_sys::SDL_Event;
 
 use crate::{
     d,
-    draw::event::Event,
+    draw::{event::Event, Draw},
     math::{angles::Angles, vector::Vector3},
+    o,
     oxide::{cheat::cheats::Cheats, hook::hooks::Hooks, interfaces::Interfaces},
+    s,
     sdk::{base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
     util::sigscanner::find_sig,
     DRAW,
 };
+
+use self::hook::{override_view::OverrideViewHook, poll_event::PollEventHook};
 
 pub mod cheat;
 pub mod hook;
@@ -24,7 +28,7 @@ pub struct Oxide {
     pub hooks: Hooks,
     pub global_vars: &'static GlobalVars,
     pub cheats: Cheats,
-    pub fov: f32,
+    pub fov: Option<f32>,
     pub get_bone_position_fn: GetBonePositionFn,
 }
 pub type GetBonePositionFn =
@@ -41,16 +45,30 @@ impl Oxide {
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
 
+        Oxide::hook(&mut hooks);
+        Draw::hook(&mut hooks);
+
         let oxide = Oxide {
             interfaces,
             cheats,
             hooks,
             global_vars,
-            fov: 0f32,
+            fov: None,
             get_bone_position_fn,
         };
 
         Ok(oxide)
+    }
+    pub fn hook(hooks: &mut Hooks) {
+        let mut poll_event = hooks.get::<PollEventHook>(PollEventHook::name());
+        poll_event.before.push(|event| unsafe {
+            o!().handle_event(event);
+        });
+        let mut override_view_hook = hooks.get::<OverrideViewHook>(OverrideViewHook::name());
+        override_view_hook.before.push(|_, view_setup| {
+            view_setup.fov = *s!().visual.fov.lock().unwrap();
+            o!().fov = Some(view_setup.fov);
+        })
     }
     unsafe fn get_global_vars(base_client: &BaseClient) -> &'static mut GlobalVars {
         let hud_update_addr = (*base_client.vmt).hud_update as usize;
@@ -58,13 +76,16 @@ impl Oxide {
             transmute(hud_update_addr + 9);
         **global_vars
     }
-    pub unsafe fn handle_event(&mut self, event: *mut SDL_Event) -> bool {
-        let mut event = Event::from(unsafe { *event });
+    pub unsafe fn handle_event(&mut self, raw_event: *mut SDL_Event) {
+        let mut event = Event::from(unsafe { *raw_event });
 
         if DRAW.is_some() {
             d!().handle_event(&mut event);
         }
-        return event.handled;
+        self.cheats.handle_event(&mut event);
+        if event.handled {
+            (*raw_event).type_ = 0;
+        }
     }
     pub fn self_unload() {
         let lib_path = CString::new("/tmp/liboxide.so").unwrap();

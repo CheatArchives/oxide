@@ -4,6 +4,8 @@ use crate::{
     error::OxideError,
     i,
     math::{angles::Angles, vector::Vector3},
+    o,
+    oxide::hook::{create_move::CreateMoveHook, hooks::Hooks},
     s,
     sdk::{
         condition::ConditionFlags,
@@ -17,7 +19,7 @@ use crate::{
 
 use super::Cheat;
 
-pub const HITBOX_SCALE: f32 = 9.0/ 10.0;
+pub const HITBOX_SCALE: f32 = 9.0 / 10.0;
 
 #[derive(Debug, Clone)]
 pub struct Aimbot {
@@ -25,6 +27,9 @@ pub struct Aimbot {
 }
 
 impl Aimbot {
+    pub fn name() -> &'static str {
+        "Aimbot"
+    }
     pub fn init() -> Aimbot {
         Aimbot {
             shoot_key_pressed: false,
@@ -71,19 +76,21 @@ impl Aimbot {
 
         let scaled_hitbox = hitbox.scaled(HITBOX_SCALE);
 
-        let points = vec![scaled_hitbox.center(ent)];
-        let mut corners = scaled_hitbox.corners(ent).to_vec();
+        let mut points = vec![scaled_hitbox.center(ent)];
+        if *s!().aimbot.multipoint.lock().unwrap() {
+            let mut corners = scaled_hitbox.corners(ent).to_vec();
 
-        corners.sort_by(|corner1, corner2| {
-            let diff1 = corner1.clone() - my_eyes.clone();
-            let diff2 = corner2.clone() - my_eyes.clone();
-            diff1.len().total_cmp(&diff2.len())
-        });
+            corners.sort_by(|corner1, corner2| {
+                let diff1 = corner1.clone() - my_eyes.clone();
+                let diff2 = corner2.clone() - my_eyes.clone();
+                diff1.len().total_cmp(&diff2.len())
+            });
 
-        corners.pop();
-        corners.remove(0);
+            corners.pop();
+            corners.remove(0);
 
-        let points = vec![points, corners].concat();
+            points = vec![points, corners].concat();
+        }
 
         for point in points {
             let trace = trace(
@@ -103,15 +110,19 @@ impl Aimbot {
         None
     }
 
-    pub fn find_point(&self, p_local: &'static Entity, ent: &'static Entity) -> Option<Vector3> {
+    pub fn find_point(
+        &self,
+        p_local: &'static Entity,
+        ent: &'static Entity,
+    ) -> Option<(Vector3, isize)> {
         for hitboxid in self.hitbox_order(p_local) {
             let hitbox = ent.get_hitbox(hitboxid).unwrap();
 
-            let Some((point,_)) = self.point_scan(p_local, ent, hitboxid, &hitbox) else {
+            let Some((point,prio)) = self.point_scan(p_local, ent, hitboxid, &hitbox) else {
                 continue;
             };
 
-            return Some(point);
+            return Some((point, prio));
         }
         None
     }
@@ -119,7 +130,7 @@ impl Aimbot {
     pub fn find_target(&self, p_local: &'static Entity) -> Result<Option<Angles>, OxideError> {
         let entity_count = c!(i!(entity_list), get_max_entities);
 
-        let mut target: Option<(Vector3, isize)> = None;
+        let mut target: Option<(Vector3, (isize, isize))> = None;
         let my_eyes = c!(p_local, eye_position);
 
         for i in 0..entity_count {
@@ -131,17 +142,19 @@ impl Aimbot {
                 continue;
             };
 
-            let Some(point) = self.find_point(p_local, ent) else {
+            let Some((point,point_prio)) = self.find_point(p_local, ent) else {
                 continue;
             };
 
-            let Some((_, last_prio)) = &target else {
-                target = Some((point, prio));
+            let Some((_, (last_prio, last_point_prio))) = target.clone() else {
+                target = Some((point, (prio,point_prio)));
                 continue;
             };
 
-            if prio > *last_prio {
-                target = Some((point, prio))
+            if prio > last_prio {
+                target = Some((point, (prio, point_prio)))
+            } else if prio == last_prio && last_point_prio < point_prio {
+                target = Some((point, (prio, point_prio)))
             }
         }
 
@@ -178,7 +191,7 @@ impl Aimbot {
         true
     }
 
-    pub fn pre_create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
+    pub fn create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
         if !self.should_run() {
             return Ok(());
         }
@@ -244,5 +257,16 @@ impl Cheat for Aimbot {
             }
             _ => (),
         }
+    }
+
+    fn hook(&mut self, hooks: &mut Hooks) {
+        let mut hook = hooks.get::<CreateMoveHook>(CreateMoveHook::name());
+        hook.before.push(|_, _, cmd| {
+            let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
+            aimbot.create_move(cmd).unwrap();
+        });
+        hook.after = Some(|_, _, _, res| {
+            *res = false;
+        })
     }
 }

@@ -46,7 +46,6 @@ unsafe fn main() -> Result<(), std::boxed::Box<dyn Error>> {
     *oxide_ptr = ManuallyDrop::new(Oxide::init()?);
     OXIDE = Some(oxide_ptr as *mut _ as *mut c_void);
 
-    Draw::hook(&mut o!().hooks);
 
     println!("loaded");
     Ok(())

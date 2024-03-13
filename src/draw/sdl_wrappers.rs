@@ -52,8 +52,9 @@ impl Frame {
 
         let mut angle = 0f32;
         while angle < 360f32 {
-            let x = (r as f32 * (angle as f32 * PI / 180f32).cos()) as i32 + root_x as i32;
-            let y = (r as f32 * (angle as f32 * PI / 180f32).sin()) as i32 + root_y as i32;
+            let rad = angle as f32 * PI / 180f32;
+            let x = (r as f32 * rad.cos()) as i32 + root_x as i32;
+            let y = (r as f32 * rad.sin()) as i32 + root_y as i32;
             points.push(SDL_Point { x, y });
             angle += step;
         }

@@ -22,8 +22,8 @@ pub struct TextInput {
     x: isize,
     y: isize,
     w: isize,
-    rooted_x: isize,
-    rooted_y: isize,
+    input_x: isize,
+    input_y: isize,
     val: Arc<Mutex<String>>,
     focussed: bool,
 }
@@ -41,8 +41,8 @@ impl TextInput {
             x,
             y,
             w,
-            rooted_x: 0,
-            rooted_y: 0,
+            input_x: 0,
+            input_y: 0,
             val,
             focussed: false,
         }
@@ -53,10 +53,8 @@ impl Component for TextInput {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize) {
         let x = self.x + root_x;
         let y = self.y + root_y;
-        self.rooted_x = x;
-        self.rooted_y = y;
-        let label = format!("{}:", self.label);
 
+        let label = format!("{}:", self.label);
         let label_size = frame.fonts.get_text_size(&label, FontSize::Small);
 
         frame.text(
@@ -69,6 +67,8 @@ impl Component for TextInput {
             255,
         );
         let x = x + label_size.0 + 10;
+        self.input_x = x;
+        self.input_y = y;
 
         frame.filled_rect(x, y, self.w, SIZE, BACKGROUND, 255);
         let outline = if self.focussed { BLUE } else { FOREGROUND };
@@ -94,8 +94,8 @@ impl Component for TextInput {
                     if point_in_bounds(
                         d!().cursor.0,
                         d!().cursor.1,
-                        self.rooted_x,
-                        self.rooted_y,
+                        self.input_x,
+                        self.input_y,
                         self.w,
                         SIZE,
                     ) {

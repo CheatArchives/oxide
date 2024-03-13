@@ -71,8 +71,8 @@ impl Hooks {
 
         Hooks(hooks)
     }
-    pub fn get<T: Hook>(&mut self) -> ManuallyDrop<&mut Box<T>>{
-        unsafe { ManuallyDrop::new(transmute(self.0.get_mut(&SwapWindowHook::name()).unwrap())) }
+    pub fn get<T>(&mut self, name: String) -> ManuallyDrop<&mut Box<T>>{
+        unsafe { ManuallyDrop::new(transmute(self.0.get_mut(&name).unwrap())) }
     }
     pub fn restore(&mut self) {
         for (_, hook) in &mut self.0 {

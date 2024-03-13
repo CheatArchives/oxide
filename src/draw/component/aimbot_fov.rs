@@ -31,7 +31,7 @@ impl Component for AimbotFov {
         }
         let size = frame.window_size();
         let aimbot_fov = *s!().aimbot.fov.lock().unwrap() as f32;
-        let fov = o!().fov;
+        let Some(fov) = o!().fov else {return}; 
 
         let screen_fov = size.0 as f32 / size.1 as f32 / (4f32 / 3f32);
         let real_fov = (screen_fov * (fov / 360f32 * PI).tan()).atan();
