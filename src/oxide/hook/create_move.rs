@@ -1,7 +1,7 @@
 use std::f32::consts::PI;
 
 use crate::{
-    c, define_hook, math::angles::Angles, oxide::cheat::aimbot::Aimbot, s, sdk::{client_mode::ClientMode, entity::Entity, user_cmd::{ButtonFlags, UserCmd}}
+    c, define_hook, math::angles::Angles, oxide::cheat::aimbot::Aimbot, s, sdk::{client_mode::ClientMode, condition::ConditionFlags, entity::Entity, user_cmd::{ButtonFlags, UserCmd}}
 };
 
 fn subhooks(hook: &mut CreateMoveHook) {
@@ -30,9 +30,14 @@ fn subhooks(hook: &mut CreateMoveHook) {
             cmd.sidemove = correct_side;
         }
         if cmd.buttons.get(ButtonFlags::InJump) && *s!().movement.bhop.lock().unwrap(){
+
             cmd.buttons
                 .set(ButtonFlags::InJump, (p_local.flags & 1) == 1);
-        }
+
+            if *s!().movement.revhop.lock().unwrap() && !p_local.player_cond.get(ConditionFlags::Aiming){ 
+                cmd.buttons
+                    .set(ButtonFlags::InAttack2, (p_local.flags & 1) == 1); }
+            }
     });
     hook.after = Some(|_, _, _, res| {
         *res = false;

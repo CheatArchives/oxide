@@ -171,7 +171,7 @@ impl Entity {
             }
             let ent = &mut *ent;
             let net = ent.as_networkable();
-            if c!(net, is_dormant) || !c!(ent, is_player) {
+            if c!(net, is_dormant)  || !c!(ent, is_player) {
                 return None;
             }
 

@@ -47,6 +47,8 @@ impl AimbotSettings {
 pub struct VisualSettings {
     pub third_person: amt!(bool),
     pub fov: amt!(f32),
+    pub esp: amt!(bool),
+    pub hitboxes: amt!(bool),
 }
 
 impl VisualSettings {
@@ -54,6 +56,8 @@ impl VisualSettings {
         VisualSettings {
             third_person: am!(false),
             fov: am!(100f32),
+            esp: am!(false),
+            hitboxes: am!(false),
         }
     }
 }
@@ -61,12 +65,14 @@ impl VisualSettings {
 #[derive(Debug, Clone)]
 pub struct MovementSettings {
     pub bhop: amt!(bool),
+    pub revhop: amt!(bool)
 }
 
 impl MovementSettings {
     pub fn new() -> MovementSettings {
         MovementSettings {
             bhop: am!(false),
+            revhop: am!(false),
         }
     }
 }
