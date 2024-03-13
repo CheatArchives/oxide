@@ -4,7 +4,7 @@ use crate::sdk::engine_trace::VectorAligned;
 
 use super::angles::Angles;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 #[repr(C)]
 pub struct Vector3 {
     pub x: f32,

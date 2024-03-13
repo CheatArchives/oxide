@@ -1,16 +1,22 @@
-use crate::{define_hook, sdk::engine_vgui::EngineVgui};
+use crate::{define_hook, oxide::paint::{esp::esp, hitbox::draw_hitboxes}, sdk::engine_vgui::EngineVgui};
 
-//pub type PaintFn = cfn!((), &EngineVgui, isize);
 
-//pub unsafe extern "C-unwind" fn paint_hook(engine_vgui: &EngineVgui, mode: isize) {
-//    //(o!().hooks.paint.org)(engine_vgui, mode);
-//    draw_hitboxes()
-//}
+fn subhooks(hook:&mut PaintHook) {
+    
+    hook.before = Some(|_,_|{
+
+    });
+    hook.after = Some(|_,_,_|{
+        draw_hitboxes();
+        esp();
+    });
+}
 define_hook!(
     PaintHook,
     "Paint",
     (),
     (),
+    subhooks,
     engine_vgui,
     &EngineVgui,
     mode,

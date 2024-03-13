@@ -10,6 +10,7 @@ use crate::{
     cfn,
     math::{
         angles::Angles,
+        get_corners,
         vector::{Vector3, Vector4},
     },
     o,
@@ -69,33 +70,9 @@ impl Hitbox {
     }
     pub fn corners(&self, ent: &Entity) -> [Vector3; 8] {
         let (pos, angle) = self.get_bone_pos(ent);
-        let rotation = angle.to_vectors();
-
-        let mut corners = [
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-            Vector3::zeroed(),
-        ];
-        let min = &self.min;
-        let max = &self.max;
-        for i in 0..8 {
-            let x = if i & 0x1 != 0 { max.x } else { min.x };
-            let y = if i & 0x2 != 0 { max.y } else { min.y };
-            let z = if i & 0x4 != 0 { max.z } else { min.z };
-
-            let corner = Vector3::new(x, y, z);
-
-            let corner = corner.rotate(&rotation);
-            corners[i] = corner + pos.clone()
-        }
-        corners
+        get_corners(&pos, &angle, &self.min, &self.max)
     }
-    pub fn scaled(&self, scale: f32) -> Hitbox{
+    pub fn scaled(&self, scale: f32) -> Hitbox {
         let mut hitbox = self.clone();
         hitbox.min *= scale;
         hitbox.max *= scale;

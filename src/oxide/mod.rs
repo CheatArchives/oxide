@@ -5,17 +5,13 @@ use sdl2_sys::SDL_Event;
 
 use crate::{
     d,
-    draw::{event::Event, Draw},
+    draw::event::Event,
     math::{angles::Angles, vector::Vector3},
-    o,
     oxide::{cheat::cheats::Cheats, hook::hooks::Hooks, interfaces::Interfaces},
-    s,
     sdk::{base_client::BaseClient, entity::Entity, global_vars::GlobalVars},
     util::sigscanner::find_sig,
     DRAW,
 };
-
-use self::hook::{override_view::OverrideViewHook, poll_event::PollEventHook};
 
 pub mod cheat;
 pub mod hook;
@@ -40,13 +36,10 @@ impl Oxide {
             "55 89 E5 53 8D 5D ? 83 EC 44 8B 45 ? 89 5C 24 ? 89 44 24 ? 8B 45 ? 89 04 24 E8 ? ? ? ? 8B 45";
         let get_bone_position_fn = transmute(find_sig("./tf/bin/client.so", &sig));
         let interfaces = Interfaces::init()?;
-        let mut hooks = Hooks::init(&interfaces);
-        let cheats = Cheats::init(&mut hooks);
+        let hooks = Hooks::init(&interfaces);
+        let cheats = Cheats::init();
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
-
-        Oxide::hook(&mut hooks);
-        Draw::hook(&mut hooks);
 
         let oxide = Oxide {
             interfaces,
@@ -59,32 +52,23 @@ impl Oxide {
 
         Ok(oxide)
     }
-    pub fn hook(hooks: &mut Hooks) {
-        let mut poll_event = hooks.get::<PollEventHook>(PollEventHook::name());
-        poll_event.before.push(|event| unsafe {
-            o!().handle_event(event);
-        });
-        let mut override_view_hook = hooks.get::<OverrideViewHook>(OverrideViewHook::name());
-        override_view_hook.before.push(|_, view_setup| {
-            view_setup.fov = *s!().visual.fov.lock().unwrap();
-            o!().fov = Some(view_setup.fov);
-        })
-    }
     unsafe fn get_global_vars(base_client: &BaseClient) -> &'static mut GlobalVars {
         let hud_update_addr = (*base_client.vmt).hud_update as usize;
         let global_vars: &'static mut &'static mut &'static mut GlobalVars =
             transmute(hud_update_addr + 9);
         **global_vars
     }
-    pub unsafe fn handle_event(&mut self, raw_event: *mut SDL_Event) {
+    pub fn handle_event(&mut self, raw_event: *mut SDL_Event) {
         let mut event = Event::from(unsafe { *raw_event });
 
-        if DRAW.is_some() {
-            d!().handle_event(&mut event);
-        }
-        self.cheats.handle_event(&mut event);
-        if event.handled {
-            (*raw_event).type_ = 0;
+        unsafe {
+            if DRAW.is_some() {
+                d!().handle_event(&mut event);
+            }
+            self.cheats.handle_event(&mut event);
+            if event.handled {
+                (*raw_event).type_ = 0;
+            }
         }
     }
     pub fn self_unload() {

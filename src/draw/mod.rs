@@ -1,18 +1,14 @@
 use std::{
-    alloc::{alloc, Layout},
     error::Error,
     ffi::CString,
-    mem::ManuallyDrop,
 };
 
 use libc::c_void;
 use sdl2_sys::*;
 
 use crate::{
-    d,
     draw::component::{aimbot_fov::AimbotFov, overlay::Overlay},
-    oxide::hook::{hooks::Hooks, swap_window::SwapWindowHook},
-    AUTHOR, DRAW, NAME, VERSION,
+    AUTHOR, NAME, VERSION,
 };
 
 use self::{
@@ -80,19 +76,6 @@ impl Draw {
             SDL_GL_DeleteContext(self.ctx);
         }
         self.fonts.restore();
-    }
-
-    pub fn hook(hooks: &mut Hooks) {
-        let mut swap_window = hooks.get::<SwapWindowHook>(SwapWindowHook::name());
-        swap_window.before.push(|window| unsafe {
-            if DRAW.is_none() {
-                let draw_ptr = alloc(Layout::new::<Draw>()) as *mut _ as *mut ManuallyDrop<Draw>;
-                let draw = ManuallyDrop::new(Draw::init(window).unwrap());
-                *draw_ptr = draw;
-                DRAW = Some(draw_ptr as *mut _ as *mut c_void);
-            }
-            d!().run(window);
-        });
     }
 
     pub fn run(&'static mut self, window: *mut SDL_Window) {

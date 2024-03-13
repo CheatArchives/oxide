@@ -1,4 +1,19 @@
-use crate::{define_hook, sdk::panel::{Panel, VPanel}};
+use std::ffi::CStr;
+
+use crate::{
+    c, define_hook, sdk::panel::{Panel, VPanel}
+};
+
+fn subhooks(hook: &mut PaintTraverseHook) {
+    hook.before = Some(|panel, vpanel, _, _| {
+        let panel_name = unsafe { CStr::from_ptr(c!(panel, get_name, vpanel)) };
+        match panel_name.to_str() {
+            Ok("HudScope") => return,
+            _ => {}
+        }
+    });
+    hook.after = Some(|_, _, _, _, _| {});
+}
 
 //pub type PaintRraverseFn = cfn!((), &'static Panel, VPanel, bool, bool);
 
@@ -8,14 +23,6 @@ use crate::{define_hook, sdk::panel::{Panel, VPanel}};
 //    force_paint: bool,
 //    allow_force: bool,
 //) {
-//    let panel_name = CStr::from_ptr(c!(panel, get_name, vpanel));
-//    match panel_name.to_str() {
-//        Ok("HudScope") => return,
-//        _ => {}
-//    }
-//    if OXIDE.is_some() {
-//        //(o!().hooks.paint_traverse.org)(panel, vpanel, force_paint, allow_force);
-//    }
 //}
 
 define_hook!(
@@ -23,6 +30,7 @@ define_hook!(
     "PaintTraverse",
     (),
     (),
+    subhooks,
     panel,
     &Panel,
     vpanel,

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, mem::{transmute, ManuallyDrop}};
 
-use crate::{draw::event::Event, oxide::hook::hooks::Hooks};
+use crate::draw::event::Event;
 
 use super::{aimbot::Aimbot, Cheat};
 
@@ -10,12 +10,11 @@ pub struct Cheats (
 );
 
 impl Cheats {
-    pub fn init(hooks: &mut Hooks) -> Cheats {
+    pub fn init() -> Cheats {
         let cheats = HashMap::new();
         let mut cheats = Cheats ( cheats );
 
-        let mut aimbot = Aimbot::init();
-        aimbot.hook(hooks);
+        let aimbot = Aimbot::init();
         cheats.add(aimbot,Aimbot::name());
 
         cheats

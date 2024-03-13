@@ -4,9 +4,7 @@ use crate::{
     error::OxideError,
     i,
     math::{angles::Angles, vector::Vector3},
-    o,
-    oxide::hook::{create_move::CreateMoveHook, hooks::Hooks},
-    s,
+    o, s,
     sdk::{
         condition::ConditionFlags,
         engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
@@ -257,16 +255,5 @@ impl Cheat for Aimbot {
             }
             _ => (),
         }
-    }
-
-    fn hook(&mut self, hooks: &mut Hooks) {
-        let mut hook = hooks.get::<CreateMoveHook>(CreateMoveHook::name());
-        hook.before.push(|_, _, cmd| {
-            let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
-            aimbot.create_move(cmd).unwrap();
-        });
-        hook.after = Some(|_, _, _, res| {
-            *res = false;
-        })
     }
 }

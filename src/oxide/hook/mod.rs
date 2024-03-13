@@ -14,7 +14,7 @@ pub trait Hook: std::fmt::Debug {
 
 #[macro_export]
 macro_rules! define_hook{
-    ($name:ident,$stringName:expr,$return:ty,$default:expr,$($argName:ident,$argType:ty),*) => {
+    ($name:ident,$stringName:expr,$return:ty,$default:expr,$subhooks:expr,$($argName:ident,$argType:ty),*) => {
         use crate::{cfn,o,OXIDE,oxide::hook::Hook};
         use core::intrinsics::{transmute_unchecked};
 
@@ -28,7 +28,7 @@ macro_rules! define_hook{
         {
             pub org: RawHookFn,
             pub target: &'static mut RawHookFn,
-            pub before: Vec<BeforeHookFn>,
+            pub before: Option<BeforeHookFn>,
             pub after: Option<AfterHookFn>,
         }
 
@@ -42,9 +42,9 @@ macro_rules! define_hook{
             pub fn init(target: &RawHookFn) -> Self {
                 let target = unsafe {transmute_unchecked::<_,&'static mut RawHookFn>(target)};
                 let org = (*target).clone();
-                let before = Vec::new();
-                let hook = $name { org, target, before, after: None };
+                let mut hook = $name { org, target, before: None, after: None };
                 *hook.target = $name::hook_fn;
+                $subhooks(&mut hook);
                 hook
             }
             pub fn name() -> String{
@@ -73,10 +73,7 @@ macro_rules! define_hook{
         impl Hook for $name {
             fn restore(&mut self) {
                 self.restore()
-
             }
-
-
         }
     }
 }

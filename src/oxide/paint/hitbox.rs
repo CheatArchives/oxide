@@ -7,7 +7,7 @@ use crate::{
     util::world_to_screen,
 };
 
-use super::cheat::aimbot::HITBOX_SCALE;
+use crate::oxide::cheat::aimbot::HITBOX_SCALE;
 
 const COLOR_SCALE: f32 = 1.0 / 2.0;
 
@@ -21,7 +21,7 @@ pub fn draw_hitboxes() {
             let Some(ent) = Entity::get_player(i) else {
                     continue;
                 };
-            if ent as *const _ == p_local as *const _ {
+            if ent as *const _ == p_local as *const _ || !c!(ent, is_alive) {
                 continue;
             }
             let team = c!(ent, get_team_number);

@@ -50,12 +50,11 @@ impl Component for KeyInput {
         self.rooted_x = x;
         self.rooted_y = y;
 
-        let label = format!("{}:", self.label);
 
-        let label_size = frame.fonts.get_text_size(&label, FontSize::Small);
+        let label_size = frame.fonts.get_text_size(&self.label, FontSize::Small);
 
         frame.text(
-            &label,
+            &self.label,
             x,
             y + SIZE / 2,
             FontSize::Small,

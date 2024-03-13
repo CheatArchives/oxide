@@ -1,10 +1,11 @@
 use super::{event::Event, frame::Frame};
 
 pub mod aimbot_fov;
-pub mod aimbot_window;
 pub mod base;
 pub mod overlay;
 pub mod visuals_window;
+pub mod aimbot_window;
+pub mod movement_window;
 
 pub trait Component: std::fmt::Debug {
     fn draw(&mut self, frame: &mut Frame, root_x: isize, root_y: isize);

@@ -3,20 +3,17 @@ use crate::{
     sdk::base_client::{BaseClient, FrameStage},
 };
 
-//pub type FrameStageNotifyFn = cfn!((), &BaseClient, FrameStage);
-//
-//pub unsafe extern "C-unwind" fn frame_stage_notify_hook(client: &BaseClient, stage: FrameStage) {
-//    match stage {
-//        _ => {}
-//    }
-//    //(o!().hooks.frame_stage_notify.org)(client, stage);
-//}
+fn subhooks(hook: &mut FrameStageNotifyHook) {
+    hook.before = Some(|_, _| {});
+    hook.after = Some(|_, _, _| {});
+}
 
 define_hook!(
     FrameStageNotifyHook,
     "FrameStageNotify",
     (),
     (),
+    subhooks,
     client,
     &BaseClient,
     stage,

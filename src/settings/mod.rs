@@ -9,6 +9,7 @@ use crate::{am, amt};
 pub struct Settings {
     pub aimbot: AimbotSettings,
     pub visual: VisualSettings,
+    pub movement: MovementSettings,
 }
 
 impl Settings {
@@ -16,6 +17,7 @@ impl Settings {
         Settings {
             aimbot: AimbotSettings::new(),
             visual: VisualSettings::new(),
+            movement: MovementSettings::new(),
         }
     }
 }
@@ -52,6 +54,19 @@ impl VisualSettings {
         VisualSettings {
             third_person: am!(false),
             fov: am!(100f32),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MovementSettings {
+    pub bhop: amt!(bool),
+}
+
+impl MovementSettings {
+    pub fn new() -> MovementSettings {
+        MovementSettings {
+            bhop: am!(false),
         }
     }
 }

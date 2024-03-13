@@ -8,7 +8,7 @@ use sdl2_sys::*;
 
 use crate::{c, draw::{colors::*, event::{Event, EventType}, fonts::FontSize, frame::Frame}, i, NAME, VERSION};
 
-use super::{aimbot_window::AimbotWindow, base::button::Button, visuals_window::VisualsWindow, Component, Components};
+use super::{aimbot_window::AimbotWindow, base::button::Button, movement_window::MovementWindow, visuals_window::VisualsWindow, Component, Components};
 
 const LEFT_OVERLAY_WIDTH: isize = 300;
 const TOP_OVERLAY_HEIGHT: isize = 50;
@@ -28,6 +28,7 @@ impl Overlay {
 
         let show_aimbot_window = Arc::new(Mutex::new(false));
         let show_visuals_window = Arc::new(Mutex::new(false));
+        let show_movement_window = Arc::new(Mutex::new(false));
 
         components.add(Button::new(
             "AIMBOT",
@@ -49,9 +50,20 @@ impl Overlay {
             FontSize::Medium,
         ));
 
+        components.add(Button::new(
+            "MOVEMENT",
+            PADDING,
+            TOP_OVERLAY_HEIGHT + PADDING * 4 + BUTTON_HEIGHT * 2,
+            LEFT_OVERLAY_WIDTH - PADDING * 2,
+            BUTTON_HEIGHT,
+            show_movement_window.clone(),
+            FontSize::Medium,
+        ));
+
         let mut windows = Components::new();
         windows.add(AimbotWindow::new(show_aimbot_window.clone()));
         windows.add(VisualsWindow::new(show_visuals_window.clone()));
+        windows.add(MovementWindow::new(show_movement_window.clone()));
 
         Overlay {
             visible: true,
