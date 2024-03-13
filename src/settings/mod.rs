@@ -29,6 +29,8 @@ pub struct AimbotSettings {
     pub fov: amt!(f32),
     pub key: amt!(SDL_Scancode),
     pub multipoint: amt!(bool),
+    pub autoshoot: amt!(bool),
+    pub silent: amt!(bool),
 }
 
 impl AimbotSettings {
@@ -37,6 +39,8 @@ impl AimbotSettings {
             multipoint: am!(false),
             enabled: am!(false),
             draw_fov: am!(false),
+            autoshoot: am!(false),
+            silent: am!(false),
             fov: am!(30f32),
             key: am!(SDL_Scancode::SDL_SCANCODE_LSHIFT),
         }

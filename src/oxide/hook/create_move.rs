@@ -1,7 +1,5 @@
 use crate::{
-    c, define_hook,
-    oxide::cheat::{aimbot::Aimbot, movement::Movement},
-    sdk::{client_mode::ClientMode, entity::Entity, user_cmd::UserCmd},
+    c, define_hook, oxide::cheat::{aimbot::Aimbot, movement::Movement}, s, sdk::{client_mode::ClientMode, cvar::get_cvar, entity::Entity, user_cmd::UserCmd}
 };
 
 fn subhooks(hook: &mut CreateMoveHook) {
@@ -19,11 +17,20 @@ fn subhooks(hook: &mut CreateMoveHook) {
 
         let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
         aimbot.create_move(cmd).unwrap();
+
         let mut movement = o!().cheats.get::<Movement>(Movement::name());
         movement.create_move(cmd, &org_cmd);
+
+        let interpolation = get_cvar("cl_interpolate");
+        dbg!(interpolation.float_value);
+        c!(interpolation, internal_set_float_value, 0.0, true);
+
+        let interp = get_cvar("cl_interp");
+        dbg!(interp.float_value);
+        c!(interp, internal_set_float_value, 0.0, true);
     });
     hook.after = Some(|_, _, _, res| {
-        *res = false;
+        *res = !*s!().aimbot.silent.lock().unwrap();
     });
 }
 

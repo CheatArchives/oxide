@@ -35,6 +35,8 @@ impl AimbotWindow {
         ));
         components.add(KeyInput::new("aimbot key",10, 75, 100, s!().aimbot.key.clone()));
         components.add(Checkbox::new("multipoint", s!().aimbot.multipoint.clone(), 10, 100));
+        components.add(Checkbox::new("autoshoot", s!().aimbot.autoshoot.clone(), 10, 120));
+        components.add(Checkbox::new("silent", s!().aimbot.silent.clone(), 10, 140));
 
         let window = Window::new("AIMBOT".to_owned(), visible, components);
         AimbotWindow { window }

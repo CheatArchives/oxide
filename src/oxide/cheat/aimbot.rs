@@ -197,7 +197,11 @@ impl Aimbot {
         let p_local = Entity::local().unwrap();
 
         if let Some(new_angle) = self.find_target(p_local)? {
-            if self.shoot(p_local, cmd) {
+            if *s!().aimbot.autoshoot.lock().unwrap() {
+                if self.shoot(p_local, cmd) {
+                    cmd.viewangles = new_angle;
+                }
+            } else {
                 cmd.viewangles = new_angle;
             }
         }

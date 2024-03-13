@@ -1,5 +1,6 @@
 use std::ffi::CStr;
 
+use derivative::Derivative;
 use libc::c_void;
 
 use crate::cfn;
@@ -8,20 +9,24 @@ use crate::cfn;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct VMTConVar {
-    _pad: [u8; 4*14],
+    _pad: [i32; 14],
     pub internal_set_value: cfn!((), &'static ConVar , &CStr),
     pub internal_set_float_value: cfn!((), &'static ConVar,f32 , bool),
     pub internal_set_int_value: cfn!((), &'static ConVar, isize),
 }
 
 #[repr(C)]
-#[derive(Debug, Clone)]
+#[derive(Derivative,Clone)]
+#[derivative(Debug)]
 pub struct ConVar {
-    vmt: &'static VMTConVar,
+    #[derivative(Debug="ignore")]
+    pub vmt: &'static VMTConVar,
+    #[derivative(Debug="ignore")]
     _pad: [u8; 0x18],
+    #[derivative(Debug="ignore")]
     pub parent: &'static ConVar,
-    pub default_value: &'static CStr,
-    pub string: &'static CStr,
+    pub default_value: *const i8,
+    pub string: *const i8,
     pub string_length: isize,
     pub float_value: f32,
     pub int_value: isize,

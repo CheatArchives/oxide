@@ -1,19 +1,21 @@
-use std::{any::Any, f32::consts::PI, ffi::CString};
+use std::f32::consts::PI;
 
 use crate::{
-    c, i,
+    c,
     math::{angles::Angles, dtr},
     s,
     sdk::{
         condition::ConditionFlags,
         entity::{flags::Flag, Entity},
-        player_class::PlayerClass,
         user_cmd::{ButtonFlags, UserCmd},
         weapon::WeaponType,
     },
 };
 
 use super::Cheat;
+
+const SPEED_VAR: f32 = 6062.0;
+const WISH_SPEED: f32 = 30.0;
 
 #[derive(Debug)]
 pub struct Movement {}
@@ -27,6 +29,9 @@ impl Movement {
     pub fn create_move(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) {
         let p_local = Entity::local().unwrap();
 
+        if p_local.flags.get(Flag::INWATER) {
+            return;
+        }
         self.bhop(cmd, p_local);
         self.auto_strafe(cmd, p_local);
 
@@ -42,51 +47,61 @@ impl Movement {
         }
     }
     pub fn bhop(&mut self, cmd: &mut UserCmd, p_local: &Entity) {
-        if cmd.buttons.get(ButtonFlags::InJump) && *s!().movement.bhop.lock().unwrap() {
-            cmd.buttons
-                .set(ButtonFlags::InJump, p_local.flags.get(Flag::ONGROUND));
+        if !*s!().movement.bhop.lock().unwrap() {
+            return;
+        }
+        if p_local.velocity.len2d() < 200.0 || !cmd.buttons.get(ButtonFlags::InJump) {
+            cmd.buttons.set(ButtonFlags::InJump, false);
+            return;
+        }
+        cmd.buttons
+            .set(ButtonFlags::InJump, p_local.flags.get(Flag::ONGROUND));
 
-            if *s!().movement.revhop.lock().unwrap()
-                && !p_local.player_cond.get(ConditionFlags::Aiming)
-                && matches!(
-                    c!(c!(p_local, get_weapon), get_weapon_id),
-                    WeaponType::Minigun
-                )
-            {
-                cmd.buttons
-                    .set(ButtonFlags::InAttack2, p_local.flags.get(Flag::ONGROUND));
-            }
+        if *s!().movement.revhop.lock().unwrap()
+            && !p_local.player_cond.get(ConditionFlags::Aiming)
+            && matches!(
+                c!(c!(p_local, get_weapon), get_weapon_id),
+                WeaponType::Minigun
+            )
+        {
+            cmd.buttons
+                .set(ButtonFlags::InAttack2, p_local.flags.get(Flag::ONGROUND));
         }
     }
     pub fn auto_strafe(&self, cmd: &mut UserCmd, p_local: &Entity) {
         if p_local.flags.get(Flag::ONGROUND) || !*s!().movement.autostrafe.lock().unwrap() {
             return;
         }
-        dbg!("test");
         let velocity = p_local.velocity;
         let speed = velocity.len2d();
 
-        let speed_var = 6062.0; // Engine limit on 3 axis, see: reddit.com/r/tf2/comments/57hhl4/question_is_there_a_maximum_rocket_jumping/d8t9x82
-        let air_var = c!(
-            i!(cvar),
-            find_var,
-            &CString::new("sv_airaccelerate").unwrap()
-        )
-        .float_value;
-        let wish_speed = 30.0; // This is hardcoded for tf2, unless you run sourcemod
+        //let var_name = CString::new("sv_airaccelerate").unwrap();
+        //let air_var = c!(
+        //    i!(cvar),
+        //    find_var,
+        //    var_name.as_ptr()
+        //).float_value;
 
-        let term = wish_speed / air_var / speed_var * 100.0 / speed;
+        let air_var = 10.0;
 
-        let perfect_delta = if term < 1.0 && term > -1.0 {
+        let term = WISH_SPEED / air_var / SPEED_VAR * 100.0 / speed;
+
+        let perfect_delta = if -1.0 < term && term < 1.0 {
             term.acos()
         } else {
             0.0
         };
 
         let yaw = dtr(cmd.viewangles.yaw);
-        let angle = velocity.y.atan2(velocity.y) - yaw;
-        let desired_angle = cmd.sidemove.atan2(cmd.forwardmove);
-        let delta = angle - desired_angle;
+        let angle = velocity.y.atan2(velocity.x) - yaw;
+        let desired_angle = (-cmd.sidemove).atan2(cmd.forwardmove);
+        let mut delta = angle - desired_angle;
+        while delta > PI {
+            delta -= 2.0 * PI
+        }
+        while delta < -PI {
+            delta += 2.0 * PI
+        }
 
         let direction = if delta < 0.0 {
             angle + perfect_delta
@@ -95,7 +110,7 @@ impl Movement {
         };
 
         cmd.forwardmove = direction.cos() * 450.0;
-        cmd.forwardmove = -direction.sin() * 450.0;
+        cmd.sidemove = -direction.sin() * 450.0;
     }
     pub fn correct_movement(
         org_view_angles: Angles,
