@@ -21,13 +21,6 @@ fn subhooks(hook: &mut CreateMoveHook) {
         let mut movement = o!().cheats.get::<Movement>(Movement::name());
         movement.create_move(cmd, &org_cmd);
 
-        let interpolation = get_cvar("cl_interpolate");
-        dbg!(interpolation.float_value);
-        c!(interpolation, internal_set_float_value, 0.0, true);
-
-        let interp = get_cvar("cl_interp");
-        dbg!(interp.float_value);
-        c!(interp, internal_set_float_value, 0.0, true);
     });
     hook.after = Some(|_, _, _, res| {
         *res = !*s!().aimbot.silent.lock().unwrap();

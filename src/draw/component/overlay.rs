@@ -108,7 +108,7 @@ impl Component for Overlay {
     fn draw(&mut self, frame: &mut Frame, _: isize, _: isize) {
         let size = frame.window_size();
 
-        c!(i!(mat_surface), set_cursor_always_visible, self.visible);
+        //c!(i!(mat_surface), set_cursor_always_visible, self.visible);
         if !self.visible {
             self.draw_watermark(frame);
             return;

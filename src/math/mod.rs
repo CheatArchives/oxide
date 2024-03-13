@@ -9,8 +9,7 @@ pub fn dtr(deg: f32) -> f32 {
     deg / 180f32 * PI
 }
 
-pub fn get_corners(pos: &Vector3, angle: &Angles, min: &Vector3, max: &Vector3) -> [Vector3; 8] {
-    let rotation = angle.to_vectors();
+pub fn get_corners(pos: &Vector3, rotation: &[Vector3;3], min: &Vector3, max: &Vector3) -> [Vector3; 8] {
 
     let mut corners = [
         Vector3::zeroed(),

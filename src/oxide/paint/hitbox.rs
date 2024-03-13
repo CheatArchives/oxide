@@ -1,10 +1,8 @@
 use crate::{
-    c, hex_to_rgb, i, o, rgb_to_hex,
-    sdk::{
+    c, hex_to_rgb, i, o, rgb_to_hex, s, sdk::{
         entity::Entity,
         model_info::{Hitbox, HitboxId},
-    },
-    util::world_to_screen,
+    }, util::world_to_screen
 };
 
 use crate::oxide::cheat::aimbot::HITBOX_SCALE;
@@ -15,7 +13,9 @@ pub fn draw_hitboxes() {
     let Some(p_local) = Entity::local() else {
         return;
     };
-    if c!(i!(base_engine), is_in_game) {
+    if !c!(i!(base_engine), is_in_game) || !*s!().visual.hitboxes.lock().unwrap(){
+        return
+    }
         let entity_count = c!(i!(entity_list), get_highest_entity_index);
         for i in 0..entity_count {
             let Some(ent) = Entity::get_player(i) else {
@@ -39,7 +39,6 @@ pub fn draw_hitboxes() {
                 draw_hitbox(ent, hitbox, color, 10);
             }
         }
-    }
 }
 pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
     let corners = hitbox.corners(ent);

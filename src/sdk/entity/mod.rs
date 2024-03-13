@@ -66,8 +66,8 @@ pub struct VMTEntity {
     pub get_team_number: cfn!(Team, *const Entity),
     #[derivative(Debug = "ignore")]
     _pad6: [u32; 34],
-    pub get_health: cfn!(&isize, &Entity),
-    pub get_max_health: cfn!(&isize, &Entity),
+    pub get_health: cfn!(isize, &Entity),
+    pub get_max_health: cfn!(isize, &Entity),
     #[derivative(Debug = "ignore")]
     _pad7: [u32; 29],
     pub is_alive: cfn!(bool, *const Entity),

@@ -7,13 +7,13 @@ pub use std::{
 use libc::c_void;
 
 use crate::{
-    cfn,
+    c, cfn,
     math::{
-        angles::Angles,
         get_corners,
         vector::{Vector3, Vector4},
     },
     o,
+    sdk::entity::{BoneMask, MAX_STUDIO_BONES},
 };
 
 use super::{entity::Entity, model_render::Matrix3x4, WithVmt};
@@ -59,18 +59,32 @@ impl Hitbox {
             (self.min.z + self.max.z) / 2.0 + pos.z,
         )
     }
-    pub fn get_bone_pos(&self, ent: &Entity) -> (Vector3, Angles) {
+    pub fn get_bone_pos(&self, ent: &Entity) -> (Vector3, [Vector3;3]) {
         unsafe {
-            let mut pos = MaybeUninit::zeroed().assume_init();
-            let mut angle = MaybeUninit::zeroed().assume_init();
+            let renderable = ent.as_renderable();
+            let bones = MaybeUninit::zeroed().assume_init();
+            c!(
+                renderable,
+                setup_bones,
+                &bones,
+                MAX_STUDIO_BONES,
+                BoneMask::BoneUsedByHitbox,
+                o!().global_vars().curtime
+            );
+            let bone = bones[self.bone].clone();
+            let pos = Vector3::new(bone[0][3], bone[1][3], bone[2][3]);
+            let angle = [
+                Vector3::new(bone[0][0],bone[0][1],bone[0][2]),
+                Vector3::new(bone[1][0],bone[1][1],bone[1][2]),
+                Vector3::new(bone[2][0],bone[2][1],bone[2][2]),
+            ];
 
-            (o!().get_bone_position_fn)(&ent, self.bone, &mut pos, &mut angle);
             (pos, angle)
         }
     }
     pub fn corners(&self, ent: &Entity) -> [Vector3; 8] {
-        let (pos, angle) = self.get_bone_pos(ent);
-        get_corners(&pos, &angle, &self.min, &self.max)
+        let (pos, rotation) = self.get_bone_pos(ent);
+        get_corners(&pos, &rotation, &self.min, &self.max)
     }
     pub fn scaled(&self, scale: f32) -> Hitbox {
         let mut hitbox = self.clone();
