@@ -65,7 +65,8 @@ impl VisualSettings {
 #[derive(Debug, Clone)]
 pub struct MovementSettings {
     pub bhop: amt!(bool),
-    pub revhop: amt!(bool)
+    pub revhop: amt!(bool),
+    pub autostrafe: amt!(bool)
 }
 
 impl MovementSettings {
@@ -73,6 +74,7 @@ impl MovementSettings {
         MovementSettings {
             bhop: am!(false),
             revhop: am!(false),
+            autostrafe: am!(false),
         }
     }
 }

@@ -12,9 +12,9 @@ pub type CVar = WithVmt<VMTCVar>;
 #[derive(Debug, Clone)]
 pub struct VMTCVar{
     _pad: [u8;4*12],
-    pub find_var: cfn!(&'static mut ConVar, &'static CVar, CStr),
-    pub find_var_const: cfn!(&'static ConVar, &'static CVar, CStr),
-    pub find_command: cfn!(&'static mut ConCommand, &'static CVar, CStr),
-    pub find_command_const: cfn!(&'static ConCommand, &'static CVar, CStr),
+    pub find_var: cfn!(&'static mut ConVar, &CVar, &CStr),
+    pub find_var_const: cfn!(&'static ConVar, &CVar, &CStr),
+    pub find_command: cfn!(&mut ConCommand, &'static CVar, CStr),
+    pub find_command_const: cfn!(&ConCommand, &'static CVar, CStr),
 }
 

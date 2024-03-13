@@ -16,6 +16,7 @@ impl MovementWindow {
 
         components.add(Checkbox::new("bhop", s!().movement.bhop.clone(), 10, 10));
         components.add(Checkbox::new("revhop", s!().movement.revhop.clone(), 10, 30));
+        components.add(Checkbox::new("autostrafe", s!().movement.autostrafe.clone(), 10, 50));
 
         let window = Window::new("Movement".to_owned(), visible, components);
         MovementWindow { window }
