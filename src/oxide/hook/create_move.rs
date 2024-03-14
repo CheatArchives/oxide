@@ -1,11 +1,8 @@
 use crate::{
     c, define_hook,
-    oxide::{
-        cheat::{aimbot::Aimbot, movement::Movement},
-        tick_cache::TickCache,
-    },
+    oxide::cheat::{aimbot::Aimbot, movement::Movement},
     s,
-    sdk::{client_mode::ClientMode, entity::Entity, user_cmd::UserCmd},
+    sdk::{client_mode::ClientMode, entity::{Entity, Player}, user_cmd::UserCmd},
 };
 
 fn subhooks(hook: &mut CreateMoveHook) {
@@ -13,18 +10,9 @@ fn subhooks(hook: &mut CreateMoveHook) {
         if cmd.command_number == 0 {
             return Ok(true);
         }
-        match TickCache::init() {
-            Ok(cache) => {
-                o!().last_tick_cache = Some(cache.clone());
-            }
-            Err(e) => {
-                o!().last_tick_cache = None;
-                return Err(e);
-            }
-        };
         let p_local = Entity::get_local()?;
 
-        if !c!(p_local, is_alive) {
+        if !c!(&p_local.entity, is_alive) {
             return Ok(true);
         }
 
@@ -32,8 +20,7 @@ fn subhooks(hook: &mut CreateMoveHook) {
 
         if *s!().visual.third_person.lock().unwrap() {
             p_local.force_taunt_cam = 1
-        }
-         else {
+        } else {
             p_local.force_taunt_cam = 0
         }
 
@@ -67,8 +54,8 @@ define_hook!(
     &mut UserCmd
 );
 
-pub fn remove_punch(p_local: &Entity) {
-    let mut my_angles = c!(p_local, get_abs_angles).clone();
+pub fn remove_punch(p_local: &Player) {
+    let mut my_angles = c!(&p_local.entity, get_abs_angles).clone();
     my_angles.pitch += p_local.vec_punch_angle.pitch;
     my_angles.yaw += p_local.vec_punch_angle.yaw;
     my_angles.roll += p_local.vec_punch_angle.roll;

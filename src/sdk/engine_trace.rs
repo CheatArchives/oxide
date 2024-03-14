@@ -6,7 +6,7 @@ use std::{
 
 use crate::{c, cfn, i, math::vector::Vector3};
 
-use super::{entity::Entity, model_info::HitboxId, WithVmt};
+use super::{entity::{Entity, Player}, model_info::HitboxId, WithVmt};
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
@@ -73,7 +73,7 @@ pub struct VMTTraceFilter {
 #[derive(Debug, Clone)]
 pub struct TraceFilter<'a> {
     vmt: *const VMTTraceFilter,
-    p_local: &'a Entity,
+    p_local: &'a Player,
 }
 
 pub enum TraceType {
@@ -88,7 +88,7 @@ unsafe extern "C-unwind" fn should_hit_entity(
     ent: *const Entity,
     _: i32,
 ) -> bool {
-    ent != unsafe { trace_filter.read().p_local }
+    ent as *const _ != unsafe { trace_filter.read().p_local } as *const Player as *const _
 }
 
 unsafe extern "C-unwind" fn get_trace_type(_: *const TraceFilter) -> TraceType {
@@ -96,7 +96,7 @@ unsafe extern "C-unwind" fn get_trace_type(_: *const TraceFilter) -> TraceType {
 }
 
 impl TraceFilter<'_> {
-    pub fn new(p_local: &Entity) -> TraceFilter {
+    pub fn new(p_local: &Player) -> TraceFilter {
         unsafe {
             let alloc = alloc(Layout::new::<VMTTraceFilter>());
             let ptr = alloc as *mut VMTTraceFilter;

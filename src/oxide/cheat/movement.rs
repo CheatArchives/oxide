@@ -29,7 +29,7 @@ impl Movement {
     }
     pub fn create_move(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) -> OxideResult<()> {
         let p_local = Entity::get_local()?;
-        if p_local.flags.get(Flag::INWATER) {
+        if p_local.entity.flags.get(Flag::INWATER) {
             return Ok(());
         }
         self.bhop(cmd)?;
@@ -53,7 +53,7 @@ impl Movement {
         if !*s!().movement.bhop.lock().unwrap() {
             return Ok(());
         }
-        if (p_local.velocity.len2d() < 200.0 && *s!().movement.revhop.lock().unwrap())
+        if (p_local.entity.velocity.len2d() < 200.0 && *s!().movement.revhop.lock().unwrap())
             || !cmd.buttons.get(ButtonFlags::InJump)
         {
             cmd.buttons.set(ButtonFlags::InJump, false);
@@ -61,26 +61,26 @@ impl Movement {
         }
 
         cmd.buttons
-            .set(ButtonFlags::InJump, p_local.flags.get(Flag::ONGROUND));
+            .set(ButtonFlags::InJump, p_local.entity.flags.get(Flag::ONGROUND));
 
         if *s!().movement.revhop.lock().unwrap()
             && !p_local.player_cond.get(ConditionFlags::Aiming)
             && matches!(
-                c!(c!(p_local, get_weapon), get_weapon_id),
+                c!(c!(&p_local.entity, get_weapon), get_weapon_id),
                 WeaponType::Minigun
             )
         {
             cmd.buttons
-                .set(ButtonFlags::InAttack2, p_local.flags.get(Flag::ONGROUND));
+                .set(ButtonFlags::InAttack2, p_local.entity.flags.get(Flag::ONGROUND));
         }
         Ok(())
     }
     pub fn auto_strafe(&self, cmd: &mut UserCmd) -> OxideResult<()> {
         let p_local = Entity::get_local()?;
-        if p_local.flags.get(Flag::ONGROUND) || !*s!().movement.autostrafe.lock().unwrap() {
+        if p_local.entity.flags.get(Flag::ONGROUND) || !*s!().movement.autostrafe.lock().unwrap() {
             return Ok(());
         }
-        let velocity = p_local.velocity;
+        let velocity = p_local.entity.velocity;
         let speed = velocity.len2d();
 
         //let var_name = CString::new("sv_airaccelerate").unwrap();

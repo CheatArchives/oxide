@@ -3,7 +3,9 @@ use std::{ffi::CString, fs::File, io::Write};
 use crate::{
     c,
     draw::fonts::NERD_FONT,
-    sdk::font::{Font, FontFlags},
+    error::OxideResult,
+    hex_to_rgb, i, o,
+    sdk::font::{Font, FontDrawType, FontFlags},
 };
 
 use super::interfaces::Interfaces;
@@ -36,7 +38,7 @@ impl Paint {
             name: name.as_ptr(),
             tall: 15,
             weight: 700,
-            flags: FontFlags::DROPSHADOW as i32 | FontFlags::ANTIALIAS as i32,
+            flags: FontFlags::ANTIALIAS as i32,
             id,
         };
 
@@ -55,5 +57,56 @@ impl Paint {
         );
 
         Paint { normal }
+    }
+    pub fn paint(&mut self) -> OxideResult<()> {
+        if let Some(cache) = &o!().last_tick_cache {
+            self.draw_hitboxes(&cache)?;
+            self.esp(&cache)?;
+        }
+        Ok(())
+    }
+    pub fn paint_text(
+        &mut self,
+        text: &str,
+        mut x: isize,
+        mut y: isize,
+        color: usize,
+        center: bool,
+    ) {
+        let text = CString::new(text).unwrap();
+        let text = text
+            .into_bytes()
+            .iter()
+            .map(|b| *b as i32)
+            .collect::<Vec<i32>>();
+        let text = text.as_slice();
+
+        //this gives inconsistant width for some reason;
+        if center {
+            let mut w = 0;
+            let mut h = 0;
+            c!(
+                i!(surface),
+                get_text_size,
+                o!().paint.normal.id,
+                text.as_ptr(),
+                &mut w,
+                &mut h
+            );
+            x -= w / 2;
+            y -= h / 2;
+        }
+
+        c!(i!(surface), set_text_font, o!().paint.normal.id);
+        c!(i!(surface), set_text_pos, x, y);
+        let (r, g, b) = hex_to_rgb!(color);
+        c!(i!(surface), set_text_color, r, g, b, 255);
+        c!(
+            i!(surface),
+            print_text,
+            text.as_ptr(),
+            text.len(),
+            FontDrawType::Default
+        );
     }
 }

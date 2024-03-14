@@ -14,15 +14,15 @@ const MAX_CUSTOM_FILES: usize = 4;
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub struct PlayerInfo {
-    name: [c_char; MAX_PLAYER_NAME_LENGTH],
-    user_id: isize,
-    guid: [c_char; SIGNED_GUID_LEN + 1],
-    friends_id: usize,
-    friends_name: [c_char; SIGNED_GUID_LEN + 1],
-    fakeplayer: bool,
-    ishltv: bool,
-    custom_files: [usize; MAX_CUSTOM_FILES],
-    files_downloaded: c_char,
+    pub name: [u8; MAX_PLAYER_NAME_LENGTH],
+    pub user_id: isize,
+    pub guid: [u8; SIGNED_GUID_LEN + 1],
+    pub friends_id: usize,
+    pub friends_name: [c_char; SIGNED_GUID_LEN + 1],
+    pub fakeplayer: bool,
+    pub ishltv: bool,
+    pub custom_files: [usize; MAX_CUSTOM_FILES],
+    pub files_downloaded: c_char,
 }
 
 #[repr(C)]
@@ -33,9 +33,9 @@ pub struct VMTBaseEngine {
     _pad2: [u32; 2],
     pub get_player_info: cfn!(
         bool,
-        &'static BaseEngine,
-        &'static isize,
-        &'static PlayerInfo
+        &BaseEngine,
+        isize,
+        &mut PlayerInfo
     ),
     _pad3: [u32; 3],
     pub get_local_player: cfn!(isize, &BaseEngine),

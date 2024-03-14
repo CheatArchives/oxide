@@ -122,6 +122,12 @@ pub struct Entity {
     #[derivative(Debug = "ignore")]
     _pad5: [u8; 0xC],
     pub flags: Flags,
+}
+#[repr(C)]
+#[derive(Derivative, Clone, Copy)]
+#[derivative(Debug)]
+pub struct Player {
+    pub entity: Entity,
     #[derivative(Debug = "ignore")]
     _pad6: [u8; 0x8E4],
     pub next_attack: f32,
@@ -170,11 +176,6 @@ impl Entity {
         unsafe { transmute(transmute::<&mut Self, usize>(self) + 8) }
     }
 
-    pub unsafe fn can_attack(&self) -> bool {
-        let now = o!().global_vars.now();
-        self.next_attack <= now
-    }
-
     //todo make this shit a result type
     pub fn get_hitbox(&self, hitbox_id: HitboxId) -> Option<Hitbox> {
         unsafe {
@@ -194,12 +195,26 @@ impl Entity {
     }
 }
 
+impl Player {
+    pub unsafe fn can_attack(&self) -> bool {
+        let now = o!().global_vars.now();
+        self.next_attack <= now
+    }
+}
+
 impl Entity {
-    pub fn get_local() -> Result<&'static mut Entity, Box<dyn Error>> {
+    pub fn get_local() -> Result<&'static mut Player, Box<dyn Error>> {
         let id = c!(i!(base_engine), get_local_player);
         Self::get_player(id)
     }
-    pub fn get_player(id: isize) -> Result<&'static mut Entity, Box<dyn Error>> {
+    pub fn get_ent(id: isize) -> Result<&'static mut Entity, Box<dyn Error>> {
+        let ent = c!(i!(entity_list), get_client_entity, id);
+        if ent.is_null() {
+            return Err(OxideError::new("entity is null"));
+        }
+        unsafe { Ok(&mut *ent) }
+    }
+    pub fn get_player(id: isize) -> Result<&'static mut Player, Box<dyn Error>> {
         unsafe {
             let ent = c!(i!(entity_list), get_client_entity, id);
             if ent.is_null() {
@@ -210,7 +225,7 @@ impl Entity {
                 return Err(OxideError::new("entity is not a player"));
             }
 
-            Ok(ent)
+            Ok(transmute(ent))
         }
     }
 }

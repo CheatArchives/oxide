@@ -1,11 +1,12 @@
 #!/bin/python3.11
 
 import argparse
-from subprocess import run, PIPE, Popen
+from subprocess import run
 from pathlib import Path
 from time import sleep
 import shutil
 import os
+from contextlib import suppress
 
 
 TF2_DIR = Path.home() / '.local'/'share'/'Steam' / \
@@ -34,7 +35,7 @@ def inject(pid, lib):
         exit(result)
 
 
-def unload(pid, lib):
+def unload(pid):
 
     loaded_lib = Path("/tmp")/"liboxide.so"
 
@@ -93,11 +94,15 @@ def build(dev=False):
 
 
 def start_tf2():
-    run(["bash", "./hl2.sh", "-game", "tf", "-steam", "-novid", "-nojoy",
-         "-nosteamcontroller", "-nohltv", "-particles", "1",
-         "-precachefontchars", "-noquicktime", "-nobreakpad"], cwd=TF2_DIR,
-        env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
+    with suppress(KeyboardInterrupt):
+        run(["bash", "./hl2.sh", "-game", "tf", "-steam", "-novid", "-nojoy",
+             "-nosteamcontroller", "-nohltv", "-particles", "1",
+             "-precachefontchars", "-noquicktime", "-nobreakpad"], cwd=TF2_DIR,
+            env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
+    pid = get_pid()
+    run(["kill","-9",pid])
     os.remove("/tmp/source_engine_2925226592.lock")
+
 
 
 parser = argparse.ArgumentParser(
@@ -123,14 +128,13 @@ match args.action:
         inject(pid, lib, )
     case 'unload':
         pid = get_pid()
-        lib = get_lib(args.debug)
 
-        unload(pid, lib)
+        unload(pid)
     case 'reload':
         pid = get_pid()
         lib = get_lib(args.debug)
 
-        unload(pid, lib)
+        unload(pid)
         sleep(1)
         inject(pid, lib)
     case 'build':

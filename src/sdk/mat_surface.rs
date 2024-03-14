@@ -45,11 +45,11 @@ pub struct VMTMatSurface {
     _pad8: [u32; 6],
     pub get_text_size: cfn!(
         c_void,
-        &'static Surface,
+        &Surface,
         HFont,
-        &'static i32,
-        &'static mut isize,
-        &'static mut isize
+        *const i32,
+        &mut isize,
+        &mut isize
     ),
     _pad9: [u32; 23],
     pub draw_circle: cfn!(c_void, &'static Surface, isize, isize, isize, isize),

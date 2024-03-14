@@ -7,8 +7,9 @@ use crate::{
     sdk::{
         condition::ConditionFlags,
         engine_trace::{trace, MASK_SHOT},
-        entity::Entity,
+        entity::{Entity, Player},
         model_info::{Hitbox, HitboxId},
+        networkable::ClientClassId,
         user_cmd::{ButtonFlags, UserCmd},
         weapon::WeaponType,
     },
@@ -56,9 +57,9 @@ impl Aimbot {
         Some(-distance_to_center as isize)
     }
 
-    pub fn ent_priority(&self, ent: &Entity) -> Option<isize> {
+    pub fn ent_priority(&self, player: &Player) -> Option<isize> {
         let p_local = &*Entity::get_local().unwrap();
-        if c!(ent, get_team_number) == c!(p_local, get_team_number) {
+        if c!(&player.entity, get_team_number) == c!(&p_local.entity, get_team_number) {
             return None;
         }
         Some(1 as isize)
@@ -71,7 +72,7 @@ impl Aimbot {
         hitbox: &Hitbox,
     ) -> Option<(Vector3, isize)> {
         let p_local = &*Entity::get_local().unwrap();
-        let my_eyes = c!(p_local, eye_position);
+        let my_eyes = c!(&p_local.entity, eye_position);
 
         let scaled_hitbox = hitbox.scaled(HITBOX_SCALE);
 
@@ -104,11 +105,11 @@ impl Aimbot {
         None
     }
 
-    pub fn find_point(&self, ent: &Entity) -> Option<(Vector3, isize)> {
+    pub fn find_point(&self, player: &Player) -> Option<(Vector3, isize)> {
         for hitboxid in self.hitbox_order() {
-            let hitbox = ent.get_hitbox(hitboxid).unwrap();
+            let hitbox = player.entity.get_hitbox(hitboxid).unwrap();
 
-            let Some((point,prio)) = self.point_scan(ent, hitboxid, &hitbox) else {
+            let Some((point,prio)) = self.point_scan(player, hitboxid, &hitbox) else {
                 continue;
             };
 
@@ -120,11 +121,19 @@ impl Aimbot {
     pub fn find_target(&self) -> OxideResult<Option<Angles>> {
         let p_local = &*Entity::get_local().unwrap();
         let mut target: Option<(Vector3, (isize, isize))> = None;
-        let my_eyes = c!(p_local, eye_position);
+        let my_eyes = c!(&p_local.entity, eye_position);
 
-        for id in o!().last_tick_cache.as_ref().unwrap().players.clone() {
+        for id in o!()
+            .last_tick_cache
+            .clone()
+            .unwrap()
+            .entities
+            .get(&ClientClassId::CBasePlayer)
+            .unwrap()
+            .clone()
+        {
             let player = Entity::get_player(id)?;
-            if c!(player.as_networkable(), is_dormant) {
+            if c!(player.entity.as_networkable(), is_dormant) {
                 continue;
             }
             let Some(prio) = self.ent_priority(&player) else {
@@ -156,7 +165,7 @@ impl Aimbot {
     }
     pub fn hitbox_order(&self) -> Vec<HitboxId> {
         let p_local = &*Entity::get_local().unwrap();
-        let weapon = c!(p_local, get_weapon);
+        let weapon = c!(&p_local.entity, get_weapon);
         let id = c!(weapon, get_weapon_id);
         match id {
             WeaponType::Sniperrifle => {
@@ -171,7 +180,7 @@ impl Aimbot {
             return false;
         }
 
-        if !c!(p_local, is_alive) {
+        if !c!(&p_local.entity, is_alive) {
             return false;
         }
 
@@ -196,7 +205,7 @@ impl Aimbot {
     }
     pub fn shoot(&mut self, cmd: &mut UserCmd) -> bool {
         let p_local = &*Entity::get_local().unwrap();
-        let weapon = c!(p_local, get_weapon);
+        let weapon = c!(&p_local.entity, get_weapon);
         let id = c!(weapon, get_weapon_id);
         match id {
             WeaponType::Sniperrifle => {
