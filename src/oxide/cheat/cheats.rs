@@ -5,7 +5,7 @@ use std::{
 
 use crate::draw::event::Event;
 
-use super::{aimbot::Aimbot, movement::Movement, Cheat};
+use super::{aimbot::Aimbot, movement::Movement, visual::Visuals, Cheat};
 
 #[derive(Debug)]
 pub struct Cheats(pub HashMap<String, Box<dyn Cheat>>);
@@ -20,6 +20,9 @@ impl Cheats {
 
         let movement = Movement::init();
         cheats.add(movement, Movement::name());
+
+        let visuals = Visuals::init();
+        cheats.add(visuals, Visuals::name());
 
         cheats
     }

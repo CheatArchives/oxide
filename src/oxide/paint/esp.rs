@@ -1,24 +1,27 @@
 use crate::{
-    c, draw::colors::GREEN, hex_to_rgb, i, math::{get_corners, vector::Vector2}, s, sdk::entity::Entity, util::world_to_screen
+    c,
+    draw::colors::{BLUE, GREEN},
+    error::OxideResult,
+    hex_to_rgb, i,
+    math::{get_corners, vector::Vector2},
+    oxide::tick_cache::TickCache,
+    s,
+    sdk::entity::Entity,
+    util::world_to_screen,
 };
 
-pub fn esp() {
-    let Some(p_local) = Entity::local() else {
-        return;
-    };
-    if !c!(i!(base_engine), is_in_game) || !*s!().visual.esp.lock().unwrap(){
-        return;
+pub fn esp(cache: &TickCache) -> OxideResult<()> {
+    if !c!(i!(base_engine), is_in_game) || !*s!().visual.esp.lock().unwrap() {
+        return Ok(());
     }
-    let entity_count = c!(i!(entity_list), get_highest_entity_index);
-    for i in 0..entity_count {
-        let Some(ent) = Entity::get_player(i) else {
-                continue;
-            };
-        if ent as *const _ == p_local as *const _ || !c!(ent, is_alive) {
+    for id in cache.players.clone() {
+        let player = Entity::get_player(id)?;
+        let p_local = Entity::get_local()?;
+        if player as *const _ == p_local as *const _ || !c!(player, is_alive) {
             continue;
         }
-        let team = c!(ent, get_team_number);
-        let collidable = c!(ent, get_collideable);
+        let team = c!(player, get_team_number);
+        let collidable = c!(player, get_collideable);
         let min = *c!(collidable, obb_mins);
         let max = *c!(collidable, obb_maxs);
         let origin = *c!(collidable, get_origin);
@@ -34,7 +37,7 @@ pub fn esp() {
 
         let (r, g, b) = hex_to_rgb!(team.color());
         c!(
-            i!(mat_surface),
+            i!(surface),
             set_color,
             r as isize,
             g as isize,
@@ -43,7 +46,7 @@ pub fn esp() {
         );
 
         c!(
-            i!(mat_surface),
+            i!(surface),
             draw_rect,
             minx as isize,
             miny as isize,
@@ -53,25 +56,48 @@ pub fn esp() {
 
         let (r, g, b) = hex_to_rgb!(GREEN);
         c!(
-            i!(mat_surface),
+            i!(surface),
             set_color,
             r as isize,
             g as isize,
             b as isize,
             50 as isize
         );
-        let health = c!(ent, get_health);
-        let max_health = c!(ent, get_max_health);
+        let health = c!(player, get_health);
+        let max_health = c!(player, get_max_health);
 
         c!(
-            i!(mat_surface),
+            i!(surface),
             draw_filled_rect,
             minx as isize - 5,
             miny as isize
-                + ((1.0 - (health as f32 / max_health as f32)) * (maxy as f32 - miny as f32))
-                    as isize,
+                + ((1.0 - (health.min(max_health) as f32 / max_health as f32))
+                    * (maxy as f32 - miny as f32)) as isize,
             minx as isize - 2,
             maxy as isize
         );
+        if health > max_health {
+            let (r, g, b) = hex_to_rgb!(BLUE);
+            c!(
+                i!(surface),
+                set_color,
+                r as isize,
+                g as isize,
+                b as isize,
+                50 as isize
+            );
+
+            c!(
+                i!(surface),
+                draw_filled_rect,
+                minx as isize - 5,
+                miny as isize
+                    + ((2.0 - (health as f32 / max_health as f32).max(1.0))
+                        * (maxy as f32 - miny as f32)) as isize,
+                minx as isize - 2,
+                maxy as isize
+            );
+        }
     }
+    Ok(())
 }

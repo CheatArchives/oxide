@@ -4,7 +4,7 @@ use std::{
 
 use libc::{c_void, dlsym};
 
-use crate::{cfn, sdk::{base_client::{BaseClient, VMTBaseClient}, base_engine::{BaseEngine, VMTBaseEngine}, client_mode::{ClientMode, VMTClientMode}, cvar::{CVar, VMTCVar}, engine_trace::{EngineTrace, VMTEngineTrace}, engine_vgui::{EngineVgui, VMTEngineVgui}, entity_list::{EntityList, VMTEntityList}, game_movement::{GameMovement, VMTGameMovement}, mat_surface::{MatSurface, VMTMatSurface}, material_system::{MaterialSystem, VMTMaterialSystem}, model_info::{ModelInfo, VMTModelInfo}, model_render::{ModelRender, VMTModelRender}, panel::{Panel, VMTPanel}, predictions::{Prediction, VMTPrediction}, render_view::{RenderView, VMTRenderView}, HasVmt}, util::{get_handle, vmt_size}};
+use crate::{cfn, sdk::{base_client::{BaseClient, VMTBaseClient}, base_engine::{BaseEngine, VMTBaseEngine}, client_mode::{ClientMode, VMTClientMode}, cvar::{CVar, VMTCVar}, engine_trace::{EngineTrace, VMTEngineTrace}, engine_vgui::{EngineVgui, VMTEngineVgui}, entity_list::{EntityList, VMTEntityList}, game_movement::{GameMovement, VMTGameMovement}, mat_surface::{Surface, VMTMatSurface}, material_system::{MaterialSystem, VMTMaterialSystem}, model_info::{ModelInfo, VMTModelInfo}, model_render::{ModelRender, VMTModelRender}, panel::{Panel, VMTPanel}, predictions::{Prediction, VMTPrediction}, render_view::{RenderView, VMTRenderView}, HasVmt}, util::{get_handle, vmt_size}};
 
 #[derive(Debug, Clone)]
 pub struct Interface<T: HasVmt<V> + 'static, V: 'static> {
@@ -63,7 +63,7 @@ pub struct Interfaces {
     pub entity_list: Interface<EntityList, VMTEntityList>,
     pub engine_vgui: Interface<EngineVgui, VMTEngineVgui>,
     pub cvar: Interface<CVar, VMTCVar>,
-    pub mat_surface: Interface<MatSurface, VMTMatSurface>,
+    pub surface: Interface<Surface, VMTMatSurface>,
     pub panel: Interface<Panel, VMTPanel>,
     pub model_info: Interface<ModelInfo, VMTModelInfo>,
     pub render_view: Interface<RenderView, VMTRenderView>,
@@ -93,7 +93,7 @@ impl Interfaces {
             entity_list: Interface::create(client_handle, "VClientEntityList003")?,
             engine_vgui: Interface::create(engine_handle, "VEngineVGui002")?,
             cvar: Interface::create(vstdlib_handle, "VEngineCvar004")?,
-            mat_surface: Interface::create(matsurface_handle, "VGUI_Surface030")?,
+            surface: Interface::create(matsurface_handle, "VGUI_Surface030")?,
             panel: Interface::create(vgui_handle, "VGUI_Panel009")?,
             model_info: Interface::create(engine_handle, "VModelInfoClient006")?,
             render_view: Interface::create(engine_handle, "VEngineRenderView014")?,
@@ -117,7 +117,7 @@ impl Interfaces {
         self.entity_list.restore();
         self.engine_vgui.restore();
         self.cvar.restore();
-        self.mat_surface.restore();
+        self.surface.restore();
         self.panel.restore();
         self.model_info.restore();
         self.render_view.restore();

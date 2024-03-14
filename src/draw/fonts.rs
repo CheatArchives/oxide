@@ -9,7 +9,8 @@ use sdl2_sys::{
 
 use crate::{d, hex_to_rgb};
 
-static NERD_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
+
+pub static NERD_FONT: &[u8; 2215536] = include_bytes!("./../../HackNerdFont-Regular.ttf");
 
 #[derive(Debug, Clone)]
 pub struct Fonts {
@@ -17,7 +18,7 @@ pub struct Fonts {
     pub face_large: FT_Face,
     pub face_medium: FT_Face,
     pub face_small: FT_Face,
-}
+} 
 
 #[derive(Debug, Clone)]
 pub enum FontSize {

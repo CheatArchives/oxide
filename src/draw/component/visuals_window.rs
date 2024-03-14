@@ -27,19 +27,26 @@ impl VisualsWindow {
         ));
 
         components.add(FloatInput::new("fov", 10, 30, 100, s!().visual.fov.clone()));
+        components.add(FloatInput::new("scoped fov", 10, 55, 100, s!().visual.scoped_fov.clone()));
 
         components.add(Checkbox::new(
             "esp",
             s!().visual.esp.clone(),
             10,
-            60,
+            80,
         ));
 
         components.add(Checkbox::new(
             "hitboxes",
             s!().visual.hitboxes.clone(),
             10,
-            80,
+            100,
+        ));
+        components.add(Checkbox::new(
+            "remove scope",
+            s!().visual.remove_scope.clone(),
+            10,
+            120,
         ));
         let window = Window::new("VISUALS".to_owned(), visible, components);
         VisualsWindow { window }

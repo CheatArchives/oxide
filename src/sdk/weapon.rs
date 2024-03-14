@@ -19,14 +19,14 @@ pub struct VMTWeapon {
     pub get_name: cfn!(CStr, &'static Weapon),
     #[derivative(Debug="ignore")]
     _pad4: [u8; 4 * 48],
-    pub get_weapon_id: cfn!(WeaponType, &'static Weapon),
-    pub get_damage_type: cfn!(isize, &'static Weapon),
+    pub get_weapon_id: cfn!(WeaponType, &Weapon),
+    pub get_damage_type: cfn!(isize, &Weapon),
     #[derivative(Debug="ignore")]
     _pad5: [u8; 4 * 14],
     pub calc_is_attack_critical_helper: cfn!(bool, &'static Weapon),
     #[derivative(Debug="ignore")]
     _pad6: [u8; 4 * 28],
-    pub can_fire_critical_shot: cfn!(bool, *const Weapon, bool),
+    pub can_fire_critical_shot: cfn!(bool, &Weapon, bool),
     #[derivative(Debug="ignore")]
     _pad7: [u8; 4 * 30],
     pub get_swing_range: cfn!(isize, &'static Weapon),

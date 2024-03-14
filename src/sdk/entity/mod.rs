@@ -1,16 +1,20 @@
-use std::mem::transmute;
+use std::{error::Error, mem::transmute};
 
 use derivative::Derivative;
 
 use crate::{
     c,
     draw::colors::{BLUE, RED},
+    error::OxideError,
     i,
     math::{angles::Angles, vector::Vector3},
     o,
 };
 
-use self::{flags::Flags, model_info::{Hitbox, HitboxId}};
+use self::{
+    flags::Flags,
+    model_info::{Hitbox, HitboxId},
+};
 
 use super::*;
 
@@ -99,7 +103,7 @@ pub struct VMTEntity {
 }
 
 #[repr(C)]
-#[derive(Derivative, Clone)]
+#[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
 pub struct Entity {
     pub vmt: *mut VMTEntity,
@@ -165,21 +169,6 @@ impl Entity {
     pub fn as_networkable(&mut self) -> &mut Networkable {
         unsafe { transmute(transmute::<&mut Self, usize>(self) + 8) }
     }
-    pub fn get_player(id: isize) -> Option<&'static mut Entity> {
-        unsafe {
-            let ent = c!(i!(entity_list), get_client_entity, id);
-            if ent.is_null() {
-                return None;
-            }
-            let ent = &mut *ent;
-            let net = ent.as_networkable();
-            if c!(net, is_dormant) || !c!(ent, is_player) {
-                return None;
-            }
-
-            Some(ent)
-        }
-    }
 
     pub unsafe fn can_attack(&self) -> bool {
         let now = o!().global_vars.now();
@@ -203,9 +192,26 @@ impl Entity {
             Some(hitbox)
         }
     }
-    pub fn local() -> Option<&'static mut Entity> {
+}
+
+impl Entity {
+    pub fn get_local() -> Result<&'static mut Entity, Box<dyn Error>> {
         let id = c!(i!(base_engine), get_local_player);
         Self::get_player(id)
+    }
+    pub fn get_player(id: isize) -> Result<&'static mut Entity, Box<dyn Error>> {
+        unsafe {
+            let ent = c!(i!(entity_list), get_client_entity, id);
+            if ent.is_null() {
+                return Err(OxideError::new("entity is null"));
+            }
+            let ent = &mut *ent;
+            if !c!(ent, is_player) {
+                return Err(OxideError::new("entity is not a player"));
+            }
+
+            Ok(ent)
+        }
     }
 }
 
@@ -224,4 +230,3 @@ impl Team {
         }
     }
 }
-

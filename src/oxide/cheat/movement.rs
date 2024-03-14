@@ -2,6 +2,7 @@ use std::f32::consts::PI;
 
 use crate::{
     c,
+    error::OxideResult,
     math::{angles::Angles, dtr},
     s,
     sdk::{
@@ -26,14 +27,13 @@ impl Movement {
     pub fn name() -> &'static str {
         "Movement"
     }
-    pub fn create_move(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) {
-        let p_local = Entity::local().unwrap();
-
+    pub fn create_move(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) -> OxideResult<()> {
+        let p_local = Entity::get_local()?;
         if p_local.flags.get(Flag::INWATER) {
-            return;
+            return Ok(());
         }
-        self.bhop(cmd, p_local);
-        self.auto_strafe(cmd, p_local);
+        self.bhop(cmd)?;
+        self.auto_strafe(cmd)?;
 
         if org_cmd.viewangles.yaw != cmd.viewangles.yaw {
             let (corrected_forward, correct_side) = Self::correct_movement(
@@ -45,15 +45,21 @@ impl Movement {
             cmd.forwardmove = corrected_forward;
             cmd.sidemove = correct_side;
         }
+
+        Ok(())
     }
-    pub fn bhop(&mut self, cmd: &mut UserCmd, p_local: &Entity) {
+    pub fn bhop(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
+        let p_local = Entity::get_local()?;
         if !*s!().movement.bhop.lock().unwrap() {
-            return;
+            return Ok(());
         }
-        if p_local.velocity.len2d() < 200.0 || !cmd.buttons.get(ButtonFlags::InJump) {
+        if (p_local.velocity.len2d() < 200.0 && *s!().movement.revhop.lock().unwrap())
+            || !cmd.buttons.get(ButtonFlags::InJump)
+        {
             cmd.buttons.set(ButtonFlags::InJump, false);
-            return;
+            return Ok(());
         }
+
         cmd.buttons
             .set(ButtonFlags::InJump, p_local.flags.get(Flag::ONGROUND));
 
@@ -67,10 +73,12 @@ impl Movement {
             cmd.buttons
                 .set(ButtonFlags::InAttack2, p_local.flags.get(Flag::ONGROUND));
         }
+        Ok(())
     }
-    pub fn auto_strafe(&self, cmd: &mut UserCmd, p_local: &Entity) {
+    pub fn auto_strafe(&self, cmd: &mut UserCmd) -> OxideResult<()> {
+        let p_local = Entity::get_local()?;
         if p_local.flags.get(Flag::ONGROUND) || !*s!().movement.autostrafe.lock().unwrap() {
-            return;
+            return Ok(());
         }
         let velocity = p_local.velocity;
         let speed = velocity.len2d();
@@ -111,6 +119,7 @@ impl Movement {
 
         cmd.forwardmove = direction.cos() * 450.0;
         cmd.sidemove = -direction.sin() * 450.0;
+        Ok(())
     }
     pub fn correct_movement(
         org_view_angles: Angles,

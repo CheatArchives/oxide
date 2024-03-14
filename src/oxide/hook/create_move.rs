@@ -1,29 +1,55 @@
 use crate::{
-    c, define_hook, oxide::cheat::{aimbot::Aimbot, movement::Movement}, s, sdk::{client_mode::ClientMode, cvar::get_cvar, entity::Entity, user_cmd::UserCmd}
+    c, define_hook,
+    oxide::{
+        cheat::{aimbot::Aimbot, movement::Movement},
+        tick_cache::TickCache,
+    },
+    s,
+    sdk::{client_mode::ClientMode, entity::Entity, user_cmd::UserCmd},
 };
 
 fn subhooks(hook: &mut CreateMoveHook) {
     hook.before = Some(|_, _, cmd| {
-        let Some(p_local) = Entity::local() else {
-            return;
+        if cmd.command_number == 0 {
+            return Ok(true);
+        }
+        match TickCache::init() {
+            Ok(cache) => {
+                o!().last_tick_cache = Some(cache.clone());
+            }
+            Err(e) => {
+                o!().last_tick_cache = None;
+                return Err(e);
+            }
         };
+        let p_local = Entity::get_local()?;
+
         if !c!(p_local, is_alive) {
-            return;
+            return Ok(true);
         }
 
         let org_cmd = cmd.clone();
 
+        if *s!().visual.third_person.lock().unwrap() {
+            p_local.force_taunt_cam = 1
+        }
+         else {
+            p_local.force_taunt_cam = 0
+        }
+
         remove_punch(p_local);
 
         let mut aimbot = o!().cheats.get::<Aimbot>(Aimbot::name());
-        aimbot.create_move(cmd).unwrap();
+        aimbot.create_move(cmd)?;
 
         let mut movement = o!().cheats.get::<Movement>(Movement::name());
-        movement.create_move(cmd, &org_cmd);
+        movement.create_move(cmd, &org_cmd)?;
 
+        Ok(false)
     });
     hook.after = Some(|_, _, _, res| {
-        *res = !*s!().aimbot.silent.lock().unwrap();
+        *res = !*s!().aimbot.silent.lock()?;
+        Ok(())
     });
 }
 

@@ -3,9 +3,11 @@ use sdl2_sys::SDL_Event;
 use crate::define_hook;
 fn subhooks(hook:&mut PollEventHook) {
     hook.before = Some(|e|{
-        o!().handle_event(e)
+        o!().handle_event(e);
+        Ok(true)
     });
     hook.after = Some(|_,_|{
+        Ok(())
 
     });
 }

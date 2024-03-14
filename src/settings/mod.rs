@@ -52,6 +52,8 @@ pub struct VisualSettings {
     pub third_person: amt!(bool),
     pub fov: amt!(f32),
     pub esp: amt!(bool),
+    pub scoped_fov: amt!(f32),
+    pub remove_scope: amt!(bool),
     pub hitboxes: amt!(bool),
 }
 
@@ -60,6 +62,8 @@ impl VisualSettings {
         VisualSettings {
             third_person: am!(false),
             fov: am!(100f32),
+            scoped_fov: am!(30f32),
+            remove_scope: am!(false),
             esp: am!(false),
             hitboxes: am!(false),
         }

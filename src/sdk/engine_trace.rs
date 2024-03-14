@@ -71,9 +71,9 @@ pub struct VMTTraceFilter {
 
 #[repr(C)]
 #[derive(Debug, Clone)]
-pub struct TraceFilter {
+pub struct TraceFilter<'a> {
     vmt: *const VMTTraceFilter,
-    p_local: &'static Entity,
+    p_local: &'a Entity,
 }
 
 pub enum TraceType {
@@ -95,8 +95,8 @@ unsafe extern "C-unwind" fn get_trace_type(_: *const TraceFilter) -> TraceType {
     TraceType::Everything
 }
 
-impl TraceFilter {
-    pub fn new(p_local: &'static Entity) -> TraceFilter {
+impl TraceFilter<'_> {
+    pub fn new(p_local: &Entity) -> TraceFilter {
         unsafe {
             let alloc = alloc(Layout::new::<VMTTraceFilter>());
             let ptr = alloc as *mut VMTTraceFilter;
@@ -160,17 +160,16 @@ pub struct VMTEngineTrace {
     ),
 }
 
-pub fn trace(start: Vector3, end: Vector3, mask: u32, p_local: &'static Entity) -> Trace {
-    unsafe {
-        let trace_engine = i!(engine_trace);
+pub fn trace(start: Vector3, end: Vector3, mask: u32) -> Trace {
+    let p_local = Entity::get_local().unwrap();
+    let trace_engine = i!(engine_trace);
 
-        let ray = Ray::new(start, end);
-        let filter = TraceFilter::new(p_local);
-        let mut trace = MaybeUninit::zeroed().assume_init();
+    let ray = Ray::new(start, end);
+    let filter = TraceFilter::new(p_local);
+    let mut trace = unsafe{MaybeUninit::zeroed().assume_init()};
 
-        c!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
-        trace
-    }
+    c!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
+    trace
 }
 
 pub const CONTENTS_EMPTY: u32 = 0x0;

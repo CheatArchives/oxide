@@ -1,13 +1,12 @@
 use crate::{
     c,
     draw::event::EventType,
-    error::OxideError,
-    i,
+    error::OxideResult,
     math::{angles::Angles, vector::Vector3},
     o, s,
     sdk::{
         condition::ConditionFlags,
-        engine_trace::{trace, CONTENTS_GRATE, MASK_SHOT},
+        engine_trace::{trace, MASK_SHOT},
         entity::Entity,
         model_info::{Hitbox, HitboxId},
         user_cmd::{ButtonFlags, UserCmd},
@@ -34,7 +33,8 @@ impl Aimbot {
         }
     }
 
-    pub fn point_priority(&self, p_local: &Entity, target_point: Vector3) -> Option<isize> {
+    pub fn point_priority(&self, target_point: Vector3) -> Option<isize> {
+        let p_local = &*Entity::get_local().unwrap();
         let my_eyes = c!(p_local, eye_position);
 
         let diff = my_eyes - target_point;
@@ -56,7 +56,8 @@ impl Aimbot {
         Some(-distance_to_center as isize)
     }
 
-    pub fn ent_priority(&self, p_local: &Entity, ent: &Entity) -> Option<isize> {
+    pub fn ent_priority(&self, ent: &Entity) -> Option<isize> {
+        let p_local = &*Entity::get_local().unwrap();
         if c!(ent, get_team_number) == c!(p_local, get_team_number) {
             return None;
         }
@@ -65,11 +66,11 @@ impl Aimbot {
 
     pub fn point_scan(
         &self,
-        p_local: &'static Entity,
         ent: &Entity,
         hitboxid: HitboxId,
         hitbox: &Hitbox,
     ) -> Option<(Vector3, isize)> {
+        let p_local = &*Entity::get_local().unwrap();
         let my_eyes = c!(p_local, eye_position);
 
         let scaled_hitbox = hitbox.scaled(HITBOX_SCALE);
@@ -91,16 +92,11 @@ impl Aimbot {
         }
 
         for point in points {
-            let trace = trace(
-                my_eyes.clone(),
-                point.clone(),
-                MASK_SHOT | CONTENTS_GRATE,
-                p_local,
-            );
+            let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT);
             if trace.entity != ent || trace.hitbox != hitboxid {
                 continue;
             }
-            let Some(prio) = self.point_priority(p_local, point.clone()) else {
+            let Some(prio) = self.point_priority(point.clone()) else {
                 continue;
             };
             return Some((point, prio));
@@ -108,15 +104,11 @@ impl Aimbot {
         None
     }
 
-    pub fn find_point(
-        &self,
-        p_local: &'static Entity,
-        ent: &'static Entity,
-    ) -> Option<(Vector3, isize)> {
-        for hitboxid in self.hitbox_order(p_local) {
+    pub fn find_point(&self, ent: &Entity) -> Option<(Vector3, isize)> {
+        for hitboxid in self.hitbox_order() {
             let hitbox = ent.get_hitbox(hitboxid).unwrap();
 
-            let Some((point,prio)) = self.point_scan(p_local, ent, hitboxid, &hitbox) else {
+            let Some((point,prio)) = self.point_scan(ent, hitboxid, &hitbox) else {
                 continue;
             };
 
@@ -125,22 +117,21 @@ impl Aimbot {
         None
     }
 
-    pub fn find_target(&self, p_local: &'static Entity) -> Result<Option<Angles>, OxideError> {
-        let entity_count = c!(i!(entity_list), get_max_entities);
-
+    pub fn find_target(&self) -> OxideResult<Option<Angles>> {
+        let p_local = &*Entity::get_local().unwrap();
         let mut target: Option<(Vector3, (isize, isize))> = None;
         let my_eyes = c!(p_local, eye_position);
 
-        for i in 0..entity_count {
-            let Some(ent) = Entity::get_player(i) else {
+        for id in o!().last_tick_cache.as_ref().unwrap().players.clone() {
+            let player = Entity::get_player(id)?;
+            if c!(player.as_networkable(), is_dormant) {
+                continue;
+            }
+            let Some(prio) = self.ent_priority(&player) else {
                 continue;
             };
 
-            let Some(prio) = self.ent_priority(p_local, ent) else {
-                continue;
-            };
-
-            let Some((point,point_prio)) = self.find_point(p_local, ent) else {
+            let Some((point,point_prio)) = self.find_point(&player) else {
                 continue;
             };
 
@@ -163,7 +154,8 @@ impl Aimbot {
 
         Ok(Some(diff.angle()))
     }
-    pub fn hitbox_order(&self, p_local: &Entity) -> Vec<HitboxId> {
+    pub fn hitbox_order(&self) -> Vec<HitboxId> {
+        let p_local = &*Entity::get_local().unwrap();
         let weapon = c!(p_local, get_weapon);
         let id = c!(weapon, get_weapon_id);
         match id {
@@ -173,14 +165,11 @@ impl Aimbot {
             _ => [HitboxId::body(), vec![HitboxId::Head]].concat(),
         }
     }
-    pub fn should_run(&mut self) -> bool {
+    pub fn should_run(&self) -> bool {
+        let p_local = &*Entity::get_local().unwrap();
         if !*s!().aimbot.enabled.lock().unwrap() || !self.shoot_key_pressed {
             return false;
         }
-
-        let Some(p_local) = Entity::local() else {
-            return false;
-        };
 
         if !c!(p_local, is_alive) {
             return false;
@@ -189,31 +178,28 @@ impl Aimbot {
         true
     }
 
-    pub fn create_move(&mut self, cmd: &mut UserCmd) -> Result<(), OxideError> {
+    pub fn create_move(&mut self, cmd: &mut UserCmd) -> OxideResult<()> {
         if !self.should_run() {
             return Ok(());
         }
 
-        let p_local = Entity::local().unwrap();
-
-        if let Some(new_angle) = self.find_target(p_local)? {
+        if let Some(new_angle) = self.find_target()? {
             if *s!().aimbot.autoshoot.lock().unwrap() {
-                if self.shoot(p_local, cmd) {
+                if self.shoot(cmd) {
                     cmd.viewangles = new_angle;
                 }
             } else {
                 cmd.viewangles = new_angle;
             }
         }
-
         Ok(())
     }
-    pub fn shoot(&mut self, p_local: &Entity, cmd: &mut UserCmd) -> bool {
+    pub fn shoot(&mut self, cmd: &mut UserCmd) -> bool {
+        let p_local = &*Entity::get_local().unwrap();
         let weapon = c!(p_local, get_weapon);
         let id = c!(weapon, get_weapon_id);
         match id {
             WeaponType::Sniperrifle => {
-                let weapon = c!(p_local, get_weapon);
                 if !p_local.player_cond.get(ConditionFlags::Zoomed) {
                     cmd.buttons.set(ButtonFlags::InAttack2, true);
                     return false;

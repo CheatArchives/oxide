@@ -7,10 +7,10 @@ pub struct OxideError {
 }
 
 impl OxideError {
-    pub fn new(msg: &str) -> OxideError {
-        OxideError {
+    pub fn new(msg: &str) -> Box<OxideError> {
+        Box::new(OxideError {
             message: msg.to_owned(),
-        }
+        })
     }
 }
 
@@ -21,3 +21,6 @@ impl fmt::Display for OxideError {
         write!(f, "{}", self.message)
     }
 }
+
+pub type OxideResult<T> = Result<T, Box<dyn Error>>;
+

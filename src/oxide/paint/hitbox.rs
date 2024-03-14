@@ -1,5 +1,5 @@
 use crate::{
-    c, hex_to_rgb, i, o, rgb_to_hex, s, sdk::{
+    c, error::OxideResult, hex_to_rgb, i, o, oxide::tick_cache::TickCache, rgb_to_hex, s, sdk::{
         entity::Entity,
         model_info::{Hitbox, HitboxId},
     }, util::world_to_screen
@@ -9,36 +9,32 @@ use crate::oxide::cheat::aimbot::HITBOX_SCALE;
 
 const COLOR_SCALE: f32 = 1.0 / 2.0;
 
-pub fn draw_hitboxes() {
-    let Some(p_local) = Entity::local() else {
-        return;
-    };
-    if !c!(i!(base_engine), is_in_game) || !*s!().visual.hitboxes.lock().unwrap(){
-        return
+pub fn draw_hitboxes(cache: &TickCache) -> OxideResult<()>{
+    if !c!(i!(base_engine), is_in_game) || !*s!().visual.hitboxes.lock().unwrap() {
+        return Ok(());
     }
-        let entity_count = c!(i!(entity_list), get_highest_entity_index);
-        for i in 0..entity_count {
-            let Some(ent) = Entity::get_player(i) else {
-                    continue;
-                };
-            if ent as *const _ == p_local as *const _ || !c!(ent, is_alive) {
-                continue;
-            }
-            let team = c!(ent, get_team_number);
-
-            let hitbox = ent.get_hitbox(HitboxId::Head).unwrap().scaled(HITBOX_SCALE);
-            draw_hitbox(ent, hitbox, team.color(), 10);
-            for hitbox_id in HitboxId::body() {
-                let (r, g, b) = hex_to_rgb!(team.color());
-                let color = rgb_to_hex!(
-                    r as f32 * COLOR_SCALE,
-                    g as f32 * COLOR_SCALE,
-                    b as f32 * COLOR_SCALE
-                );
-                let hitbox = ent.get_hitbox(hitbox_id).unwrap().scaled(HITBOX_SCALE);
-                draw_hitbox(ent, hitbox, color, 10);
-            }
+    for id in cache.players.clone() {
+        let p_local = Entity::get_local()?;
+        let player = Entity::get_player(id)?;
+        if player as *const _ == p_local as *const _ || !c!(player, is_alive) {
+            continue;
         }
+        let team = c!(player, get_team_number);
+
+        let hitbox = player.get_hitbox(HitboxId::Head).unwrap().scaled(HITBOX_SCALE);
+        draw_hitbox(&player, hitbox, team.color(), 10);
+        for hitbox_id in HitboxId::body() {
+            let (r, g, b) = hex_to_rgb!(team.color());
+            let color = rgb_to_hex!(
+                r as f32 * COLOR_SCALE,
+                g as f32 * COLOR_SCALE,
+                b as f32 * COLOR_SCALE
+            );
+            let hitbox = player.get_hitbox(hitbox_id).unwrap().scaled(HITBOX_SCALE);
+            draw_hitbox(&player, hitbox, color, 10);
+        }
+    }
+    Ok(())
 }
 pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
     let corners = hitbox.corners(ent);
@@ -67,7 +63,7 @@ pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
                     };
         let (r, g, b) = hex_to_rgb!(color);
         c!(
-            i!(mat_surface),
+            i!(surface),
             set_color,
             r as isize,
             g as isize,
@@ -76,7 +72,7 @@ pub fn draw_hitbox(ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
         );
 
         c!(
-            i!(mat_surface),
+            i!(surface),
             draw_line,
             pos1.x as isize,
             pos1.y as isize,

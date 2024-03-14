@@ -13,19 +13,24 @@ use crate::{
     DRAW,
 };
 
+use self::{paint::Paint, tick_cache::TickCache};
+
 pub mod cheat;
 pub mod hook;
 pub mod interfaces;
 pub mod paint;
+pub mod tick_cache;
 
 #[derive(Debug)]
-pub struct Oxide {
+pub struct Oxide<> {
     pub interfaces: Interfaces,
     pub hooks: Hooks,
     pub global_vars: &'static GlobalVars,
     pub cheats: Cheats,
     pub fov: Option<f32>,
     pub get_bone_position_fn: GetBonePositionFn,
+    pub last_tick_cache: Option<TickCache>,
+    pub paint: Paint
 }
 pub type GetBonePositionFn =
     unsafe extern "C-unwind" fn(&Entity, usize, &mut Vector3, &mut Angles) -> ();
@@ -41,6 +46,8 @@ impl Oxide {
 
         let global_vars = Oxide::get_global_vars(interfaces.base_client.interface_ref());
 
+        let paint = Paint::init(&interfaces);
+
         let oxide = Oxide {
             interfaces,
             cheats,
@@ -48,6 +55,8 @@ impl Oxide {
             global_vars,
             fov: None,
             get_bone_position_fn,
+            last_tick_cache: None,
+            paint
         };
 
         Ok(oxide)

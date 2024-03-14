@@ -1,5 +1,5 @@
 
-#[derive(Debug,Clone)]
+#[derive(Debug,Clone,Copy)]
 pub struct Flags (u32);
 impl Flags {
     pub fn get(&self, flag: Flag) -> bool {

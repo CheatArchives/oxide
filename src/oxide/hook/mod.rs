@@ -2,6 +2,7 @@ pub mod hooks;
 
 pub mod create_move;
 pub mod frame_stage_notify;
+pub mod level_shutdown;
 pub mod override_view;
 pub mod paint;
 pub mod paint_traverse;
@@ -15,12 +16,12 @@ pub trait Hook: std::fmt::Debug {
 #[macro_export]
 macro_rules! define_hook{
     ($name:ident,$stringName:expr,$return:ty,$default:expr,$subhooks:expr,$($argName:ident,$argType:ty),*) => {
-        use crate::{cfn,o,OXIDE,oxide::hook::Hook};
+        use crate::{cfn,o,OXIDE,oxide::hook::Hook,error::OxideResult};
         use core::intrinsics::{transmute_unchecked};
 
         type RawHookFn = cfn!($return,$($argType),*);
-        type BeforeHookFn =  fn ($($argType),*) -> ();
-        type AfterHookFn = fn ($($argType),*,&mut $return) -> ();
+        type BeforeHookFn =  fn ($($argType),*) -> OxideResult<bool>;
+        type AfterHookFn = fn ($($argType),*,&mut $return) -> OxideResult<()>;
 
 
         #[derive(Debug)]
@@ -58,16 +59,32 @@ macro_rules! define_hook{
 
                 let mut hook = o!().hooks.get::<Self>(Self::name());
 
-                for fun in &hook.before {
-                    (fun)($($argName),*);
+                let mut should_run = true;
+
+                if let Some(fun) = &hook.before {
+
+                    match (fun)($($argName),*) {
+                        Ok(res) => should_run = should_run.min(res),
+                        Err(e) => {
+                            eprintln!("error in {} bofere hook: {}",$stringName,e);
+                        }
+                    }
+
                 }
 
-                let mut res = (hook.org)($($argName),*);
 
-                if let Some(after) = hook.after {
-                    (after)($($argName),*,&mut res);
+                let mut return_value = if should_run {
+                        (hook.org)($($argName),*)
+                    } else {
+                        $default
+                };
+
+                if let Some(fun) = hook.after {
+                    if let Err(e) = (fun)($($argName),*,&mut return_value) {
+                        eprintln!("error in {} after hook: {}",$stringName,e);
+                    }
                 }
-                res
+                return return_value;
             }
         }
         impl Hook for $name {

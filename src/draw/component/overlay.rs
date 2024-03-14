@@ -5,10 +5,20 @@ use std::{
 
 use sdl2_sys::*;
 
+use crate::{
+    draw::{
+        colors::*,
+        event::{Event, EventType},
+        fonts::FontSize,
+        frame::Frame,
+    },
+    NAME, VERSION,
+};
 
-use crate::{c, draw::{colors::*, event::{Event, EventType}, fonts::FontSize, frame::Frame}, i, NAME, VERSION};
-
-use super::{aimbot_window::AimbotWindow, base::button::Button, movement_window::MovementWindow, visuals_window::VisualsWindow, Component, Components};
+use super::{
+    aimbot_window::AimbotWindow, base::button::Button, movement_window::MovementWindow,
+    visuals_window::VisualsWindow, Component, Components,
+};
 
 const LEFT_OVERLAY_WIDTH: isize = 300;
 const TOP_OVERLAY_HEIGHT: isize = 50;
@@ -167,4 +177,3 @@ impl Component for Overlay {
         self.components.handle_event(event);
     }
 }
-

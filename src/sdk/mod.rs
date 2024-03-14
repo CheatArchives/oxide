@@ -28,10 +28,11 @@ pub mod networkable;
 pub mod condition;
 pub mod global_vars;
 pub mod player_class;
+pub mod camerd_third_data;
+pub mod font;
 
 pub type CBaseHandle = usize;
 pub type ConCommand = *const u8;
-pub type HFont = usize;
 
 pub type VMatrix = [[f32; 4]; 4];
 
