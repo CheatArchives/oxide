@@ -6,7 +6,7 @@ pub struct ClientClass {
     _pad1: [i32; 2],
     pub network_name: *const char,
     _pad2: [i32; 2],
-    pub class_id: ClientClassId,
+    pub class_id: ClassId,
 }
 #[repr(C)]
 #[derive(Derivative, Clone)]
@@ -22,7 +22,7 @@ pub struct VMTNetworkable {
 pub type Networkable = WithVmt<VMTNetworkable>;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub enum ClientClassId {
+pub enum ClassId {
     CTFWearableRazorback = 341,
     CTFWearableDemoShield = 338,
     CTFWearableLevelableItem = 340,

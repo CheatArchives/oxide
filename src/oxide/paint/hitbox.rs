@@ -7,7 +7,7 @@ use crate::{
     sdk::{
         entity::Entity,
         model_info::{Hitbox, HitboxId},
-        networkable::ClientClassId,
+        networkable::ClassId,
     },
     util::world_to_screen,
 };
@@ -23,28 +23,22 @@ impl Paint {
         if !c!(i!(base_engine), is_in_game) || !*s!().visual.hitboxes.lock().unwrap() {
             return Ok(());
         }
-        for id in cache
-            .entities
-            .get(&ClientClassId::CTFPlayer)
-            .unwrap()
-            .clone()
-        {
+        for id in cache.get(ClassId::CTFPlayer) {
             let p_local = Entity::get_local()?;
-            let player = Entity::get_player(id)?;
-            if c!(player.entity.as_networkable(), is_dormant) {
+            let player = Entity::get_ent(id)?;
+            if c!(player.as_networkable(), is_dormant) {
                 continue;
             }
-            if player as *const _ == p_local as *const _ || !c!(&player.entity, is_alive) {
+            if player as *const _ == &p_local.as_ent() as *const _ || !c!(player, is_alive) {
                 continue;
             }
-            let team = c!(&player.entity, get_team_number);
+            let team = c!(player, get_team_number);
 
             let hitbox = player
-                .entity
                 .get_hitbox(HitboxId::Head)
                 .unwrap()
                 .scaled(HITBOX_SCALE);
-            self.draw_hitbox(&player.entity, hitbox, team.color(), 10);
+            self.draw_hitbox(&player, hitbox, team.color(), 10);
             for hitbox_id in HitboxId::body() {
                 let (r, g, b) = hex_to_rgb!(team.color());
                 let color = rgb_to_hex!(
@@ -53,11 +47,10 @@ impl Paint {
                     b as f32 * COLOR_SCALE
                 );
                 let hitbox = player
-                    .entity
                     .get_hitbox(hitbox_id)
                     .unwrap()
                     .scaled(HITBOX_SCALE);
-                self.draw_hitbox(&player.entity, hitbox, color, 10);
+                self.draw_hitbox(&player, hitbox, color, 10);
             }
         }
         Ok(())

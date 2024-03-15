@@ -6,7 +6,11 @@ use std::{
 
 use crate::{c, cfn, i, math::vector::Vector3};
 
-use super::{entity::{Entity, Player}, model_info::HitboxId, WithVmt};
+use super::{
+    entity::{player::Player, Entity},
+    model_info::HitboxId,
+    WithVmt,
+};
 
 pub type EngineTrace = WithVmt<VMTEngineTrace>;
 
@@ -166,7 +170,7 @@ pub fn trace(start: Vector3, end: Vector3, mask: u32) -> Trace {
 
     let ray = Ray::new(start, end);
     let filter = TraceFilter::new(p_local);
-    let mut trace = unsafe{MaybeUninit::zeroed().assume_init()};
+    let mut trace = unsafe { MaybeUninit::zeroed().assume_init() };
 
     c!(trace_engine, trace_ray, &ray, mask, &filter, &mut trace);
     trace

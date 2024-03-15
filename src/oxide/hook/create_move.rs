@@ -2,7 +2,7 @@ use crate::{
     c, define_hook,
     oxide::cheat::{aimbot::Aimbot, movement::Movement},
     s,
-    sdk::{client_mode::ClientMode, entity::{Entity, Player}, user_cmd::UserCmd},
+    sdk::{client_mode::ClientMode, entity::{Entity, player::Player}, user_cmd::UserCmd},
 };
 
 fn subhooks(hook: &mut CreateMoveHook) {
@@ -12,7 +12,7 @@ fn subhooks(hook: &mut CreateMoveHook) {
         }
         let p_local = Entity::get_local()?;
 
-        if !c!(&p_local.entity, is_alive) {
+        if !c!(&p_local.as_ent(), is_alive) {
             return Ok(true);
         }
 
@@ -55,7 +55,7 @@ define_hook!(
 );
 
 pub fn remove_punch(p_local: &Player) {
-    let mut my_angles = c!(&p_local.entity, get_abs_angles).clone();
+    let mut my_angles = c!(&p_local.as_ent(), get_abs_angles).clone();
     my_angles.pitch += p_local.vec_punch_angle.pitch;
     my_angles.yaw += p_local.vec_punch_angle.yaw;
     my_angles.roll += p_local.vec_punch_angle.roll;

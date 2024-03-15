@@ -3,8 +3,7 @@ use std::f32::consts::PI;
 use crate::{
     c,
     draw::{colors::YELLOW, event::Event, frame::Frame},
-    o,
-    s,
+    o, s,
     sdk::entity::Entity,
 };
 
@@ -21,8 +20,7 @@ impl AimbotFov {
         let Ok(p_local) = Entity::get_local() else {
             return false;
         };
-
-        if !c!(&p_local.entity, is_alive) {
+        if !c!(&p_local.as_ent(), is_alive) {
             return false;
         }
         true
