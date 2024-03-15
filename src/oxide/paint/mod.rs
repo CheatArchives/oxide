@@ -59,7 +59,7 @@ impl Paint {
         Paint { normal }
     }
     pub fn paint(&mut self) -> OxideResult<()> {
-        if let Some(cache) = &o!().last_tick_cache {
+        if let Some(cache) = &o!().last_entity_cache {
             self.draw_hitboxes(&cache)?;
             self.esp(&cache)?;
         }

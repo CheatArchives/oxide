@@ -13,13 +13,13 @@ use crate::{
     DRAW,
 };
 
-use self::{paint::Paint, tick_cache::TickCache};
+use self::{paint::Paint, entity_cache::EntityCache};
 
 pub mod cheat;
 pub mod hook;
 pub mod interfaces;
 pub mod paint;
-pub mod tick_cache;
+pub mod entity_cache;
 
 #[derive(Debug)]
 pub struct Oxide<> {
@@ -29,7 +29,7 @@ pub struct Oxide<> {
     pub cheats: Cheats,
     pub fov: Option<f32>,
     pub get_bone_position_fn: GetBonePositionFn,
-    pub last_tick_cache: Option<TickCache>,
+    pub last_entity_cache: Option<EntityCache>,
     pub paint: Paint
 }
 pub type GetBonePositionFn =
@@ -55,7 +55,7 @@ impl Oxide {
             global_vars,
             fov: None,
             get_bone_position_fn,
-            last_tick_cache: None,
+            last_entity_cache: None,
             paint
         };
 

@@ -1,4 +1,4 @@
-use std::{ffi::CString, mem::MaybeUninit};
+use std::{ffi::CString, intrinsics::breakpoint, mem::MaybeUninit};
 
 use crate::{
     c,
@@ -6,7 +6,7 @@ use crate::{
     error::OxideResult,
     hex_to_rgb, i,
     math::{get_corners, vector::Vector2},
-    oxide::tick_cache::TickCache,
+    oxide::entity_cache::EntityCache,
     s,
     sdk::{entity::Entity, networkable::ClientClassId},
     util::world_to_screen,
@@ -15,11 +15,11 @@ use crate::{
 use super::Paint;
 
 impl Paint {
-    pub fn esp(&mut self, cache: &TickCache) -> OxideResult<()> {
+    pub fn esp(&mut self, cache: &EntityCache) -> OxideResult<()> {
         if !c!(i!(base_engine), is_in_game) || !*s!().visual.esp.lock().unwrap() {
             return Ok(());
         }
-        for id in cache.entities.get(&ClientClassId::CBasePlayer).unwrap().clone() {
+        for &id in cache.entities.get(&ClientClassId::CTFPlayer).unwrap() {
             let player = Entity::get_player(id)?;
             let p_local = Entity::get_local()?;
             if c!(player.entity.as_networkable(), is_dormant) {
@@ -109,7 +109,11 @@ impl Paint {
             //name
             let mut info = unsafe { MaybeUninit::zeroed().assume_init() };
             c!(i!(base_engine), get_player_info, id, &mut info);
-            let name = info.name.into_iter().filter(|&x| x != 0).collect::<Vec<u8>>();
+            let name = info
+                .name
+                .into_iter()
+                .filter(|&x| x != 0)
+                .collect::<Vec<u8>>();
             let name = CString::new(name).unwrap();
             self.paint_text(
                 name.to_str()?,

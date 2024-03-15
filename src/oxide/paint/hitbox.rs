@@ -2,7 +2,7 @@ use crate::{
     c,
     error::OxideResult,
     hex_to_rgb, i, o,
-    oxide::tick_cache::TickCache,
+    oxide::entity_cache::EntityCache,
     rgb_to_hex, s,
     sdk::{
         entity::Entity,
@@ -19,13 +19,13 @@ use super::Paint;
 const COLOR_SCALE: f32 = 1.0 / 2.0;
 
 impl Paint {
-    pub fn draw_hitboxes(&mut self, cache: &TickCache) -> OxideResult<()> {
+    pub fn draw_hitboxes(&mut self, cache: &EntityCache) -> OxideResult<()> {
         if !c!(i!(base_engine), is_in_game) || !*s!().visual.hitboxes.lock().unwrap() {
             return Ok(());
         }
         for id in cache
             .entities
-            .get(&ClientClassId::CBasePlayer)
+            .get(&ClientClassId::CTFPlayer)
             .unwrap()
             .clone()
         {

@@ -22,7 +22,7 @@ impl AimbotFov {
             return false;
         };
 
-        if !c!(p_local, is_alive) {
+        if !c!(&p_local.entity, is_alive) {
             return false;
         }
         true

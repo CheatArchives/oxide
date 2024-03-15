@@ -1,6 +1,7 @@
+
 use crate::{
     define_hook,
-    oxide::tick_cache::TickCache,
+    oxide::entity_cache::EntityCache,
     sdk::base_client::{BaseClient, FrameStage},
 };
 
@@ -8,12 +9,12 @@ fn subhooks(hook: &mut FrameStageNotifyHook) {
     hook.before = Some(|_, stage| {
         match stage {
             FrameStage::FrameNetUpdateEnd => {
-                match TickCache::init() {
+                match EntityCache::init() {
                     Ok(cache) => {
-                        o!().last_tick_cache = Some(cache.clone());
+                        o!().last_entity_cache = Some(cache);
                     }
                     Err(e) => {
-                        o!().last_tick_cache = None;
+                        o!().last_entity_cache = None;
                         return Err(e);
                     }
                 };

@@ -36,7 +36,7 @@ impl Aimbot {
 
     pub fn point_priority(&self, target_point: Vector3) -> Option<isize> {
         let p_local = &*Entity::get_local().unwrap();
-        let my_eyes = c!(p_local, eye_position);
+        let my_eyes = c!(&p_local.entity, eye_position);
 
         let diff = my_eyes - target_point;
         let angle = diff.angle();
@@ -67,7 +67,7 @@ impl Aimbot {
 
     pub fn point_scan(
         &self,
-        ent: &Entity,
+        player: &Player,
         hitboxid: HitboxId,
         hitbox: &Hitbox,
     ) -> Option<(Vector3, isize)> {
@@ -76,9 +76,9 @@ impl Aimbot {
 
         let scaled_hitbox = hitbox.scaled(HITBOX_SCALE);
 
-        let mut points = vec![scaled_hitbox.center(ent)];
+        let mut points = vec![scaled_hitbox.center(&player.entity)];
         if *s!().aimbot.multipoint.lock().unwrap() {
-            let mut corners = scaled_hitbox.corners(ent).to_vec();
+            let mut corners = scaled_hitbox.corners(&player.entity).to_vec();
 
             corners.sort_by(|corner1, corner2| {
                 let diff1 = corner1.clone() - my_eyes.clone();
@@ -94,7 +94,7 @@ impl Aimbot {
 
         for point in points {
             let trace = trace(my_eyes.clone(), point.clone(), MASK_SHOT);
-            if trace.entity != ent || trace.hitbox != hitboxid {
+            if trace.entity as *const _ != player || trace.hitbox != hitboxid {
                 continue;
             }
             let Some(prio) = self.point_priority(point.clone()) else {
@@ -124,11 +124,11 @@ impl Aimbot {
         let my_eyes = c!(&p_local.entity, eye_position);
 
         for id in o!()
-            .last_tick_cache
+            .last_entity_cache
             .clone()
             .unwrap()
             .entities
-            .get(&ClientClassId::CBasePlayer)
+            .get(&ClientClassId::CTFPlayer)
             .unwrap()
             .clone()
         {

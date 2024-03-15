@@ -99,6 +99,7 @@ def start_tf2():
              "-nosteamcontroller", "-nohltv", "-particles", "1",
              "-precachefontchars", "-noquicktime", "-nobreakpad"], cwd=TF2_DIR,
             env={**os.environ, "RUST_BACKTRACE": "FULL", "LD_LIBRARY_PATH": "bin"})
+    print("[oxide] killing tf2");
     pid = get_pid()
     run(["kill","-9",pid])
     os.remove("/tmp/source_engine_2925226592.lock")

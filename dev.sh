@@ -4,4 +4,5 @@ sudo rust-gdb -n -q \
   -ex "set \$dlerror = (char* (*)(void))dlerror"\
   -ex "call \$dlopen( \"$(realpath ./target/i686-unknown-linux-gnu/debug/liboxide.so)\", 2)"\
   -ex "call \$dlerror()"\
+  -ex "layout src"\
   -ex "continue"\
