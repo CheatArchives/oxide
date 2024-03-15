@@ -1,4 +1,3 @@
-use std::mem::MaybeUninit;
 pub use std::{
     ffi::{c_char, CStr},
     mem::{size_of, transmute},
@@ -8,12 +7,12 @@ use libc::c_void;
 
 use crate::{
     c, cfn,
+    error::OxideResult,
     math::{
         get_corners,
         vector::{Vector3, Vector4},
     },
     o,
-    sdk::entity::{BoneMask, MAX_STUDIO_BONES},
 };
 
 use super::{entity::Entity, model_render::Matrix3x4, WithVmt};
@@ -51,40 +50,34 @@ pub struct Hitbox {
 }
 
 impl Hitbox {
-    pub fn center(&self, ent: &Entity) -> Vector3 {
-        let (pos, _) = self.get_bone_pos(ent);
-        Vector3::new(
+    pub fn center(&self, ent: &Entity) -> OxideResult<Vector3> {
+        let (pos, _) = self.get_bone_pos(ent)?;
+        Ok(Vector3::new(
             (self.min.x + self.max.x) / 2.0 + pos.x,
             (self.min.y + self.max.y) / 2.0 + pos.y,
             (self.min.z + self.max.z) / 2.0 + pos.z,
-        )
+        ))
     }
-    pub fn get_bone_pos(&self, ent: &Entity) -> (Vector3, [Vector3;3]) {
-        unsafe {
-            let renderable = ent.as_renderable();
-            let bones = MaybeUninit::zeroed().assume_init();
-            c!(
-                renderable,
-                setup_bones,
-                &bones,
-                MAX_STUDIO_BONES,
-                BoneMask::BoneUsedByHitbox,
-                o!().global_vars().curtime
-            );
-            let bone = bones[self.bone].clone();
-            let pos = Vector3::new(bone[0][3], bone[1][3], bone[2][3]);
-            let angle = [
-                Vector3::new(bone[0][0],bone[0][1],bone[0][2]),
-                Vector3::new(bone[1][0],bone[1][1],bone[1][2]),
-                Vector3::new(bone[2][0],bone[2][1],bone[2][2]),
-            ];
+    pub fn get_bone_pos(&self, ent: &Entity) -> OxideResult<(Vector3, [Vector3; 3])> {
+        let bones = o!()
+            .last_entity_cache
+            .clone()
+            .unwrap()
+            .get_bones(c!(ent, get_index))?;
 
-            (pos, angle)
-        }
+        let bone = bones[self.bone].clone();
+        let pos = Vector3::new(bone[0][3], bone[1][3], bone[2][3]);
+        let angle = [
+            Vector3::new(bone[0][0], bone[0][1], bone[0][2]),
+            Vector3::new(bone[1][0], bone[1][1], bone[1][2]),
+            Vector3::new(bone[2][0], bone[2][1], bone[2][2]),
+        ];
+
+        Ok((pos, angle))
     }
-    pub fn corners(&self, ent: &Entity) -> [Vector3; 8] {
-        let (pos, rotation) = self.get_bone_pos(ent);
-        get_corners(&pos, &rotation, &self.min, &self.max)
+    pub fn corners(&self, ent: &Entity) -> OxideResult<[Vector3; 8]> {
+        let (pos, rotation) = self.get_bone_pos(ent)?;
+        Ok(get_corners(&pos, &rotation, &self.min, &self.max))
     }
     pub fn scaled(&self, scale: f32) -> Hitbox {
         let mut hitbox = self.clone();

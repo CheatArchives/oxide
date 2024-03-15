@@ -7,7 +7,7 @@ use crate::{
     s,
     sdk::{
         condition::ConditionFlags,
-        entity::{flags::Flag, Entity},
+        entity::{flags::Flag, Entity, WaterLevel},
         user_cmd::{ButtonFlags, UserCmd},
         weapon::WeaponType,
     },
@@ -29,7 +29,8 @@ impl Movement {
     }
     pub fn create_move(&mut self, cmd: &mut UserCmd, org_cmd: &UserCmd) -> OxideResult<()> {
         let p_local = Entity::get_local()?;
-        if p_local.as_ent().flags.get(Flag::INWATER) {
+
+        if p_local.as_ent().flags.get(Flag::INWATER) || p_local.as_ent().flags.get(Flag::SWIM) || p_local.as_ent().water_level > WaterLevel::Feet{
             return Ok(());
         }
         self.bhop(cmd)?;
@@ -60,24 +61,29 @@ impl Movement {
             return Ok(());
         }
 
-        cmd.buttons
-            .set(ButtonFlags::InJump, p_local.as_ent().flags.get(Flag::ONGROUND));
+        cmd.buttons.set(
+            ButtonFlags::InJump,
+            p_local.as_ent().flags.get(Flag::ONGROUND),
+        );
 
         if *s!().movement.revhop.lock().unwrap()
             && !p_local.player_cond.get(ConditionFlags::Aiming)
             && matches!(
-                c!(c!(&p_local.as_ent(), get_weapon), get_weapon_id),
+                c!(c!(p_local.as_ent(), get_weapon), get_weapon_id),
                 WeaponType::Minigun
             )
         {
-            cmd.buttons
-                .set(ButtonFlags::InAttack2, p_local.as_ent().flags.get(Flag::ONGROUND));
+            cmd.buttons.set(
+                ButtonFlags::InAttack2,
+                p_local.as_ent().flags.get(Flag::ONGROUND),
+            );
         }
         Ok(())
     }
     pub fn auto_strafe(&self, cmd: &mut UserCmd) -> OxideResult<()> {
         let p_local = Entity::get_local()?;
-        if p_local.as_ent().flags.get(Flag::ONGROUND) || !*s!().movement.autostrafe.lock().unwrap() {
+        if p_local.as_ent().flags.get(Flag::ONGROUND) || !*s!().movement.autostrafe.lock().unwrap()
+        {
             return Ok(());
         }
         let velocity = p_local.as_ent().velocity;

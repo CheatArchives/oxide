@@ -67,18 +67,12 @@ impl Paint {
     }
     pub fn paint_text(
         &mut self,
-        text: &str,
+        text: Vec<i32>,
         mut x: isize,
         mut y: isize,
         color: usize,
         center: bool,
     ) {
-        let text = CString::new(text).unwrap();
-        let text = text
-            .into_bytes()
-            .iter()
-            .map(|b| *b as i32)
-            .collect::<Vec<i32>>();
         let text = text.as_slice();
 
         //this gives inconsistant width for some reason;

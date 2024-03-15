@@ -12,8 +12,7 @@ use crate::{
 };
 
 use self::{
-    flags::Flags,
-    model_info::{Hitbox, HitboxId}, player::Player,
+    flags::Flags, model_info::{Hitbox, HitboxId}, model_render::Matrix3x4, player::Player
 };
 
 use super::*;
@@ -27,24 +26,25 @@ pub mod paint;
 pub mod player;
 
 pub const MAX_STUDIO_BONES: usize = 128;
+pub type Bones = [Matrix3x4; MAX_STUDIO_BONES];
 pub const HITBOX_SET: usize = 0;
 
 #[repr(C)]
 #[derive(Debug, Clone)]
 pub enum BoneMask {
-    BoneUsedByAnything = 0x0007FF00,
-    BoneUsedByHitbox = 0x00000100,
-    BoneUsedByAttachment = 0x00000200,
-    BoneUsedByVertexMask = 0x0003FC00,
-    BoneUsedByVertexLod0 = 0x00000400,
-    BoneUsedByVertexLod1 = 0x00000800,
-    BoneUsedByVertexLod2 = 0x00001000,
-    BoneUsedByVertexLod3 = 0x00002000,
-    BoneUsedByVertexLod4 = 0x00004000,
-    BoneUsedByVertexLod5 = 0x00008000,
-    BoneUsedByVertexLod6 = 0x00010000,
-    BoneUsedByVertexLod7 = 0x00020000,
-    BoneUsedByBoneMerge = 0x00040000,
+    Anything = 0x0007FF00,
+    Hitbox = 0x00000100,
+    Attachment = 0x00000200,
+    VertexMask = 0x0003FC00,
+    VertexLod0 = 0x00000400,
+    VertexLod1 = 0x00000800,
+    VertexLod2 = 0x00001000,
+    VertexLod3 = 0x00002000,
+    VertexLod4 = 0x00004000,
+    VertexLod5 = 0x00008000,
+    VertexLod6 = 0x00010000,
+    VertexLod7 = 0x00020000,
+    BoneMerge = 0x00040000,
 }
 
 #[repr(C)]
@@ -60,7 +60,7 @@ pub struct VMTEntity {
     pub get_abs_angles: cfn!(&'static Angles, *const Entity),
     #[derivative(Debug = "ignore")]
     _pad3: [u32; 66],
-    pub get_index: cfn!(&isize, &Entity),
+    pub get_index: cfn!(isize, &Entity),
     #[derivative(Debug = "ignore")]
     _pad4: [u32; 26],
     pub world_space_center: cfn!(&Vector3, &Entity),
@@ -101,6 +101,14 @@ pub struct VMTEntity {
     pub get_observer_target: cfn!(&Entity, &Entity),
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum WaterLevel {
+    NotInWater,
+    Feet,
+    Waist,
+    Eyes,
+}
+
 #[repr(C)]
 #[derive(Derivative, Clone, Copy)]
 #[derivative(Debug)]
@@ -114,7 +122,7 @@ pub struct Entity {
     pub velocity: Vector3,
     #[derivative(Debug = "ignore")]
     _pad3: [u8; 0x7C],
-    pub water_level: usize,
+    pub water_level: WaterLevel,
     #[derivative(Debug = "ignore")]
     _pad4: [u8; 0x1B8],
     pub vec_origin: Vector3,
@@ -151,7 +159,6 @@ impl Entity {
         }
     }
 }
-
 
 impl Entity {
     pub fn get_local() -> Result<&'static mut Player, Box<dyn Error>> {

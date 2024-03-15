@@ -51,7 +51,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn as_ent(self) -> Entity {
+    pub fn as_ent(&self) -> &mut Entity {
         unsafe { transmute_unchecked(self) }
     }
     pub fn can_attack(&self) -> bool {

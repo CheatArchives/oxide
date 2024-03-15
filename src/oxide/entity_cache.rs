@@ -1,15 +1,20 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, mem::MaybeUninit};
 
 use crate::{
     c,
     error::OxideResult,
-    i,
-    sdk::{entity::Entity, networkable::ClassId},
+    i, o,
+    sdk::{
+        entity::{BoneMask, Bones, Entity, MAX_STUDIO_BONES},
+        model_render::Matrix3x4,
+        networkable::ClassId,
+    },
 };
 
 #[derive(Debug, Clone)]
 pub struct EntityCache {
     entities: HashMap<ClassId, Vec<isize>>,
+    bones: HashMap<isize, [Matrix3x4; MAX_STUDIO_BONES]>,
 }
 
 impl EntityCache {
@@ -31,9 +36,29 @@ impl EntityCache {
             };
         }
 
-        Ok(EntityCache { entities })
+        Ok(EntityCache { entities, bones: HashMap::new() })
     }
-    pub fn get(&self, id: ClassId) -> Vec<isize> {
+    pub fn get_bones(&mut self, id: isize) -> OxideResult<Bones> {
+        if let Some(bones) = self.bones.get(&id) {
+            return Ok(bones.clone())
+        }
+        
+        let ent = Entity::get_ent(id)?;
+        let renderable = ent.as_renderable();
+
+        let bones = unsafe { MaybeUninit::zeroed().assume_init() };
+        c!(
+            renderable,
+            setup_bones,
+            &bones,
+            MAX_STUDIO_BONES,
+            BoneMask::Hitbox,
+            o!().global_vars().curtime
+        );
+        self.bones.insert(id, bones.clone());
+        Ok(bones.clone())
+    }
+    pub fn get_ent(&self, id: ClassId) -> Vec<isize> {
         self.entities.get(&id).cloned().unwrap_or(vec![])
     }
 }

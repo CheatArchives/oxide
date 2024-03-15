@@ -20,7 +20,7 @@ impl AimbotFov {
         let Ok(p_local) = Entity::get_local() else {
             return false;
         };
-        if !c!(&p_local.as_ent(), is_alive) {
+        if !c!(p_local.as_ent(), is_alive) {
             return false;
         }
         true

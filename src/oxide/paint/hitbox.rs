@@ -23,13 +23,13 @@ impl Paint {
         if !c!(i!(base_engine), is_in_game) || !*s!().visual.hitboxes.lock().unwrap() {
             return Ok(());
         }
-        for id in cache.get(ClassId::CTFPlayer) {
+        for id in cache.get_ent(ClassId::CTFPlayer) {
             let p_local = Entity::get_local()?;
             let player = Entity::get_ent(id)?;
             if c!(player.as_networkable(), is_dormant) {
                 continue;
             }
-            if player as *const _ == &p_local.as_ent() as *const _ || !c!(player, is_alive) {
+            if player as *const _ == p_local.as_ent() as *const _ || !c!(player, is_alive) {
                 continue;
             }
             let team = c!(player, get_team_number);
@@ -38,7 +38,7 @@ impl Paint {
                 .get_hitbox(HitboxId::Head)
                 .unwrap()
                 .scaled(HITBOX_SCALE);
-            self.draw_hitbox(&player, hitbox, team.color(), 10);
+            self.draw_hitbox(&player, hitbox, team.color(), 10)?;
             for hitbox_id in HitboxId::body() {
                 let (r, g, b) = hex_to_rgb!(team.color());
                 let color = rgb_to_hex!(
@@ -46,17 +46,20 @@ impl Paint {
                     g as f32 * COLOR_SCALE,
                     b as f32 * COLOR_SCALE
                 );
-                let hitbox = player
-                    .get_hitbox(hitbox_id)
-                    .unwrap()
-                    .scaled(HITBOX_SCALE);
-                self.draw_hitbox(&player, hitbox, color, 10);
+                let hitbox = player.get_hitbox(hitbox_id).unwrap().scaled(HITBOX_SCALE);
+                self.draw_hitbox(&player, hitbox, color, 10)?;
             }
         }
         Ok(())
     }
-    pub fn draw_hitbox(&mut self, ent: &Entity, hitbox: Hitbox, color: usize, alpha: u8) {
-        let corners = hitbox.corners(ent);
+    pub fn draw_hitbox(
+        &mut self,
+        ent: &Entity,
+        hitbox: Hitbox,
+        color: usize,
+        alpha: u8,
+    ) -> OxideResult<()> {
+        let corners = hitbox.corners(ent)?;
 
         let pairs = [
             (corners[0].clone(), corners[1].clone()),
@@ -99,5 +102,6 @@ impl Paint {
                 pos2.y as isize
             );
         }
+        Ok(())
     }
 }

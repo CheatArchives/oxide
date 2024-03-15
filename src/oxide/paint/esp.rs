@@ -1,4 +1,4 @@
-use std::{ffi::CString, mem::MaybeUninit};
+use std::mem::MaybeUninit;
 
 use crate::{
     c,
@@ -19,13 +19,13 @@ impl Paint {
         if !c!(i!(base_engine), is_in_game) || !*s!().visual.esp.lock().unwrap() {
             return Ok(());
         }
-        for id in cache.get(ClassId::CTFPlayer) {
+        for id in cache.get_ent(ClassId::CTFPlayer) {
             let player = Entity::get_ent(id)?;
             let p_local = Entity::get_local()?;
             if c!(player.as_networkable(), is_dormant) {
                 continue;
             }
-            if player as *const _ == &p_local.as_ent() as *const _ || !c!(player, is_alive) {
+            if player as *const _ == p_local.as_ent() as *const _ || !c!(player, is_alive) {
                 continue;
             }
 
@@ -48,18 +48,17 @@ impl Paint {
             let name = info
                 .name
                 .into_iter()
-                .filter(|&x| x != 0)
-                .collect::<Vec<u8>>();
-            let name = CString::new(name).unwrap();
+                .filter_map(|x| if x != 0 { Some(x as i32) } else { None })
+                .collect::<Vec<i32>>();
             self.paint_text(
-                name.to_str()?,
+                name,
                 minx as isize,
                 (miny - 15f32) as isize,
                 FOREGROUND,
                 false,
             )
         }
-        for id in cache.get(ClassId::CObjectSentrygun) {
+        for id in cache.get_ent(ClassId::CObjectSentrygun) {
             let entity = Entity::get_ent(id)?;
             entity.paint();
         }
